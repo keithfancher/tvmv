@@ -3,7 +3,14 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: themoviedb-1.2.2@sha256:e63cc30a9262745cf1afdaccc5f1ec15dea861668ae5243fe1659fe1a08983b2,3979
+    pantry-tree:
+      sha256: 633a05b573fa0ec52cb60b60a22deb3123561cfba703523bce7dba1e6c116370
+      size: 2090
+  original:
+    hackage: themoviedb-1.2.2
 snapshots:
 - completed:
     sha256: 0ced7f93245307212900d760c1322dfb527c4b902868c11ccac37f48b7d4ebb9
