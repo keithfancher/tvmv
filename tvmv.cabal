@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      API
       Show
   other-modules:
       Paths_tvmv
