@@ -23,5 +23,7 @@ mapTvShow s =
     { showId = TMDB.tvID s,
       showName = TMDB.tvName s,
       seasons = [],
-      description = TMDB.tvOverview s
+      description = TMDB.tvOverview s,
+      numberOfSeasons = TMDB.tvNumberOfSeasons s,
+      numberOfEpisodes = TMDB.tvNumberOfEpisodes s
     }

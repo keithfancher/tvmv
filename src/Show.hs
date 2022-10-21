@@ -2,29 +2,61 @@ module Show
   ( TvShow (..),
     Season,
     Episode,
+    printShows,
+    showInfoBrief,
   )
 where
 
 import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 
-type ShowId = Int
+-- A unique ID used for a given API resource.
+--
+-- TODO: Int or Text? Both TheTVDB and TheMovieDB use integers, though IMDB's
+-- API would require a string. Text is probably most flexible, would require
+-- fewer code changes if swapping out APIs. Probably change this and map
+-- accordingly.
+type ItemId = Int
 
 data TvShow = TvShow
-  { showId :: ShowId,
+  { showId :: ItemId,
     showName :: T.Text,
     seasons :: [Season],
-    description :: T.Text -- Some "flavor text"
+    description :: T.Text, -- Some "flavor text"
+    numberOfSeasons :: Int,
+    numberOfEpisodes :: Int
   }
   deriving (Eq, Show)
 
 data Season = Season
-  { seasonNum :: Int,
+  { seasonNumber :: Int,
     episodes :: [Episode]
   }
   deriving (Eq, Show)
 
 data Episode = Episode
-  { epNumber :: Int,
-    epName :: T.Text
+  { episodeNumber :: Int,
+    episodeName :: T.Text,
+    episodeSeasonNumber :: Int
   }
   deriving (Eq, Show)
+
+-- Brief text summary of a show.
+showInfoBrief :: TvShow -> T.Text
+showInfoBrief s =
+  "ID: "
+    <> toText (showId s)
+    <> "\nName: "
+    <> showName s
+    <> "\nDescription: "
+    <> description s
+
+-- Print out summaries for a list of shows.
+printShows :: [TvShow] -> IO ()
+printShows s = TIO.putStrLn (T.intercalate sep showSummaries)
+  where
+    showSummaries = map showInfoBrief s
+    sep = "\n--\n"
+
+toText :: Show a => a -> T.Text
+toText = T.pack . show
