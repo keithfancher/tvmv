@@ -1,6 +1,10 @@
 module Main (main) where
 
-import Lib
+import API (searchShowByName)
 
 main :: IO ()
-main = someFunc
+main = do
+  result <- searchShowByName apiKey "Buffy"
+  print result
+  where
+    apiKey = ""
