@@ -63,3 +63,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - tvmv
+    - hspec

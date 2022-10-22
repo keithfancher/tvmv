@@ -1,2 +1,9 @@
+import qualified RenameSpec
+import Test.Hspec
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = hspec spec
+
+spec :: Spec
+spec = do
+  describe "Rename" RenameSpec.spec
