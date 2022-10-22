@@ -1,6 +1,6 @@
 module API
   ( APIKey,
-    Error,
+    APIError,
     searchShowByName,
   )
 where
@@ -11,10 +11,10 @@ import Show (TvShow (..))
 
 type APIKey = T.Text
 
-type Error = T.Text
+type APIError = T.Text
 
 -- Given a show name, or a fragment of a name, get back a list of matches.
-searchShowByName :: APIKey -> T.Text -> IO (Either Error [TvShow])
+searchShowByName :: APIKey -> T.Text -> IO (Either APIError [TvShow])
 searchShowByName key query = do
   tmdbResults <- TMDB.runTheMovieDB (TMDB.defaultSettings key) (TMDB.searchTV query)
   return (mapEither tmdbResults)
@@ -35,6 +35,6 @@ mapTvShow s =
 -- Remove traces of the TMDB types for both success and error responses.
 -- TODO: Map error type to an internal type as well, probably. For now, just
 -- use Text. All we're doing from here is printing it anyway.
-mapEither :: Either TMDB.Error [TMDB.TV] -> Either Error [TvShow]
+mapEither :: Either TMDB.Error [TMDB.TV] -> Either APIError [TvShow]
 mapEither (Right s) = Right (map mapTvShow s)
 mapEither (Left e) = Left $ T.pack $ show e
