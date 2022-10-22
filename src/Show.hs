@@ -1,7 +1,7 @@
 module Show
-  ( TvShow (..),
-    Season,
-    Episode,
+  ( Episode (..),
+    Season (..),
+    TvShow (..),
     printShows,
     showInfoBrief,
   )
