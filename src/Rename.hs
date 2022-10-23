@@ -49,8 +49,3 @@ generateBaseFileName epData =
     (T.unpack $ episodeName ep)
   where
     ep = episode epData
-
--- Attempt to guess/figure out the required data based on the input file alone.
--- TODO
-deriveRenameData :: FilePath -> Maybe RenameData
-deriveRenameData inFile = Nothing
