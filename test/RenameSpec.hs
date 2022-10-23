@@ -6,11 +6,15 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-  describe "generateBaseFileName" $ do
-    it "generates the correct base name" $ do
-      generateBaseFileName
-        ( RenameData
-            "Buffy the Vampire Slayer"
-            (Episode 10 "Hush" 4)
-        )
-        `shouldBe` "Buffy the Vampire Slayer - 4x10 - Hush"
+  describe "renameFile" $ do
+    it "generates the correct file name" $ do
+      renameFile hushData "/root/buffy/season 4/buff 4.10.mkv"
+        `shouldBe` RenameOp
+          { oldPath = "/root/buffy/season 4/buff 4.10.mkv",
+            newPath = "/root/buffy/season 4/Buffy the Vampire Slayer - 4x10 - Hush.mkv"
+          }
+
+hushData :: RenameData
+hushData = RenameData {showName = "Buffy the Vampire Slayer", episode = hush}
+  where
+    hush = Episode {episodeNumber = 10, episodeName = "Hush", episodeSeasonNumber = 4}

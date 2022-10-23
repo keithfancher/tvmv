@@ -41,6 +41,7 @@ library:
   source-dirs: src
   dependencies:
   - themoviedb
+  - filepath
 
 executables:
   tvmv:

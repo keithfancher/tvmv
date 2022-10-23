@@ -1,19 +1,28 @@
 module Rename
   ( RenameData (..),
-    generateBaseFileName,
+    RenameOp (..),
+    renameFile,
   )
 where
 
 import qualified Data.Text as T
 import Show (Episode (..))
+import System.FilePath (replaceBaseName)
 import Text.Printf (printf)
 
 data RenameData = RenameData
   { showName :: T.Text,
     episode :: Episode
   }
+  deriving (Eq, Show)
 
--- TODO: a new filepath alias, but with Text rather than String?
+-- Contains a rename "op" for a single file. Either to be performed or which
+-- has been performed.
+data RenameOp = RenameOp
+  { oldPath :: FilePath,
+    newPath :: FilePath
+  }
+  deriving (Eq, Show)
 
 -- "[show] - [season]x[ep] - [ep name]"
 -- e.g. "Buffy the Vampire Slayer - 4x10 - Hush"
@@ -21,10 +30,13 @@ data RenameData = RenameData
 episodeNameTemplate :: FilePath
 episodeNameTemplate = "%s - %dx%d - %s"
 
--- Given full file path, get the "base" file and generate its new filename.
--- TODO: Maybe return a tuple of old and new? Or define a new type for that.
-renameFile :: RenameData -> FilePath -> FilePath
-renameFile epData inFile = ""
+-- Given a full file path and the episode metadata for that file, generate a
+-- new filename.
+renameFile :: RenameData -> FilePath -> RenameOp
+renameFile epData inFile = RenameOp {oldPath = inFile, newPath = newFullPath}
+  where
+    newBaseName = generateBaseFileName epData
+    newFullPath = replaceBaseName inFile newBaseName
 
 -- Generate the filename -- note, NOT the full path, nor the extension.
 generateBaseFileName :: RenameData -> FilePath
