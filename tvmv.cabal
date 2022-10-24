@@ -63,6 +63,7 @@ test-suite tvmv-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      FileSpec
       RenameSpec
       Paths_tvmv
   hs-source-dirs:
