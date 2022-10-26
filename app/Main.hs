@@ -1,21 +1,18 @@
 module Main (main) where
 
-import API (APIKey, searchShowByName)
+import API (APIKey)
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
-import Show (printShows)
+import Execute (renameSeason)
 import System.Environment (getArgs)
 
 main :: IO ()
 main = do
   args <- getArgs
-  let (apiKey, query) = processArgs args
-  result <- searchShowByName apiKey query
-  case result of
-    Left e -> TIO.putStrLn e
-    Right tvShows -> printShows tvShows
+  let (apiKey, query, seasonNum, dirPath) = processArgs args
+  result <- renameSeason apiKey query seasonNum dirPath
+  print result
 
 -- Obviously not a long-term solution...
-processArgs :: [String] -> (APIKey, T.Text)
-processArgs [k, q] = (T.pack k, T.pack q)
-processArgs _ = error "Usage: tvmv [APIKEY] [QUERY]"
+processArgs :: [String] -> (APIKey, T.Text, Int, FilePath)
+processArgs [k, q, n, path] = (T.pack k, T.pack q, read n, path)
+processArgs _ = error "Usage: tvmv [APIKEY] [SHOWNAME] [SEASONNUM] [PATH]"

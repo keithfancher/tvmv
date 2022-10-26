@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       API
+      Execute
       File
       Rename
       Show
