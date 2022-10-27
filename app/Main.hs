@@ -2,8 +2,9 @@ module Main (main) where
 
 import API (APIKey)
 import qualified Data.Text as T
-import Execute (renameSeason, runTVMV)
+import Execute (renameSeason)
 import System.Environment (getArgs)
+import TVMV (runTVMV)
 
 main :: IO ()
 main = do

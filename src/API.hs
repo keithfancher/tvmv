@@ -10,11 +10,9 @@ import qualified Data.Text as T
 import Error (Error (..))
 import qualified Network.API.TheMovieDB as TMDB
 import Show (Episode (..), TvShow (..))
+import TVMV (TVMV)
 
 type APIKey = T.Text
-
--- Wrap the stack!
-type TVMV a = ExceptT Error IO a
 
 -- Search for a show with the given name and, using the FIRST match for that
 -- name, return the episode data for the given season.
