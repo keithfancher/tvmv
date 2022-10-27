@@ -43,6 +43,7 @@ library:
   - themoviedb
   - filepath
   - directory
+  - transformers
 
 executables:
   tvmv:

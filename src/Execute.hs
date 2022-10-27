@@ -1,21 +1,37 @@
-module Execute (renameSeason) where
+module Execute
+  ( TVMV,
+    renameSeason,
+    runTVMV,
+  )
+where
 
 import API (APIKey, searchSeason)
-import Control.Monad (join)
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Except (ExceptT (..), runExceptT)
 import qualified Data.Text as T
+import Error (Error)
 import File (listDir)
 import Rename (RenameOp, executeRename, renameFiles)
 import Show (Episode, TvShow (..))
-import Error (Error)
+
+-- Wrap the stack!
+type TVMV a = ExceptT Error IO a
+
+runTVMV :: TVMV a -> IO (Either Error a)
+runTVMV = runExceptT
 
 -- Tie the pieces together, essentially.
-renameSeason :: APIKey -> T.Text -> Int -> FilePath -> IO (Either Error ())
+renameSeason :: APIKey -> T.Text -> Int -> FilePath -> TVMV ()
 renameSeason key name seasonNum directoryPath = do
   searchResults <- searchSeason key name seasonNum
-  files <- listDir directoryPath
-  let renameOps = join $ renameWithData <$> searchResults <*> pure files
-  mapM executeRename renameOps
+  files <- liftIO $ listDir directoryPath
+  renameOps <- liftEither $ renameWithData searchResults files
+  liftIO $ executeRename renameOps
 
--- Convenience, pulling apart the tuple return and tying things together.
+-- Convenience, pulling apart the tuple return and tying things back together.
 renameWithData :: (TvShow, [Episode]) -> [FilePath] -> Either Error [RenameOp]
 renameWithData (s, eps) = renameFiles (showName s) eps
+
+-- Admittedly, I only vaguely understand why this works :')
+liftEither :: Either Error a -> TVMV a
+liftEither = ExceptT . return
