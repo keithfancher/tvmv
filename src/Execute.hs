@@ -6,9 +6,10 @@ import qualified Data.Text as T
 import File (listDir)
 import Rename (RenameOp, executeRename, renameFiles)
 import Show (Episode, TvShow (..))
+import Error (Error)
 
 -- Tie the pieces together, essentially.
-renameSeason :: APIKey -> T.Text -> Int -> FilePath -> IO (Either T.Text ())
+renameSeason :: APIKey -> T.Text -> Int -> FilePath -> IO (Either Error ())
 renameSeason key name seasonNum directoryPath = do
   searchResults <- searchSeason key name seasonNum
   files <- listDir directoryPath
@@ -16,5 +17,5 @@ renameSeason key name seasonNum directoryPath = do
   mapM executeRename renameOps
 
 -- Convenience, pulling apart the tuple return and tying things together.
-renameWithData :: (TvShow, [Episode]) -> [FilePath] -> Either T.Text [RenameOp]
+renameWithData :: (TvShow, [Episode]) -> [FilePath] -> Either Error [RenameOp]
 renameWithData (s, eps) = renameFiles (showName s) eps

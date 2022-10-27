@@ -1,18 +1,16 @@
 module API
   ( APIKey,
-    APIError,
     searchSeason,
     searchShowByName,
   )
 where
 
 import qualified Data.Text as T
+import Error (Error (..))
 import qualified Network.API.TheMovieDB as TMDB
 import Show (Episode (..), TvShow (..))
 
 type APIKey = T.Text
-
-type APIError = T.Text
 
 -- Note that for TMDB, you need to request the SHOW, then the SEASON in
 -- separate requests.
@@ -24,7 +22,10 @@ type APIError = T.Text
 
 -- Search for a show with the given name and, using the FIRST match for that
 -- name, return the episode data for the given season.
-searchSeason :: APIKey -> T.Text -> Int -> IO (Either APIError (TvShow, [Episode]))
+--
+-- TODO: probably new data type for this return structure... it's essentially
+-- the same as `RenameData`, also
+searchSeason :: APIKey -> T.Text -> Int -> IO (Either Error (TvShow, [Episode]))
 searchSeason key query seasonNum = do
   r <- TMDB.runTheMovieDB (TMDB.defaultSettings key) showAndEpisodes
   return (mapError r) -- convert errors to our domain
@@ -33,7 +34,7 @@ searchSeason key query seasonNum = do
     mapTup (sh, se) = (mapTvShow sh, getEpisodes se)
 
 -- Given a show name, or a fragment of a name, get back a list of matches.
-searchShowByName :: APIKey -> T.Text -> IO (Either APIError [TvShow])
+searchShowByName :: APIKey -> T.Text -> IO (Either Error [TvShow])
 searchShowByName key query = do
   tmdbResults <- TMDB.runTheMovieDB (TMDB.defaultSettings key) (TMDB.searchTV query)
   return (mapEither tmdbResults)
@@ -77,14 +78,12 @@ firstMatchForName query = do
   results <- TMDB.searchTV query
   return (head results) -- TODO: not safe, of course
 
--- Map any Error type to our internal type in Eithers.
-mapError :: Show a => Either a b -> Either APIError b
+-- Map any external Error type to our internal type.
+mapError :: Show a => Either a b -> Either Error b
 mapError (Right x) = Right x
-mapError (Left e) = Left $ T.pack $ show e
+mapError (Left e) = Left $ APIError $ show e
 
 -- Remove traces of the TMDB types for both success and error responses.
--- TODO: Map error type to an internal type as well, probably. For now, just
--- use Text. All we're doing from here is printing it anyway.
-mapEither :: Either TMDB.Error [TMDB.TV] -> Either APIError [TvShow]
+mapEither :: Either TMDB.Error [TMDB.TV] -> Either Error [TvShow]
 mapEither (Right s) = Right (map mapTvShow s)
-mapEither (Left e) = Left $ T.pack $ show e
+mapEither (Left e) = Left $ APIError $ show e

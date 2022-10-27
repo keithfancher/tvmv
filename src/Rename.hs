@@ -8,11 +8,10 @@ module Rename
 where
 
 import qualified Data.Text as T
+import Error (Error (..))
 import Show (Episode (..))
 import System.FilePath (replaceBaseName)
 import Text.Printf (printf)
-
-type RenameError = T.Text
 
 -- All the pieces of data we need to correctly (re)name an episode file.
 data RenameData = RenameData
@@ -45,10 +44,10 @@ executeRename = print
 -- season, though it technically could be any group of episodes.)
 -- NOTE: The ORDER MATTERS here. The files must be in the same order as the
 -- episode data, as that's how they're paired.
--- TODO: Real error type. Alternatively: allow partial matches? Probably useful. Opt-in?
-renameFiles :: T.Text -> [Episode] -> [FilePath] -> Either RenameError [RenameOp]
+-- TODO: Allow partial matches? Probably useful. Opt-in?
+renameFiles :: T.Text -> [Episode] -> [FilePath] -> Either Error [RenameOp]
 renameFiles name eps inFiles
-  | length eps /= length inFiles = Left "Mismatched number of episodes and filenames"
+  | length eps /= length inFiles = Left $ RenameError "Mismatched number of episodes and filenames"
   | otherwise = Right (map toRenameOp epDataAndFiles)
   where
     epDataAndFiles = zip (map toRenameData eps) inFiles
