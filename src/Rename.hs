@@ -8,6 +8,7 @@ module Rename
 where
 
 import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 import Error (Error (..))
 import Show (Episode (..))
 import System.FilePath (replaceBaseName)
@@ -37,7 +38,16 @@ episodeNameTemplate = "%s - %dx%d - %s"
 -- Actually rename the files. Accumulate a log file of rename ops.
 -- TODO: just printing for now, testing!
 executeRename :: [RenameOp] -> IO ()
-executeRename = print
+executeRename = mapM_ printRenameOp
+
+printRenameOp :: RenameOp -> IO ()
+printRenameOp = TIO.putStrLn . prettyRenameOp
+
+prettyRenameOp :: RenameOp -> T.Text
+prettyRenameOp op = old <> " ->\n" <> new <> "\n---"
+  where
+    old = T.pack $ oldPath op
+    new = T.pack $ newPath op
 
 -- Given data for a list of episodes and a list of current FilePaths, generate
 -- RenameOps for all the episodes. (Most common use-case here would be with a
