@@ -7,7 +7,8 @@ where
 
 import Data.List (sortBy)
 import qualified Data.Text as T
-import System.Directory (listDirectory, makeAbsolute)
+import System.Directory (listDirectory)
+import System.FilePath ((</>))
 
 -- Get a list of files in the current directory. Note that this returns a
 -- SORTED list of ABSOLUTE paths.
@@ -19,12 +20,13 @@ listCurrentDir = listDir currentPath
 -- Get a list of files in the given directory. Note that this returns a
 -- SORTED list of ABSOLUTE paths.
 -- TODO: filters? whitelist globs, filter out hidden, etc.?
--- TODO: actually, do we care whether the paths are absolute here? maybe unnecessary
 listDir :: FilePath -> IO [FilePath]
-listDir path = do
-  files <- listDirectory path
+listDir dirPath = do
+  files <- listDirectory dirPath
   let sorted = sortCaseInsensitive files -- `listDirectory` returns in a (seemingly?) random order
-  mapM makeAbsolute sorted -- `listDirectory` returns relative paths, we want absolute
+  return $ map absPath sorted -- `listDirectory` returns relative paths, we want absolute
+  where
+    absPath relFilePath = dirPath </> relFilePath
 
 -- The default `sort` is case sensitive. For example:
 --     sort ["test", "something", "Tesz", "Somethinz"]
