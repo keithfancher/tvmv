@@ -31,7 +31,7 @@ library
       File
       Rename
       Show
-      TVMV
+      Tvmv
   other-modules:
       Paths_tvmv
   hs-source-dirs:

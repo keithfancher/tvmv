@@ -4,13 +4,13 @@ import API (APIKey)
 import qualified Data.Text as T
 import Execute (renameSeason)
 import System.Environment (getArgs)
-import TVMV (runTVMV)
+import Tvmv (runTvmv)
 
 main :: IO ()
 main = do
   args <- getArgs
   let (apiKey, query, seasonNum, dirPath) = processArgs args
-  result <- runTVMV $ renameSeason apiKey query seasonNum dirPath
+  result <- runTvmv $ renameSeason apiKey query seasonNum dirPath
   print result
 
 -- Obviously not a long-term solution...

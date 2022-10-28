@@ -10,7 +10,7 @@ import qualified Data.Text as T
 import Error (Error (..))
 import qualified Network.API.TheMovieDB as TMDB
 import Show (Episode (..), TvShow (..))
-import TVMV (TVMV)
+import Tvmv (Tvmv)
 
 type APIKey = T.Text
 
@@ -19,20 +19,20 @@ type APIKey = T.Text
 --
 -- TODO: probably new data type for this return structure... it's essentially
 -- the same as `RenameData`, also
-searchSeason :: APIKey -> T.Text -> Int -> TVMV (TvShow, [Episode])
-searchSeason key query seasonNum = toTVMV key showAndEpisodes
+searchSeason :: APIKey -> T.Text -> Int -> Tvmv (TvShow, [Episode])
+searchSeason key query seasonNum = toTvmv key showAndEpisodes
   where
     showAndEpisodes = querySeason query seasonNum
 
 -- Given a show name, or a fragment of a name, get back a list of matches.
-searchShowByName :: APIKey -> T.Text -> TVMV [TvShow]
-searchShowByName key query = toTVMV key tmdbShows
+searchShowByName :: APIKey -> T.Text -> Tvmv [TvShow]
+searchShowByName key query = toTvmv key tmdbShows
   where
     tmdbShows = queryShows query
 
 -- Map to our internal monad stack, converting errors along the way.
-toTVMV :: APIKey -> TMDB.TheMovieDB a -> TVMV a
-toTVMV key x = ExceptT mappedResult
+toTvmv :: APIKey -> TMDB.TheMovieDB a -> Tvmv a
+toTvmv key x = ExceptT mappedResult
   where
     mappedResult = mapError <$> tmdbIO
     tmdbIO = runTMDB key x

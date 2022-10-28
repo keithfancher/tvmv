@@ -7,10 +7,10 @@ import Error (Error)
 import File (listDir)
 import Rename (RenameOp, executeRename, renameFiles)
 import Show (Episode, TvShow (..))
-import TVMV (TVMV, liftEither)
+import Tvmv (Tvmv, liftEither)
 
 -- Tie the pieces together, essentially.
-renameSeason :: APIKey -> T.Text -> Int -> FilePath -> TVMV ()
+renameSeason :: APIKey -> T.Text -> Int -> FilePath -> Tvmv ()
 renameSeason key name seasonNum directoryPath = do
   searchResults <- searchSeason key name seasonNum
   files <- liftIO $ listDir directoryPath
