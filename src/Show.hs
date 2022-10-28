@@ -34,10 +34,14 @@ data Season = Season
   }
   deriving (Eq, Show)
 
+-- Note that adding season number and show name to this structure is
+-- technically redundant, but it also means an `Episode` is self-contained, has
+-- all the data we need to operate.
 data Episode = Episode
   { episodeNumber :: Int,
     episodeName :: T.Text,
-    episodeSeasonNumber :: Int
+    episodeSeasonNumber :: Int,
+    episodeShowName :: T.Text
   }
   deriving (Eq, Show)
 

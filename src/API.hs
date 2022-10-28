@@ -9,20 +9,15 @@ import Control.Monad.Trans.Except (ExceptT (..))
 import qualified Data.Text as T
 import Error (Error (..))
 import qualified Network.API.TheMovieDB as TMDB
-import Show (Episode (..), TvShow (..))
+import Show (Episode (..), Season (..), TvShow (..))
 import Tvmv (Tvmv)
 
 type APIKey = T.Text
 
 -- Search for a show with the given name and, using the FIRST match for that
 -- name, return the episode data for the given season.
---
--- TODO: probably new data type for this return structure... it's essentially
--- the same as `RenameData`, also
-searchSeason :: APIKey -> T.Text -> Int -> Tvmv (TvShow, [Episode])
-searchSeason key query seasonNum = toTvmv key showAndEpisodes
-  where
-    showAndEpisodes = querySeason query seasonNum
+searchSeason :: APIKey -> T.Text -> Int -> Tvmv Season
+searchSeason key query seasonNum = toTvmv key $ querySeason query seasonNum
 
 -- Given a show name, or a fragment of a name, get back a list of matches.
 searchShowByName :: APIKey -> T.Text -> Tvmv [TvShow]
@@ -53,34 +48,43 @@ mapTvShow s =
   TvShow
     { showId = TMDB.tvID s,
       showName = TMDB.tvName s,
-      seasons = [],
+      seasons = map mapSeason (TMDB.tvSeasons s),
       description = TMDB.tvOverview s,
       numberOfSeasons = TMDB.tvNumberOfSeasons s,
       numberOfEpisodes = TMDB.tvNumberOfEpisodes s
     }
+  where
+    mapSeason = mapTvSeason (TMDB.tvName s) -- map with the given name
 
-mapTvEpisode :: TMDB.Episode -> Episode
-mapTvEpisode e =
+mapTvSeason :: T.Text -> TMDB.Season -> Season
+mapTvSeason n s =
+  Season
+    { seasonNumber = TMDB.seasonNumber s,
+      episodes = map mapEps (TMDB.seasonEpisodes s)
+    }
+  where
+    mapEps = mapTvEpisode n -- map with the given name
+
+mapTvEpisode :: T.Text -> TMDB.Episode -> Episode
+mapTvEpisode n e =
   Episode
     { episodeNumber = TMDB.episodeNumber e,
       episodeName = TMDB.episodeName e,
-      episodeSeasonNumber = TMDB.episodeSeasonNumber e
+      episodeSeasonNumber = TMDB.episodeSeasonNumber e,
+      episodeShowName = n
     }
-
--- Get a list of (our) `Episode` objects from a TMDB `Season`
-getEpisodes :: TMDB.Season -> [Episode]
-getEpisodes s = map mapTvEpisode (TMDB.seasonEpisodes s)
 
 -- Given a query string (for show title), get FIRST match from TMDB for that
 -- title, then query episode data for the given season.
 --
 -- Note that for TMDB, you need to request first the show, then the season in
 -- separate requests. The show request returns a small subset of data.
-querySeason :: T.Text -> Int -> TMDB.TheMovieDB (TvShow, [Episode])
+querySeason :: T.Text -> Int -> TMDB.TheMovieDB Season
 querySeason query seasonNum = do
   showResults <- firstMatchForName query
   seasonData <- TMDB.fetchTVSeason (TMDB.tvID showResults) seasonNum
-  return (mapTvShow showResults, getEpisodes seasonData)
+  let name = TMDB.tvName showResults -- All we really need from the show here
+  return $ mapTvSeason name seasonData
 
 -- Get a list of shows from TMDB that match the given query.
 queryShows :: T.Text -> TMDB.TheMovieDB [TvShow]
