@@ -10,6 +10,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Error (Error (..))
 import Show (Episode (..))
+import qualified System.Directory as Dir
 import System.FilePath (replaceBaseName)
 import Text.Printf (printf)
 
@@ -32,10 +33,19 @@ data RenameOp = RenameOp
 episodeNameTemplate :: FilePath
 episodeNameTemplate = "%s - %dx%02d - %s"
 
--- Actually rename the files. Accumulate a log file of rename ops.
--- TODO: just printing for now, testing!
+-- Actually rename the files. Accumulate a log of rename ops.
+-- TODO: Writer monad, accumulate results. Also, probably catch the IO
+-- exceptions? Map to real error results?
 executeRename :: [RenameOp] -> IO ()
-executeRename = mapM_ printRenameOp
+executeRename ops = do
+  mapM_ rename ops
+  executeRenameDryRun ops -- for now, just *also* do the "dry run", which prints... replace w/ Writer
+  where
+    rename (RenameOp old new) = Dir.renameFile old new
+
+-- Just print what *would* have happened rather than actually renaming files.
+executeRenameDryRun :: [RenameOp] -> IO ()
+executeRenameDryRun = mapM_ printRenameOp
 
 printRenameOp :: RenameOp -> IO ()
 printRenameOp = TIO.putStrLn . prettyRenameOp
