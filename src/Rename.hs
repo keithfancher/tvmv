@@ -23,9 +23,14 @@ data RenameOp = RenameOp
 
 -- "[show] - [season]x[ep] - [ep name]"
 -- e.g. "Buffy the Vampire Slayer - 4x10 - Hush"
--- TODO: Zero-padding? Config? Or better yet, be smart based on total number of eps/seasons.
+--
+-- Note that this zero-pads the *episode* number but not the season, for
+-- example: "Buffy the Vampire Slayer - 4x08 - Pangs"
+--
+-- Could make this a config option, or try to be smart based on total number of
+-- seasons/episodes. But for now, this is a sane default.
 episodeNameTemplate :: FilePath
-episodeNameTemplate = "%s - %dx%d - %s"
+episodeNameTemplate = "%s - %dx%02d - %s"
 
 -- Actually rename the files. Accumulate a log file of rename ops.
 -- TODO: just printing for now, testing!

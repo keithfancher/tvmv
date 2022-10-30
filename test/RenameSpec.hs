@@ -16,7 +16,7 @@ spec = do
         `shouldBe` Right
           [ RenameOp
               { oldPath = "/root/buffy/season 1/buff 1.1.mkv",
-                newPath = "/root/buffy/season 1/Buffy the Vampire Slayer - 1x1 - Welcome to the Hellmouth.mkv"
+                newPath = "/root/buffy/season 1/Buffy the Vampire Slayer - 1x01 - Welcome to the Hellmouth.mkv"
               },
             RenameOp
               { oldPath = "/root/buffy/season 4/buff 4.10.mkv",
