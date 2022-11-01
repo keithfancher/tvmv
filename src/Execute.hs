@@ -2,6 +2,7 @@ module Execute (renameSeason) where
 
 import API (APIKey, searchSeason)
 import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Class (lift)
 import qualified Data.Text as T
 import File (listDir)
 import Rename (executeRename, renameFiles)
@@ -14,4 +15,4 @@ renameSeason key name seasonNum directoryPath = do
   season <- searchSeason key name seasonNum
   files <- liftIO $ listDir directoryPath
   renameOps <- liftEither $ renameFiles (episodes season) files
-  liftIO $ executeRename renameOps
+  lift $ executeRename renameOps

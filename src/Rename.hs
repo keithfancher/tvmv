@@ -1,11 +1,14 @@
 module Rename
   ( RenameOp (..),
     executeRename,
+    executeRenameDryRun,
     renameFile,
     renameFiles,
   )
 where
 
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Writer (WriterT, tell)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Error (Error (..))
@@ -33,15 +36,18 @@ data RenameOp = RenameOp
 episodeNameTemplate :: FilePath
 episodeNameTemplate = "%s - %dx%02d - %s"
 
--- Actually rename the files. Accumulate a log of rename ops.
--- TODO: Writer monad, accumulate results. Also, probably catch the IO
--- exceptions? Map to real error results?
-executeRename :: [RenameOp] -> IO ()
-executeRename ops = do
-  mapM_ rename ops
-  executeRenameDryRun ops -- for now, just *also* do the "dry run", which prints... replace w/ Writer
-  where
-    rename (RenameOp old new) = Dir.renameFile old new
+-- Actually rename the files. Accumulate a "log" of rename ops.
+executeRename :: [RenameOp] -> WriterT [RenameOp] IO ()
+executeRename = mapM_ executeRenameSingle
+
+-- Rename a single file on the file system. Assuming an IO Exception isn't
+-- thrown, that op will be added to the Writer values for later logging.
+-- TODO: Catch exceptions? Could also push failures into the Writer, maybe
+-- define a RenameResult type or something?
+executeRenameSingle :: RenameOp -> WriterT [RenameOp] IO ()
+executeRenameSingle (RenameOp old new) = do
+  liftIO $ Dir.renameFile old new
+  tell [RenameOp old new]
 
 -- Just print what *would* have happened rather than actually renaming files.
 executeRenameDryRun :: [RenameOp] -> IO ()

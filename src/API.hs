@@ -5,12 +5,11 @@ module API
   )
 where
 
-import Control.Monad.Trans.Except (ExceptT (..))
 import qualified Data.Text as T
 import Error (Error (..))
 import qualified Network.API.TheMovieDB as TMDB
 import Show (Episode (..), Season (..), TvShow (..))
-import Tvmv (Tvmv)
+import Tvmv (Tvmv, mkTvmv)
 
 type APIKey = T.Text
 
@@ -27,7 +26,7 @@ searchShowByName key query = toTvmv key tmdbShows
 
 -- Map to our internal monad stack, converting errors along the way.
 toTvmv :: APIKey -> TMDB.TheMovieDB a -> Tvmv a
-toTvmv key x = ExceptT mappedResult
+toTvmv key x = mkTvmv mappedResult
   where
     mappedResult = mapError <$> tmdbIO
     tmdbIO = runTMDB key x
