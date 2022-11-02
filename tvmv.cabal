@@ -45,6 +45,7 @@ library
     , filepath
     , text
     , themoviedb
+    , time
     , transformers
   default-language: Haskell2010
 

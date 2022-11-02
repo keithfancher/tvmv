@@ -44,6 +44,7 @@ library:
   - filepath
   - directory
   - transformers
+  - time
 
 executables:
   tvmv:
