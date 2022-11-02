@@ -2,15 +2,14 @@ module Main (main) where
 
 import API (APIKey)
 import qualified Data.Text as T
-import Execute (renameSeason)
+import Execute (renameSeason, run)
 import System.Environment (getArgs)
-import Tvmv (runTvmv)
 
 main :: IO ()
 main = do
   args <- getArgs
   let (apiKey, query, seasonNum, dirPath) = processArgs args
-  result <- runTvmv $ renameSeason apiKey query seasonNum dirPath
+  result <- run $ renameSeason apiKey query seasonNum dirPath
   print result
 
 -- Obviously not a long-term solution...

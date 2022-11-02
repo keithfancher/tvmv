@@ -1,5 +1,6 @@
 module Tvmv
   ( Tvmv,
+    Logger,
     mkTvmv,
     runTvmv,
     liftEither,
@@ -9,7 +10,7 @@ where
 import Control.Monad.Trans.Except (ExceptT (..), runExceptT)
 import Control.Monad.Trans.Writer (WriterT (..), runWriterT)
 import Error (Error)
-import Rename (RenameOp, executeRenameDryRun)
+import Rename (RenameOp)
 
 -- Wrap the transformer stack!
 --
@@ -26,18 +27,14 @@ mkTvmv m = ExceptT $ WriterT $ do
   eitherVal <- m
   return (eitherVal, []) -- wrap the value and empty writer/accumulator list
 
--- Pull out the IO of Either from a Tvmv. Log the resulting Writer values.
-runTvmv :: Tvmv a -> IO (Either Error a)
-runTvmv m = do
+-- Pull out the IO of Either from a Tvmv. Log the resulting Writer values using
+-- the given Logger function.
+runTvmv :: Tvmv a -> Logger -> IO (Either Error a)
+runTvmv m logResults = do
   let writerT = runExceptT m
   (retVal, writerValues) <- runWriterT writerT
-  logRenameOps writerValues
+  logResults writerValues
   return retVal
-
--- TODO: Inject a Logger into the `run` function based on config (dry-run, etc?).
--- For now, "logging" is the same as just printing.
-logRenameOps :: Logger
-logRenameOps = executeRenameDryRun
 
 -- Admittedly, I only vaguely understand why this works :')
 --
