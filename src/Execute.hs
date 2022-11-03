@@ -1,10 +1,11 @@
 module Execute
-  ( renameSeason,
+  ( execCommand,
     run,
   )
 where
 
-import API (APIKey, searchSeason)
+import API (searchSeason)
+import Command (Command (..), MvOptions (..), SearchKey (..))
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
 import qualified Data.Text as T
@@ -17,13 +18,21 @@ import Show (Season (..))
 import Text.Printf (printf)
 import Tvmv (Logger, Tvmv, liftEither, runTvmv)
 
+execCommand :: Command -> Tvmv ()
+execCommand (Mv mvOpts) = renameSeason mvOpts
+execCommand (Search _) = error "Implement me ;)" -- TODO: Other commands!
+execCommand (Undo _) = error "Implement me ;)"
+
 -- Tie the pieces together, essentially.
-renameSeason :: APIKey -> T.Text -> Int -> FilePath -> Tvmv ()
-renameSeason key name seasonNum directoryPath = do
-  season <- searchSeason key name seasonNum
+renameSeason :: MvOptions -> Tvmv ()
+renameSeason (MvOptions key name seasNum directoryPath) = do
+  season <- searchSeason key (queryName name) seasNum
   files <- liftIO $ listDir directoryPath
   renameOps <- liftEither $ renameFiles (episodes season) files
   lift $ executeRename renameOps
+  where
+    queryName (Name n) = n
+    queryName _ = error "No IDs yet ;)" -- TODO: Handle IDs in searches
 
 -- Run it with the configured logger
 run :: Tvmv a -> IO (Either Error a)

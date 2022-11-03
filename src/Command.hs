@@ -2,6 +2,8 @@ module Command
   ( Command (..),
     MvOptions (..),
     SearchKey (..),
+    SearchOptions (..),
+    UndoOptions (..),
   )
 where
 
