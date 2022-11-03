@@ -20,13 +20,12 @@ mvOptionsParser =
           <> help "..." -- TODO
           <> metavar "SEASON_NUM"
       )
-    <*> strOption
-      ( long "dir"
-          <> short 'd'
-          <> metavar "DIR_PATH"
+    <*> argument
+      str
+      ( metavar "DIR_PATH"
           <> help "..." -- TODO
           <> showDefault
-          <> value "." -- Default to current dir (TODO: make this a positional arg, probably)
+          <> value "." -- Default to current dir
       )
 
 searchKeyParser :: Parser SearchKey
@@ -62,10 +61,9 @@ searchOptionsParser =
           <> metavar "API_KEY"
           <> help "..." -- TODO
       )
-    <*> strOption
-      ( long "name"
-          <> short 'n'
-          <> metavar "SHOW_NAME"
+    <*> argument
+      str
+      ( metavar "SHOW_NAME"
           <> help "..." -- TODO
       )
 
@@ -74,7 +72,7 @@ undoOptionsParser =
   UndoOptions
     <$> strOption
       ( long "log-file"
-          <> short 'l' -- TODO: probably a positional arg
+          <> short 'l' -- TODO: probably a positional arg, or option
           <> metavar "TVMV_LOG_FILE"
           <> help "..." -- TODO
       )
