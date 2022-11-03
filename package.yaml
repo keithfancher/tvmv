@@ -56,6 +56,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - tvmv
+    - optparse-applicative
 
 tests:
   tvmv-test:
