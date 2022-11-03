@@ -2,6 +2,7 @@ module Show
   ( Episode (..),
     Season (..),
     TvShow (..),
+    ItemId,
     printShows,
     showInfoBrief,
   )

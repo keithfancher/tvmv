@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       API
+      Command
       Error
       Execute
       File
