@@ -38,6 +38,14 @@ spec = do
             newPath = "/root/buffy/season 4/Buffy the Vampire Slayer - 4x10 - Hush.mkv"
           }
 
+  describe "undoRenameOp" $ do
+    it "flip the old/new args for a given op" $ do
+      undoRenameOp RenameOp {oldPath = "old/path/to/file.mkv", newPath = "new/path/to/file.mkv"}
+        `shouldBe` RenameOp
+          { oldPath = "new/path/to/file.mkv",
+            newPath = "old/path/to/file.mkv"
+          }
+
 buffy :: T.Text
 buffy = "Buffy the Vampire Slayer"
 

@@ -70,10 +70,9 @@ searchOptionsParser =
 undoOptionsParser :: Parser UndoOptions
 undoOptionsParser =
   UndoOptions
-    <$> strOption
-      ( long "log-file"
-          <> short 'l' -- TODO: probably a positional arg, or option
-          <> metavar "TVMV_LOG_FILE"
+    <$> argument -- TODO: optional, search for (latest?) log file in dir if not specified
+      str
+      ( metavar "TVMV_LOG_FILE"
           <> help "..." -- TODO
       )
 

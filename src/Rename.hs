@@ -4,6 +4,7 @@ module Rename
     executeRenameDryRun,
     renameFile,
     renameFiles,
+    undoRenameOp,
   )
 where
 
@@ -23,7 +24,7 @@ data RenameOp = RenameOp
   { oldPath :: FilePath,
     newPath :: FilePath
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 -- "[show] - [season]x[ep] - [ep name]"
 -- e.g. "Buffy the Vampire Slayer - 4x10 - Hush"
@@ -61,6 +62,10 @@ prettyRenameOp op = old <> " ->\n" <> new <> "\n---"
   where
     old = T.pack $ oldPath op
     new = T.pack $ newPath op
+
+-- Strike that, reverse it!
+undoRenameOp :: RenameOp -> RenameOp
+undoRenameOp (RenameOp old new) = RenameOp {oldPath = new, newPath = old}
 
 -- Given data for a list of episodes and a list of current FilePaths, generate
 -- RenameOps for all the episodes. (Most common use-case here would be with a
