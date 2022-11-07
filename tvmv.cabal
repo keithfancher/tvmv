@@ -73,6 +73,7 @@ test-suite tvmv-test
   main-is: Spec.hs
   other-modules:
       FileSpec
+      LogSpec
       RenameSpec
       Paths_tvmv
   hs-source-dirs:

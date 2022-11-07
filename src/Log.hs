@@ -1,5 +1,6 @@
 module Log
   ( readLogFile,
+    renameOpsFromText,
     writeLogFileAndPrint,
   )
 where
