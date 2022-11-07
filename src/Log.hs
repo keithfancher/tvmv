@@ -16,6 +16,7 @@ import Tvmv (Logger)
 -- TODO: Inject a particular Logger into the `run` function based on config
 -- (dry-run, etc?). For now, we're printing and writing a log file every time.
 writeLogFileAndPrint :: Logger
+writeLogFileAndPrint [] = return () -- no ops, don't log
 writeLogFileAndPrint ops = do
   executeRenameDryRun ops -- print as well as...
   logFile <- logFileName
