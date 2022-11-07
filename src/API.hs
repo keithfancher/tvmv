@@ -1,6 +1,7 @@
 module API
   ( APIKey,
-    searchSeason,
+    searchSeasonById,
+    searchSeasonByName,
     searchShowByName,
   )
 where
@@ -8,15 +9,21 @@ where
 import qualified Data.Text as T
 import Error (Error (..))
 import qualified Network.API.TheMovieDB as TMDB
-import Show (Episode (..), Season (..), TvShow (..))
+import Show (Episode (..), ItemId, Season (..), TvShow (..))
 import Tvmv (Tvmv, mkTvmv)
 
 type APIKey = T.Text
 
 -- Search for a show with the given name and, using the FIRST match for that
 -- name, return the episode data for the given season.
-searchSeason :: APIKey -> T.Text -> Int -> Tvmv Season
-searchSeason key query seasonNum = toTvmv key $ querySeason query seasonNum
+searchSeasonByName :: APIKey -> T.Text -> Int -> Tvmv Season
+searchSeasonByName key query seasonNum = toTvmv key $ querySeasonByName query seasonNum
+
+-- Get season episode data using the show's unique ID directly. Doesn't
+-- actually save on API calls, which is kind of funny, but ensures you're
+-- getting exactly the match you want.
+searchSeasonById :: APIKey -> ItemId -> Int -> Tvmv Season
+searchSeasonById key itemId seasonNum = toTvmv key $ querySeasonById itemId seasonNum
 
 -- Given a show name, or a fragment of a name, get back a list of matches.
 searchShowByName :: APIKey -> T.Text -> Tvmv [TvShow]
@@ -78,11 +85,24 @@ mapTvEpisode n e =
 --
 -- Note that for TMDB, you need to request first the show, then the season in
 -- separate requests. The show request returns a small subset of data.
-querySeason :: T.Text -> Int -> TMDB.TheMovieDB Season
-querySeason query seasonNum = do
+querySeasonByName :: T.Text -> Int -> TMDB.TheMovieDB Season
+querySeasonByName query seasonNum = do
   showResults <- firstMatchForName query
-  seasonData <- TMDB.fetchTVSeason (TMDB.tvID showResults) seasonNum
-  let name = TMDB.tvName showResults -- All we really need from the show here
+  fetchShowSeason showResults seasonNum
+
+-- Same as above, but query by ID directly. Note we still have to make two API
+-- calls here, since the first is the only way we can get the show's name!
+querySeasonById :: ItemId -> Int -> TMDB.TheMovieDB Season
+querySeasonById itemId seasonNum = do
+  showResults <- TMDB.fetchTV itemId
+  fetchShowSeason showResults seasonNum
+
+-- Now that we've got the *show* data, we can pull down the data for a given
+-- season.
+fetchShowSeason :: TMDB.TV -> Int -> TMDB.TheMovieDB Season
+fetchShowSeason showData seasonNum = do
+  seasonData <- TMDB.fetchTVSeason (TMDB.tvID showData) seasonNum
+  let name = TMDB.tvName showData -- All we really need from the show here
   return $ mapTvSeason name seasonData
 
 -- Get a list of shows from TMDB that match the given query.

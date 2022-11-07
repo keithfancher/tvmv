@@ -4,7 +4,7 @@ module Execute
   )
 where
 
-import API (searchSeason, searchShowByName)
+import API (searchSeasonById, searchSeasonByName, searchShowByName)
 import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
@@ -26,14 +26,15 @@ run tvmv = runTvmv tvmv writeLogFileAndPrint
 
 -- Tie the pieces together, essentially.
 renameSeason :: MvOptions -> Tvmv ()
-renameSeason (MvOptions key name seasNum directoryPath) = do
-  season <- searchSeason key (queryName name) seasNum
+renameSeason (MvOptions apiKey searchQuery seasNum directoryPath) = do
+  season <- searchSeason seasNum
   files <- liftIO $ listDir directoryPath
   renameOps <- liftEither $ renameFiles (episodes season) files
   lift $ executeRename renameOps
   where
-    queryName (Name n) = n
-    queryName _ = error "No IDs yet ;)" -- TODO: Handle IDs in searches
+    searchSeason = case searchQuery of
+      (Name n) -> searchSeasonByName apiKey n
+      (Id i) -> searchSeasonById apiKey i
 
 undoRename :: UndoOptions -> Tvmv ()
 undoRename (UndoOptions logFileName) = do
