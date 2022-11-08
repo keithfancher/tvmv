@@ -24,7 +24,10 @@ data MvOptions = MvOptions
   { mvApiKey :: APIKey,
     searchKey :: SearchKey,
     seasonNum :: Int,
-    seasonDir :: FilePath
+    -- This can be a directory OR a list of files. To make this object easily
+    -- parseable from CLI args, we'll take it as an array and do more
+    -- processing later, once we've got it. See `InFiles` type.
+    seasonFiles :: [FilePath]
     -- TODO: flags, maybe a separate data struct, func to get defaults?
   }
 

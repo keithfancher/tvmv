@@ -1,6 +1,8 @@
 module File
-  ( listCurrentDir,
+  ( InFiles (..),
+    listCurrentDir,
     listDir,
+    listFiles,
     sortCaseInsensitive,
   )
 where
@@ -9,6 +11,14 @@ import Data.List (sortBy)
 import qualified Data.Text as T
 import System.Directory (listDirectory, makeAbsolute)
 import System.FilePath ((</>))
+
+-- Our input file selection. Can either be a directory OR a list of files.
+data InFiles = Dir FilePath | Files [FilePath]
+
+-- Given a dir or files, get back a SORTED list of ABSOLUTE file paths.
+listFiles :: InFiles -> IO [FilePath]
+listFiles (Dir dirPath) = listDir dirPath
+listFiles (Files fileList) = mapM makeAbsolute (sortCaseInsensitive fileList)
 
 -- Get a list of files in the current directory. Note that this returns a
 -- SORTED list of ABSOLUTE paths.
@@ -19,7 +29,6 @@ listCurrentDir = listDir currentPath
 
 -- Get a list of files in the given directory. Note that this returns a
 -- SORTED list of ABSOLUTE paths.
--- TODO: filters? whitelist globs, filter out hidden, etc.?
 listDir :: FilePath -> IO [FilePath]
 listDir dirPath = do
   files <- listDirectory dirPath

@@ -20,12 +20,12 @@ mvOptionsParser =
           <> help "..." -- TODO
           <> metavar "SEASON_NUM"
       )
-    <*> argument
-      str
-      ( metavar "DIR_PATH"
-          <> help "..." -- TODO
-          <> showDefault
-          <> value "." -- Default to current dir
+    <*> some -- `some` == "one or more"
+      ( argument
+          str
+          ( metavar "DIR_PATH|FILES"
+              <> help "..." -- TODO
+          )
       )
 
 searchKeyParser :: Parser SearchKey
