@@ -1,7 +1,5 @@
 module File
   ( InFiles (..),
-    listCurrentDir,
-    listDir,
     listFiles,
     sortCaseInsensitive,
   )
@@ -19,13 +17,6 @@ data InFiles = Dir FilePath | Files [FilePath]
 listFiles :: InFiles -> IO [FilePath]
 listFiles (Dir dirPath) = listDir dirPath
 listFiles (Files fileList) = mapM makeAbsolute (sortCaseInsensitive fileList)
-
--- Get a list of files in the current directory. Note that this returns a
--- SORTED list of ABSOLUTE paths.
-listCurrentDir :: IO [FilePath]
-listCurrentDir = listDir currentPath
-  where
-    currentPath = "."
 
 -- Get a list of files in the given directory. Note that this returns a
 -- SORTED list of ABSOLUTE paths.
