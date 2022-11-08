@@ -7,7 +7,7 @@ where
 
 import Data.List (sortBy)
 import qualified Data.Text as T
-import System.Directory (listDirectory)
+import System.Directory (listDirectory, makeAbsolute)
 import System.FilePath ((</>))
 
 -- Get a list of files in the current directory. Note that this returns a
@@ -24,9 +24,10 @@ listDir :: FilePath -> IO [FilePath]
 listDir dirPath = do
   files <- listDirectory dirPath
   let sorted = sortCaseInsensitive files -- `listDirectory` returns in a (seemingly?) random order
-  return $ map absPath sorted -- `listDirectory` returns relative paths, we want absolute
+  let fullPath = map prependDirPath sorted -- `listDirectory` also ONLY returns files, not their paths
+  mapM makeAbsolute fullPath -- now that we have a full path (possibly) relative to current dir, make absolute
   where
-    absPath relFilePath = dirPath </> relFilePath
+    prependDirPath p = dirPath </> p -- `dirPath` could be relative or absolute, we don't know/care
 
 -- The default `sort` is case sensitive. For example:
 --     sort ["test", "something", "Tesz", "Somethinz"]
