@@ -1,6 +1,7 @@
 module Args (cliOptParser) where
 
 import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
+import File (InFiles, mkInFiles)
 import Options.Applicative
 
 mvOptionsParser :: Parser MvOptions
@@ -20,13 +21,22 @@ mvOptionsParser =
           <> help "..." -- TODO
           <> metavar "SEASON_NUM"
       )
-    <*> many -- `many` == "zero or more"
-      ( argument
-          str
-          ( metavar "DIR_PATH|FILES"
-              <> help "..." -- TODO
-          )
-      )
+    <*> inFilesParser
+
+inFilesParser :: Parser InFiles
+inFilesParser = mkInFiles <$> filePathsParser
+
+-- We get these in from the CLI as a list of paths, but need to transform it
+-- into `InFiles`, the actually-useful type.
+filePathsParser :: Parser [FilePath]
+filePathsParser =
+  many -- `many` == "zero or more"
+    ( argument
+        str
+        ( metavar "DIR_PATH|FILES"
+            <> help "..." -- TODO
+        )
+    )
 
 searchKeyParser :: Parser SearchKey
 searchKeyParser = nameParser <|> idParser

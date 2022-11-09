@@ -1,6 +1,7 @@
 module File
   ( InFiles (..),
     listFiles,
+    mkInFiles,
     sortCaseInsensitive,
   )
 where
@@ -12,6 +13,15 @@ import System.FilePath ((</>))
 
 -- Our input file selection. Can either be a directory OR a list of files.
 data InFiles = Dir FilePath | Files [FilePath]
+
+-- Given the list of FilePaths -- which is how our input comes in from the CLI
+-- arg parsing -- create the appropriate `InFiles` type.
+-- TODO: This does NOT handle the case of passing in a single file. If there's
+-- only one value, we're assuming it's a directory. (Also, test!)
+mkInFiles :: [FilePath] -> InFiles
+mkInFiles [] = Dir "." -- empty, default to current directory
+mkInFiles [d] = Dir d -- one element passed in, assume it's a directory
+mkInFiles twoOrMore = Files twoOrMore -- otherwise, a list of files
 
 -- Given a dir or files, get back a SORTED list of ABSOLUTE file paths.
 listFiles :: InFiles -> IO [FilePath]
