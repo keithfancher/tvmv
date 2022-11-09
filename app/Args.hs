@@ -20,7 +20,7 @@ mvOptionsParser =
           <> help "..." -- TODO
           <> metavar "SEASON_NUM"
       )
-    <*> some -- `some` == "one or more"
+    <*> many -- `many` == "zero or more"
       ( argument
           str
           ( metavar "DIR_PATH|FILES"
