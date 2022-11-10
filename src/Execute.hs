@@ -1,6 +1,7 @@
 module Execute
   ( Env (..),
     execCommand,
+    populateAPIKey,
     run,
   )
 where
