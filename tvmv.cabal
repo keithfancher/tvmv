@@ -55,6 +55,7 @@ executable tvmv
   main-is: Main.hs
   other-modules:
       Args
+      Env
       Paths_tvmv
   hs-source-dirs:
       app
