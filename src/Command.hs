@@ -22,7 +22,9 @@ data Command
 data SearchKey = Name T.Text | Id ItemId
 
 data MvOptions = MvOptions
-  { mvApiKey :: APIKey,
+  { -- APIKey might not be present in the CLI options. If this is Nothing, we'll
+    -- check an env var and a file down the road. But it IS required eventually.
+    mvApiKey :: Maybe APIKey,
     searchKey :: SearchKey,
     seasonNum :: Int,
     seasonFiles :: InFiles
@@ -30,7 +32,7 @@ data MvOptions = MvOptions
   }
 
 data SearchOptions = SearchOptions
-  { searchApiKey :: APIKey, -- TODO: name conflict, need that extension so we can remove stupid prefix
+  { searchApiKey :: Maybe APIKey, -- TODO: name conflict, need that extension so we can remove stupid prefix
     query :: T.Text
   }
 

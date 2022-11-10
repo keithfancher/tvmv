@@ -2,6 +2,7 @@ module Args (cliOptParser) where
 
 import API (APIKey)
 import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
+import qualified Data.Text as T
 import File (InFiles, mkInFiles)
 import Options.Applicative
 
@@ -60,14 +61,22 @@ mvOptionsParser =
       )
     <*> inFilesParser
 
-apiKeyParser :: Parser APIKey
+apiKeyParser :: Parser (Maybe APIKey)
 apiKeyParser =
-  strOption
+  option
+    maybeApiKeyReader
     ( long "api-key"
         <> short 'k'
         <> metavar "API_KEY"
         <> help "..." -- TODO
+        <> value Nothing -- If not specified, it's Nothing
     )
+
+maybeApiKeyReader :: ReadM (Maybe APIKey)
+maybeApiKeyReader = eitherReader $ \s ->
+  case s of
+    "" -> Right Nothing
+    anythingNonEmpty -> Right $ Just $ T.pack anythingNonEmpty
 
 inFilesParser :: Parser InFiles
 inFilesParser = mkInFiles <$> filePathsParser

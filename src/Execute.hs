@@ -4,11 +4,11 @@ module Execute
   )
 where
 
-import API (searchSeasonById, searchSeasonByName, searchShowByName)
+import API (APIKey, searchSeasonById, searchSeasonByName, searchShowByName)
 import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
-import Error (Error)
+import Error (Error (APIError))
 import File (listFiles)
 import Log (readLogFile, writeLogFileAndPrint)
 import Rename (executeRename, renameFiles, undoRenameOp)
@@ -26,15 +26,16 @@ run tvmv = runTvmv tvmv writeLogFileAndPrint
 
 -- Tie the pieces together, essentially.
 renameSeason :: MvOptions -> Tvmv ()
-renameSeason (MvOptions apiKey searchQuery seasNum inFiles) = do
-  season <- searchSeason seasNum
+renameSeason (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
+  apiKey <- liftEither $ populateAPIKey maybeApiKey
+  season <- searchSeason apiKey seasNum
   files <- liftIO $ listFiles inFiles
   renameOps <- liftEither $ renameFiles (episodes season) files
   lift $ executeRename renameOps
   where
-    searchSeason = case searchQuery of
-      (Name n) -> searchSeasonByName apiKey n
-      (Id i) -> searchSeasonById apiKey i
+    searchSeason k = case searchQuery of
+      (Name n) -> searchSeasonByName k n
+      (Id i) -> searchSeasonById k i
 
 undoRename :: UndoOptions -> Tvmv ()
 undoRename (UndoOptions logFileName) = do
@@ -43,6 +44,11 @@ undoRename (UndoOptions logFileName) = do
   lift $ executeRename reversedOps -- TODO: do I want the undo op to also generate a log?
 
 searchByName :: SearchOptions -> Tvmv ()
-searchByName (SearchOptions key searchQuery) = do
-  showResults <- searchShowByName key searchQuery
+searchByName (SearchOptions maybeApiKey searchQuery) = do
+  apiKey <- liftEither $ populateAPIKey maybeApiKey
+  showResults <- searchShowByName apiKey searchQuery
   liftIO $ printShows showResults -- TODO: search shouldn't gen a log either...
+
+populateAPIKey :: Maybe APIKey -> Either Error APIKey
+populateAPIKey (Just k) = Right k
+populateAPIKey Nothing = Left $ APIError "Missing API key!" -- TODO: check env and file in this case
