@@ -2,11 +2,10 @@ module Rename
   ( RenameOp (..),
     RenameResult (..),
     executeRename,
-    executeRenameDryRun,
     renameFile,
     renameFiles,
     undoRenameOp,
-    printRenameResult,
+    printRenameResults,
   )
 where
 
@@ -51,29 +50,25 @@ executeRename = mapM_ executeRenameSingle
 
 -- Rename a single file on the file system. Assuming an IO Exception isn't
 -- thrown, that op will be added to the Writer values for later logging.
--- TODO: Catch exceptions? Could also push failures into the Writer, maybe
--- define a RenameResult type or something?
+-- TODO: Catch exceptions? Could also push failures into the Writer.
 executeRenameSingle :: RenameOp -> WriterT [RenameResult] IO ()
 executeRenameSingle (RenameOp old new) = do
   liftIO $ Dir.renameFile old new
   tell [RenameResult (RenameOp old new) True]
 
--- Just print what *would* have happened rather than actually renaming files.
-executeRenameDryRun :: [RenameOp] -> IO ()
-executeRenameDryRun = mapM_ printRenameOp
-
-printRenameOp :: RenameOp -> IO ()
-printRenameOp = TIO.putStrLn . prettyRenameOp
-
-printRenameResult :: RenameResult -> IO ()
-printRenameResult r = TIO.putStrLn opAndResult
+printRenameResults :: [RenameResult] -> IO ()
+printRenameResults r = TIO.putStrLn (T.intercalate "\n\n" asText)
   where
-    opAndResult = prettyRenameOp (op r) <> result (success r) <> "\n"
+    asText = map prettyRenameResult r
+
+prettyRenameResult :: RenameResult -> T.Text
+prettyRenameResult r = prettyRenameOp (op r) <> "\n" <> result (success r)
+  where
     result True = "Sucess!"
     result False = "ERROR :("
 
 prettyRenameOp :: RenameOp -> T.Text
-prettyRenameOp renameOp = old <> " ->\n" <> new <> "\n"
+prettyRenameOp renameOp = old <> " ->\n" <> new
   where
     old = T.pack $ oldPath renameOp
     new = T.pack $ newPath renameOp

@@ -11,7 +11,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Error (Error (..))
-import Rename (RenameOp, RenameResult (..), printRenameResult)
+import Rename (RenameOp, RenameResult (..), printRenameResults)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
 import Tvmv (Logger)
@@ -31,7 +31,7 @@ writeLogFile results = do
 printLog :: Logger
 printLog [] = return [] -- don't print if empty
 printLog results = do
-  mapM_ printRenameResult results
+  printRenameResults results
   return results
 
 printAndWriteLog :: Logger

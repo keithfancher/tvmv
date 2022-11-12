@@ -10,4 +10,6 @@ main = do
   command <- execParser cliOptParser
   env <- populateEnv
   result <- execCommand env command
-  print result
+  case result of
+    Left e -> putStrLn $ "Failed with: " <> show e
+    Right _ -> return ()

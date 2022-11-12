@@ -35,5 +35,5 @@ searchShowByName :: APIKey -> T.Text -> Tvmv [TvShow]
 searchShowByName = API.queryShows
 
 firstMatch :: [a] -> Either Error a
-firstMatch [] = Left $ APIError "No match found!"
+firstMatch [] = Left $ APIError "No match found for search query"
 firstMatch (first : _) = Right first
