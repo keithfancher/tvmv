@@ -2,7 +2,6 @@ module Execute
   ( Env (..),
     execCommand,
     populateAPIKey,
-    run,
   )
 where
 
@@ -13,7 +12,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
 import Error (Error (..))
 import File (listFiles)
-import Log (printAndWriteLog, readLogFile)
+import Log (printAndWriteLog, printLog, readLogFile)
 import Rename (executeRename, renameFiles, undoRenameOp)
 import Show (Season (..), printShows)
 import Tvmv (Tvmv, liftEither, mkTvmv, runTvmv)
@@ -25,16 +24,20 @@ data Env = Env
     apiKeyFile :: Maybe APIKey
   }
 
-execCommand :: Env -> Command -> Tvmv ()
-execCommand e (Mv mvOpts) = renameSeason e mvOpts
-execCommand e (Search searchOpts) = searchByName e searchOpts
-execCommand _ (Undo undoOpts) = undoRename undoOpts
+execCommand :: Env -> Command -> IO (Either Error ())
+execCommand env (Mv mvOpts) = runWithLog $ renameSeason env mvOpts
+execCommand env (Search searchOpts) = runNoLog $ searchByName env searchOpts
+execCommand _ (Undo undoOpts) = runNoLog $ undoRename undoOpts
 
--- Run it with the configured logger
-run :: Tvmv a -> IO (Either Error a)
-run tvmv = runTvmv tvmv printAndWriteLog
+-- Run the Tvmv, print the results from its writer AND write a log file.
+runWithLog :: Tvmv a -> IO (Either Error a)
+runWithLog = runTvmv printAndWriteLog
 
--- Tie the pieces together, essentially.
+-- Run the Tvmv, print the results ONLY. (No log file.)
+runNoLog :: Tvmv a -> IO (Either Error a)
+runNoLog = runTvmv printLog
+
+-- Rename the files of a TV season.
 renameSeason :: Env -> MvOptions -> Tvmv ()
 renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
@@ -47,17 +50,19 @@ renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
       (Name n) -> searchSeasonByName k n
       (Id i) -> searchSeasonById k i
 
+-- Undo a previously-run rename operation, given a log file.
 undoRename :: UndoOptions -> Tvmv ()
 undoRename (UndoOptions logFileName) = do
   renameOps <- mkTvmv $ readLogFile logFileName
   let reversedOps = map undoRenameOp renameOps
-  lift $ executeRename reversedOps -- TODO: do I want the undo op to also generate a log?
+  lift $ executeRename reversedOps
 
+-- Query the configured API for a show with the given name.
 searchByName :: Env -> SearchOptions -> Tvmv ()
 searchByName env (SearchOptions maybeApiKey searchQuery) = do
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
   showResults <- searchShowByName apiKey searchQuery
-  liftIO $ printShows showResults -- TODO: search shouldn't gen a log either...
+  liftIO $ printShows showResults
 
 -- We check for API key in the following places, in the following order:
 --

@@ -30,8 +30,8 @@ mkTvmv m = ExceptT $ WriterT $ do
 
 -- Pull out the IO of Either from a Tvmv. Log the resulting Writer values using
 -- the given Logger function.
-runTvmv :: Tvmv a -> Logger -> IO (Either Error a)
-runTvmv m logResults = do
+runTvmv :: Logger -> Tvmv a -> IO (Either Error a)
+runTvmv logResults m = do
   let writerT = runExceptT m
   (retVal, writerValues) <- runWriterT writerT
   _ <- logResults writerValues
