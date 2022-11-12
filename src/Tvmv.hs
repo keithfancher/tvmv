@@ -10,16 +10,17 @@ where
 import Control.Monad.Trans.Except (ExceptT (..), runExceptT)
 import Control.Monad.Trans.Writer (WriterT (..), runWriterT)
 import Error (Error)
-import Rename (RenameOp)
+import Rename (RenameResult)
 
 -- Wrap the transformer stack!
 --
 -- Note that order of these matters. Specifically, we want access to the
 -- accumulated Writer values even in the case of failure/Left, so we can log
 -- what *did* succeed in the case of a partial failure.
-type Tvmv a = ExceptT Error (WriterT [RenameOp] IO) a
+type Tvmv a = ExceptT Error (WriterT [RenameResult] IO) a
 
-type Logger = [RenameOp] -> IO ()
+-- Passes along the results so these can be chained
+type Logger = [RenameResult] -> IO [RenameResult]
 
 -- Init a Tvmv value from an IO of an Either, with empty Writer values.
 mkTvmv :: IO (Either Error a) -> Tvmv a
@@ -33,7 +34,7 @@ runTvmv :: Tvmv a -> Logger -> IO (Either Error a)
 runTvmv m logResults = do
   let writerT = runExceptT m
   (retVal, writerValues) <- runWriterT writerT
-  logResults writerValues
+  _ <- logResults writerValues
   return retVal
 
 -- Admittedly, I only vaguely understand why this works :')

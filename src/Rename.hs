@@ -1,10 +1,12 @@
 module Rename
   ( RenameOp (..),
+    RenameResult (..),
     executeRename,
     executeRenameDryRun,
     renameFile,
     renameFiles,
     undoRenameOp,
+    printRenameResult,
   )
 where
 
@@ -26,6 +28,12 @@ data RenameOp = RenameOp
   }
   deriving (Eq, Show, Read)
 
+data RenameResult = RenameResult
+  { op :: RenameOp,
+    success :: Bool -- TODO: capture error messages too
+  }
+  deriving (Eq, Show)
+
 -- "[show] - [season]x[ep] - [ep name]"
 -- e.g. "Buffy the Vampire Slayer - 4x10 - Hush"
 --
@@ -38,17 +46,17 @@ episodeNameTemplate :: FilePath
 episodeNameTemplate = "%s - %dx%02d - %s"
 
 -- Actually rename the files. Accumulate a "log" of rename ops.
-executeRename :: [RenameOp] -> WriterT [RenameOp] IO ()
+executeRename :: [RenameOp] -> WriterT [RenameResult] IO ()
 executeRename = mapM_ executeRenameSingle
 
 -- Rename a single file on the file system. Assuming an IO Exception isn't
 -- thrown, that op will be added to the Writer values for later logging.
 -- TODO: Catch exceptions? Could also push failures into the Writer, maybe
 -- define a RenameResult type or something?
-executeRenameSingle :: RenameOp -> WriterT [RenameOp] IO ()
+executeRenameSingle :: RenameOp -> WriterT [RenameResult] IO ()
 executeRenameSingle (RenameOp old new) = do
   liftIO $ Dir.renameFile old new
-  tell [RenameOp old new]
+  tell [RenameResult (RenameOp old new) True]
 
 -- Just print what *would* have happened rather than actually renaming files.
 executeRenameDryRun :: [RenameOp] -> IO ()
@@ -57,11 +65,18 @@ executeRenameDryRun = mapM_ printRenameOp
 printRenameOp :: RenameOp -> IO ()
 printRenameOp = TIO.putStrLn . prettyRenameOp
 
-prettyRenameOp :: RenameOp -> T.Text
-prettyRenameOp op = old <> " ->\n" <> new <> "\n---"
+printRenameResult :: RenameResult -> IO ()
+printRenameResult r = TIO.putStrLn opAndResult
   where
-    old = T.pack $ oldPath op
-    new = T.pack $ newPath op
+    opAndResult = prettyRenameOp (op r) <> result (success r) <> "\n"
+    result True = "Sucess!"
+    result False = "ERROR :("
+
+prettyRenameOp :: RenameOp -> T.Text
+prettyRenameOp renameOp = old <> " ->\n" <> new <> "\n"
+  where
+    old = T.pack $ oldPath renameOp
+    new = T.pack $ newPath renameOp
 
 -- Strike that, reverse it!
 undoRenameOp :: RenameOp -> RenameOp

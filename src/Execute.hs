@@ -13,7 +13,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
 import Error (Error (..))
 import File (listFiles)
-import Log (readLogFile, writeLogFileAndPrint)
+import Log (printAndWriteLog, readLogFile)
 import Rename (executeRename, renameFiles, undoRenameOp)
 import Show (Season (..), printShows)
 import Tvmv (Tvmv, liftEither, mkTvmv, runTvmv)
@@ -32,7 +32,7 @@ execCommand _ (Undo undoOpts) = undoRename undoOpts
 
 -- Run it with the configured logger
 run :: Tvmv a -> IO (Either Error a)
-run tvmv = runTvmv tvmv writeLogFileAndPrint
+run tvmv = runTvmv tvmv printAndWriteLog
 
 -- Tie the pieces together, essentially.
 renameSeason :: Env -> MvOptions -> Tvmv ()
