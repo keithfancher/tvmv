@@ -1,0 +1,5 @@
+# In theory, this *might* help the language server stop randomly pooping out?
+# See, e.g., this reddit thread for some context:
+# https://www.reddit.com/r/haskell/comments/yr09pb/hls_stack_bizarre_redherring_error_about_ghcide/
+cradle:
+  stack:
