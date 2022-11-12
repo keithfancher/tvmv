@@ -49,19 +49,23 @@ data Episode = Episode
 -- Brief text summary of a show.
 showInfoBrief :: TvShow -> T.Text
 showInfoBrief s =
-  "ID: "
+  "ID:\t"
     <> toText (showId s)
-    <> "\nName: "
+    <> "\nName:\t"
     <> showName s
-    <> "\nDescription: "
-    <> description s
+    <> "\nBlurb:\t"
+    <> trim (description s)
+  where
+    trim str
+      | T.length str > 80 = T.take 78 str <> "..."
+      | otherwise = str
 
 -- Print out summaries for a list of shows.
 printShows :: [TvShow] -> IO ()
 printShows s = TIO.putStrLn (T.intercalate sep showSummaries)
   where
     showSummaries = map showInfoBrief s
-    sep = "\n--\n"
+    sep = "\n\n"
 
 toText :: Show a => a -> T.Text
 toText = T.pack . show
