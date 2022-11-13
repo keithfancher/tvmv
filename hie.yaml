@@ -1,5 +1,38 @@
-# In theory, this *might* help the language server stop randomly pooping out?
-# See, e.g., this reddit thread for some context:
+# Dear Future-Self,
+#
+# For a simple project like this one, this file shouldn't be necessary,
+# allegedly. But without it, the language server will randomly poop out and
+# spit out crazy errors about GHC versions. See this reddit thread for more
+# context:
+#
 # https://www.reddit.com/r/haskell/comments/yr09pb/hls_stack_bizarre_redherring_error_about_ghcide/
+#
+# Also, if this file exists at all, we should (allegedly!) be able to specify
+# an even simpler form of it, i.e. just:
+# ```
+# cradle:
+#   stack:
+# ```
+# ...but this causes issues with the HLS as well, prevents it from finding
+# dependencies in the `test` component.
+#
+# See https://github.com/haskell/hie-bios for more instructions on how to use
+# this file. (There is also https://hackage.haskell.org/package/implicit-hie to
+# auto-gen the file, but it generated incorrect results for me so I had to do
+# it manually.)
+#
+# Anyway, assuming you don't add any more components, this shouldn't have to
+# change.
+#
+# Love,
+# Past-Self
 cradle:
   stack:
+    - path: "./src"
+      component: "tvmv:lib"
+
+    - path: "./app"
+      component: "tvmv:exe:tvmv"
+
+    - path: "./test"
+      component: "tvmv:test:tvmv-test"
