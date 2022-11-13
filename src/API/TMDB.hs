@@ -2,6 +2,7 @@ module API.TMDB
   ( getShow,
     getSeason,
     queryShows,
+    mapTvShow,
   )
 where
 

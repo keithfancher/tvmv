@@ -76,6 +76,7 @@ test-suite tvmv-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      API.TMDBSpec
       ExecuteSpec
       FileSpec
       LogSpec
@@ -92,5 +93,6 @@ test-suite tvmv-test
     , filepath
     , hspec
     , text
+    , themoviedb
     , tvmv
   default-language: Haskell2010
