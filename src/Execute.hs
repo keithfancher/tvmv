@@ -10,6 +10,7 @@ import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..)
 import Control.Applicative ((<|>))
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
+import qualified Data.Text.IO as TIO
 import Error (Error (..))
 import File (listFiles)
 import Log (printAndWriteLog, printLog, readLogFile)
@@ -61,8 +62,11 @@ undoRename (UndoOptions logFileName) = do
 searchByName :: Env -> SearchOptions -> Tvmv ()
 searchByName env (SearchOptions maybeApiKey searchQuery) = do
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
-  showResults <- searchShowByName apiKey searchQuery
-  liftIO $ printShows showResults
+  tvShowResults <- searchShowByName apiKey searchQuery
+  liftIO $ printResults tvShowResults
+  where
+    printResults [] = TIO.putStrLn "No results for query"
+    printResults s = printShows s
 
 -- We check for API key in the following places, in the following order:
 --

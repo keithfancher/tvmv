@@ -62,6 +62,7 @@ showInfoBrief s =
 
 -- Print out summaries for a list of shows.
 printShows :: [TvShow] -> IO ()
+printShows [] = return ()
 printShows s = TIO.putStrLn (T.intercalate sep showSummaries)
   where
     showSummaries = map showInfoBrief s
