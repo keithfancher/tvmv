@@ -4,6 +4,7 @@ module Log
     writeLogFile,
     printAndWriteLog,
     printLog,
+    getLogText,
   )
 where
 
@@ -16,17 +17,13 @@ import Text.Printf (printf)
 import Text.Read (readMaybe)
 import Tvmv (Logger)
 
+-- Write (successful) results to a log file in the current directory.
 writeLogFile :: Logger
 writeLogFile [] = return [] -- no ops, don't log
 writeLogFile results = do
   logFile <- logFileName
-  let successes = successfulOps results
-  TIO.writeFile logFile (textify successes) -- logging to a file in current directory
+  TIO.writeFile logFile (getLogText results)
   return results
-  where
-    -- Logfile is just `show`-ing the list of operations, we'll `read` it on
-    -- the other end for `undo`:
-    textify = T.pack . show
 
 printLog :: Logger
 printLog [] = return [] -- don't print if empty
@@ -36,6 +33,15 @@ printLog results = do
 
 printAndWriteLog :: Logger
 printAndWriteLog results = printLog results >>= writeLogFile
+
+-- Given a set of results, get the text to be written to a log file.
+getLogText :: [RenameResult] -> T.Text
+getLogText results = textify successes
+  where
+    -- Logfile is just `show`-ing the list of operations, we'll `read` it on
+    -- the other end for `undo`:
+    textify = T.pack . show
+    successes = successfulOps results
 
 successfulOps :: [RenameResult] -> [RenameOp]
 successfulOps r = map op onlySuccesses
