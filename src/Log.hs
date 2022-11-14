@@ -22,6 +22,7 @@ writeLogFile :: Logger
 writeLogFile [] = return () -- no ops, don't log
 writeLogFile results = do
   logFile <- logFileName
+  putStrLn $ "Writing log to `" <> logFile <> "`. Use `tvmv undo` to undo this operation."
   TIO.writeFile logFile (getLogText results)
 
 -- Print only, don't write a log file.

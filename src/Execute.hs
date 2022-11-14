@@ -10,12 +10,12 @@ import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..)
 import Control.Applicative ((<|>))
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
-import qualified Data.Text.IO as TIO
 import Error (Error (..))
 import File (listFiles)
 import Log (printAndWriteLog, printLog, readLogFile)
 import Rename (executeRename, renameFiles, undoRenameOp)
 import Show (Season (..), printShows)
+import Text.Printf (printf)
 import Tvmv (Tvmv, liftEither, mkTvmv, runTvmv)
 
 -- Wrapper for other envinroment-related stuff we might need to execute a
@@ -42,11 +42,14 @@ runNoLog = runTvmv printLog
 renameSeason :: Env -> MvOptions -> Tvmv ()
 renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
+  liftIO $ putStrLn "Fetching show data from API..."
   season <- searchSeason key seasNum
   files <- liftIO $ listFiles inFiles
   renameOps <- liftEither $ renameFiles (episodes season) files
+  liftIO $ putStrLn $ renameMsg files
   lift $ executeRename renameOps
   where
+    renameMsg f = printf "Renaming %d files..." (length f)
     searchSeason k = case searchQuery of
       (Name n) -> searchSeasonByName k n
       (Id i) -> searchSeasonById k i
@@ -56,17 +59,21 @@ undoRename :: UndoOptions -> Tvmv ()
 undoRename (UndoOptions logFileName) = do
   renameOps <- mkTvmv $ readLogFile logFileName
   let reversedOps = map undoRenameOp renameOps
+  liftIO $ putStrLn $ undoMsg reversedOps
   lift $ executeRename reversedOps
+  where
+    undoMsg f = printf "Undoing rename of %d files..." (length f)
 
 -- Query the configured API for a show with the given name.
 searchByName :: Env -> SearchOptions -> Tvmv ()
 searchByName env (SearchOptions maybeApiKey searchQuery) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
+  liftIO $ putStrLn "Querying API..."
   tvShowResults <- searchShowByName key searchQuery
-  liftIO $ printResults tvShowResults
+  liftIO $ putStrLn $ resultsMsg tvShowResults
+  liftIO $ printShows tvShowResults
   where
-    printResults [] = TIO.putStrLn "No results for query"
-    printResults s = printShows s
+    resultsMsg r = printf "Found %d results" (length r)
 
 -- We check for API key in the following places, in the following order:
 --
