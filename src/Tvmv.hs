@@ -19,8 +19,8 @@ import Rename (RenameResult)
 -- what *did* succeed in the case of a partial failure.
 type Tvmv a = ExceptT Error (WriterT [RenameResult] IO) a
 
--- Passes along the results so these can be chained
-type Logger = [RenameResult] -> IO [RenameResult]
+-- Given a list of results, "log" them, whatever that might mean.
+type Logger = [RenameResult] -> IO ()
 
 -- Init a Tvmv value from an IO of an Either, with empty Writer values.
 mkTvmv :: IO (Either Error a) -> Tvmv a
@@ -34,7 +34,7 @@ runTvmv :: Logger -> Tvmv a -> IO (Either Error a)
 runTvmv logResults m = do
   let writerT = runExceptT m
   (retVal, writerValues) <- runWriterT writerT
-  _ <- logResults writerValues
+  logResults writerValues
   return retVal
 
 -- Admittedly, I only vaguely understand why this works :')

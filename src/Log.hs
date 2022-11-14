@@ -19,20 +19,19 @@ import Tvmv (Logger)
 
 -- Write (successful) results to a log file in the current directory.
 writeLogFile :: Logger
-writeLogFile [] = return [] -- no ops, don't log
+writeLogFile [] = return () -- no ops, don't log
 writeLogFile results = do
   logFile <- logFileName
   TIO.writeFile logFile (getLogText results)
-  return results
 
+-- Print only, don't write a log file.
 printLog :: Logger
-printLog [] = return [] -- don't print if empty
-printLog results = do
-  printRenameResults results
-  return results
+printLog [] = return () -- don't print if empty
+printLog results = printRenameResults results
 
+-- Print AND log. As you might expect.
 printAndWriteLog :: Logger
-printAndWriteLog results = printLog results >>= writeLogFile
+printAndWriteLog results = printLog results >> writeLogFile results
 
 -- Given a set of results, get the text to be written to a log file.
 getLogText :: [RenameResult] -> T.Text
