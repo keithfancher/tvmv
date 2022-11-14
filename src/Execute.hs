@@ -41,8 +41,8 @@ runNoLog = runTvmv printLog
 -- Rename the files of a TV season.
 renameSeason :: Env -> MvOptions -> Tvmv ()
 renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
-  apiKey <- liftEither $ populateAPIKey maybeApiKey env
-  season <- searchSeason apiKey seasNum
+  key <- liftEither $ populateAPIKey maybeApiKey env
+  season <- searchSeason key seasNum
   files <- liftIO $ listFiles inFiles
   renameOps <- liftEither $ renameFiles (episodes season) files
   lift $ executeRename renameOps
@@ -61,8 +61,8 @@ undoRename (UndoOptions logFileName) = do
 -- Query the configured API for a show with the given name.
 searchByName :: Env -> SearchOptions -> Tvmv ()
 searchByName env (SearchOptions maybeApiKey searchQuery) = do
-  apiKey <- liftEither $ populateAPIKey maybeApiKey env
-  tvShowResults <- searchShowByName apiKey searchQuery
+  key <- liftEither $ populateAPIKey maybeApiKey env
+  tvShowResults <- searchShowByName key searchQuery
   liftIO $ printResults tvShowResults
   where
     printResults [] = TIO.putStrLn "No results for query"
