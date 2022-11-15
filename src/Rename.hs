@@ -58,14 +58,16 @@ executeRenameSingle (RenameOp old new) = do
   tell [RenameResult (RenameOp old new) True]
 
 printRenameResults :: [RenameResult] -> IO ()
-printRenameResults r = TIO.putStrLn (T.intercalate "\n\n" asText)
-  where
-    asText = map prettyRenameResult r
+printRenameResults = printList prettyRenameResult
 
 printRenameOps :: [RenameOp] -> IO ()
-printRenameOps ops = TIO.putStrLn (T.intercalate "\n\n" asText)
+printRenameOps = printList prettyRenameOp
+
+-- Print a list of things that can be turned to Text.
+printList :: (a -> T.Text) -> [a] -> IO ()
+printList toText rs = TIO.putStrLn (T.intercalate "\n\n" listAsText)
   where
-    asText = map prettyRenameOp ops
+    listAsText = map toText rs
 
 prettyRenameResult :: RenameResult -> T.Text
 prettyRenameResult r = prettyRenameOp (op r) <> "\n" <> result (success r)
