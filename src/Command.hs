@@ -37,5 +37,6 @@ data SearchOptions = SearchOptions
   }
 
 data UndoOptions = UndoOptions
-  { logFile :: FilePath
+  { -- if a logFile is't specified, we'll try to read the most recent one in the current directory
+    logFile :: Maybe FilePath
   }

@@ -1,21 +1,29 @@
 module Log
   ( readLogFile,
+    readLatestLogFile,
     renameOpsFromText,
     writeLogFile,
     printAndWriteLog,
     printLog,
     getLogText,
+    getLatestLog,
   )
 where
 
+import Data.List (isInfixOf, sortBy)
+import Data.Maybe (listToMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Error (Error (..))
 import Rename (RenameOp, RenameResult (..), printRenameResults)
+import System.Directory (listDirectory)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
 import Tvmv (Logger)
+
+tvmvLogBaseFilename :: FilePath
+tvmvLogBaseFilename = "tvmv-log"
 
 -- Write (successful) results to a log file in the current directory.
 writeLogFile :: Logger
@@ -48,10 +56,28 @@ successfulOps r = map op onlySuccesses
   where
     onlySuccesses = filter success r
 
+-- Find the most recent tvmv log file in the CURRENT directory and attempt to
+-- read it. If we don't find a log or if it's invalid, will return an Error.
+readLatestLogFile :: IO (Either Error [RenameOp])
+readLatestLogFile = do
+  files <- listDirectory "."
+  case getLatestLog files of
+    Nothing -> return $ Left $ UndoError "No tvmv log file found in current directory"
+    Just latestLog -> readLogFile latestLog
+
+-- Given a list of files, find the most recent tvmv log file, if there is one.
+getLatestLog :: [FilePath] -> Maybe FilePath
+getLatestLog paths = listToMaybe sortedLogFiles
+  where
+    sortedLogFiles = sortDesc $ filter isLogFile paths
+    isLogFile = isInfixOf tvmvLogBaseFilename
+    sortDesc = sortBy (flip compare) -- magic!
+
 -- Attempt to read in a log file, which is actually valid Haskell, and parse
 -- out the logged operations.
 readLogFile :: FilePath -> IO (Either Error [RenameOp])
 readLogFile logFile = do
+  putStrLn $ "Reading previously-completed operations from log file: " <> logFile
   text <- TIO.readFile logFile
   return $ renameOpsFromText text
 
@@ -65,7 +91,7 @@ renameOpsFromText t = case readMaybe (T.unpack t) of
 logFileName :: IO FilePath
 logFileName = printf pattern <$> epochTs
   where
-    pattern = "tvmv-log-%d.txt"
+    pattern = tvmvLogBaseFilename <> "-%d.txt"
 
 epochTs :: IO Int
 epochTs = round <$> getPOSIXTime

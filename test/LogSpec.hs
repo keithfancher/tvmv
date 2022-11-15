@@ -25,6 +25,13 @@ spec = do
     it "returns a Left in the case of a parsing error" $ do
       renameOpsFromText "wut oh hey I'm not valid" `shouldSatisfy` isLeft
 
+  describe "getLatestLog" $ do
+    it "gets the most recent log file, if one exists" $ do
+      getLatestLog fileListWithLogs `shouldBe` Just "tvmv-log-123470.txt"
+
+    it "returns Nothing if no log files are present" $ do
+      getLatestLog fileListNoLogs `shouldBe` Nothing
+
 renameResults :: [RenameResult]
 renameResults =
   [ RenameResult {op = opEp1, success = True},
@@ -53,3 +60,22 @@ opEp2 =
     { oldPath = "test/data/Poirot S12E2.mp4",
       newPath = "test/data/Agatha Christie's Poirot - 12x02 - Hallowe'en Party.mp4"
     }
+
+fileListWithLogs :: [FilePath]
+fileListWithLogs =
+  [ "Poirot S12E1.mp4",
+    "tvmv-log-123456.txt",
+    "Poirot S12E2.mp4",
+    "tvmv-log-123.txt",
+    "Poirot S12E3.mp4",
+    "tvmv-log-123470.txt", -- most recent
+    "Poirot S12E4.mp4"
+  ]
+
+fileListNoLogs :: [FilePath]
+fileListNoLogs =
+  [ "Poirot S12E1.mp4",
+    "Poirot S12E2.mp4",
+    "Poirot S12E3.mp4",
+    "Poirot S12E4.mp4"
+  ]

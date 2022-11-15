@@ -130,8 +130,15 @@ searchOptionsParser =
 undoOptionsParser :: Parser UndoOptions
 undoOptionsParser =
   UndoOptions
-    <$> argument -- TODO: optional, search for (latest?) log file in dir if not specified
-      str
+    <$> argument
+      maybeLogFileReader
       ( metavar "TVMV_LOG_FILE"
           <> help "..." -- TODO
+          <> value Nothing
       )
+
+maybeLogFileReader :: ReadM (Maybe FilePath)
+maybeLogFileReader = eitherReader $ \s ->
+  case s of
+    "" -> Right Nothing
+    anythingNonEmpty -> Right $ Just anythingNonEmpty

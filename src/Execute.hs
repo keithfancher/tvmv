@@ -12,7 +12,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
 import Error (Error (..))
 import File (listFiles)
-import Log (printAndWriteLog, printLog, readLogFile)
+import Log (printAndWriteLog, printLog, readLatestLogFile, readLogFile)
 import Rename (executeRename, renameFiles, undoRenameOp)
 import Show (Season (..), printShows)
 import Text.Printf (printf)
@@ -56,13 +56,15 @@ renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
 
 -- Undo a previously-run rename operation, given a log file.
 undoRename :: UndoOptions -> Tvmv ()
-undoRename (UndoOptions logFileName) = do
-  renameOps <- mkTvmv $ readLogFile logFileName
+undoRename (UndoOptions maybeLogFileName) = do
+  renameOps <- mkTvmv $ readLog maybeLogFileName
   let reversedOps = map undoRenameOp renameOps
   liftIO $ putStrLn $ undoMsg reversedOps
   lift $ executeRename reversedOps
   where
     undoMsg f = printf "Undoing rename of %d files..." (length f)
+    readLog (Just fileName) = readLogFile fileName
+    readLog Nothing = readLatestLogFile
 
 -- Query the configured API for a show with the given name.
 searchByName :: Env -> SearchOptions -> Tvmv ()

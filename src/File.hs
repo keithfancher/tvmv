@@ -1,5 +1,6 @@
 module File
   ( InFiles (..),
+    listDir,
     listFiles,
     mkInFiles,
     normalizeFileList,
