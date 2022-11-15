@@ -10,9 +10,9 @@ cliOptParser :: ParserInfo Command
 cliOptParser =
   info
     (commandParser <**> helper)
-    ( fullDesc -- TODO: update description!
-        <> progDesc "A more detailed description here. Blah blah blah!"
-        <> header "Header text here. Brief description of what this even is."
+    ( fullDesc
+        <> header "tvmv: Bulk-rename your TV episode files with minimal fuss."
+        <> progDesc "For help with a specific command, run: tvmv [COMMAND] -h"
     )
 
 commandParser :: Parser Command
@@ -22,19 +22,19 @@ commandParser =
         "mv"
         ( info
             (mvCommandParser <**> helper)
-            (progDesc "TODO")
+            (progDesc "Rename the files for a TV season using API data")
         )
         <> command
           "search"
           ( info
               (searchCommandParser <**> helper)
-              (progDesc "TODO")
+              (progDesc "Query the configured API for TV show data")
           )
         <> command
           "undo"
           ( info
               (undoCommandParser <**> helper)
-              (progDesc "TODO")
+              (progDesc "Undo a previously-run rename operation")
           )
     )
 
@@ -56,7 +56,7 @@ mvOptionsParser =
       auto
       ( long "season"
           <> short 's'
-          <> help "..." -- TODO
+          <> help "The season number for the files you're renaming. tvmv operates in units of seasons."
           <> metavar "SEASON_NUM"
       )
     <*> inFilesParser
@@ -68,7 +68,7 @@ apiKeyParser =
     ( long "api-key"
         <> short 'k'
         <> metavar "API_KEY"
-        <> help "..." -- TODO
+        <> help "Your TMDB API key. You can also pass this in via an env var or a file -- see the README for details!"
         <> value Nothing -- If not specified, it's Nothing
     )
 
@@ -89,7 +89,7 @@ filePathsParser =
     ( argument
         str
         ( metavar "DIR_PATH|FILES"
-            <> help "..." -- TODO
+            <> help "If omitted, tvmv will operate on all files in the current directory. Otherwise, you can specify EITHER a single directory OR a set of files (via globbing or whatever else)."
         )
     )
 
@@ -103,7 +103,7 @@ nameParser =
       ( long "name"
           <> short 'n'
           <> metavar "SHOW_NAME"
-          <> help "..." -- TODO
+          <> help "The show name, or a fragment of the show name. We'll search the API with this query and use the first matching result to get show data."
       )
 
 idParser :: Parser SearchKey
@@ -114,7 +114,7 @@ idParser =
       ( long "id"
           <> short 'i'
           <> metavar "SHOW_ID"
-          <> help "..." -- TODO
+          <> help "If you have the show's unique ID, you can search with that directly, rather than using its name. (You can get a show's ID with `tvmv search`.)"
       )
 
 searchOptionsParser :: Parser SearchOptions
@@ -124,7 +124,7 @@ searchOptionsParser =
     <*> argument
       str
       ( metavar "SHOW_NAME"
-          <> help "..." -- TODO
+          <> help "The show name, or a fragment of the show name."
       )
 
 undoOptionsParser :: Parser UndoOptions
@@ -133,7 +133,7 @@ undoOptionsParser =
     <$> argument
       maybeLogFileReader
       ( metavar "TVMV_LOG_FILE"
-          <> help "..." -- TODO
+          <> help "A log file from a previous rename operation. If omitted, tvmv will look for the MOST RECENT log file in the CURRENT directory."
           <> value Nothing
       )
 
