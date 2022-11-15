@@ -5,4 +5,5 @@ data Error
   | RenameError String
   | UndoError String
   | InvalidInput String
+  | UserAbort
   deriving (Eq, Show)

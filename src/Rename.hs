@@ -6,6 +6,7 @@ module Rename
     renameFiles,
     undoRenameOp,
     printRenameResults,
+    printRenameOps,
   )
 where
 
@@ -60,6 +61,11 @@ printRenameResults :: [RenameResult] -> IO ()
 printRenameResults r = TIO.putStrLn (T.intercalate "\n\n" asText)
   where
     asText = map prettyRenameResult r
+
+printRenameOps :: [RenameOp] -> IO ()
+printRenameOps ops = TIO.putStrLn (T.intercalate "\n\n" asText)
+  where
+    asText = map prettyRenameOp ops
 
 prettyRenameResult :: RenameResult -> T.Text
 prettyRenameResult r = prettyRenameOp (op r) <> "\n" <> result (success r)

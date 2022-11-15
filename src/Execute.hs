@@ -13,7 +13,7 @@ import Control.Monad.Trans.Class (lift)
 import Error (Error (..))
 import File (listFiles)
 import Log (printAndWriteLog, printLog, readLatestLogFile, readLogFile)
-import Rename (executeRename, renameFiles, undoRenameOp)
+import Rename (executeRename, printRenameOps, renameFiles, undoRenameOp)
 import Show (Season (..), printShows)
 import Text.Printf (printf)
 import Tvmv (Tvmv, liftEither, mkTvmv, runTvmv)
@@ -47,9 +47,11 @@ renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
   files <- liftIO $ listFiles inFiles
   renameOps <- liftEither $ renameFiles (episodes season) files
   liftIO $ putStrLn $ renameMsg files
+  liftIO $ printRenameOps renameOps >> putStrLn ""
+  awaitConfirmation
   lift $ executeRename renameOps
   where
-    renameMsg f = printf "Renaming %d files..." (length f)
+    renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
     searchSeason k = case searchQuery of
       (Name n) -> searchSeasonByName k n
       (Id i) -> searchSeasonById k i
@@ -60,9 +62,11 @@ undoRename (UndoOptions maybeLogFileName) = do
   renameOps <- mkTvmv $ readLog maybeLogFileName
   let reversedOps = map undoRenameOp renameOps
   liftIO $ putStrLn $ undoMsg reversedOps
+  liftIO $ printRenameOps reversedOps >> putStrLn ""
+  awaitConfirmation
   lift $ executeRename reversedOps
   where
-    undoMsg f = printf "Undoing rename of %d files..." (length f)
+    undoMsg f = printf "Undoing will result in the following %d rename operations...\n" (length f)
     readLog (Just fileName) = readLogFile fileName
     readLog Nothing = readLatestLogFile
 
@@ -76,6 +80,16 @@ searchByName env (SearchOptions maybeApiKey searchQuery) = do
   liftIO $ printShows tvShowResults
   where
     resultsMsg r = printf "Found %d results" (length r)
+
+awaitConfirmation :: Tvmv ()
+awaitConfirmation = do
+  liftIO $ putStrLn "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
+  input <- liftIO getChar
+  liftEither $ confirm input
+  where
+    confirm 'y' = Right ()
+    confirm 'Y' = Right ()
+    confirm _ = Left UserAbort -- default is to bail
 
 -- We check for API key in the following places, in the following order:
 --
