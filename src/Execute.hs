@@ -13,7 +13,7 @@ import Control.Monad.Trans.Class (lift)
 import Error (Error (..))
 import File (listFiles)
 import Log (printAndWriteLog, printLog, readLatestLogFile, readLogFile)
-import Rename (executeRename, printRenameOps, renameFiles, undoRenameOp)
+import Rename (RenameOp, executeRename, printRenameOps, renameFiles, undoRenameOp)
 import Show (Season (..), printShows)
 import Text.Printf (printf)
 import Tvmv (Tvmv, liftEither, mkTvmv, runTvmv)
@@ -46,10 +46,7 @@ renameSeason env (MvOptions maybeApiKey forceRename searchQuery seasNum inFiles)
   season <- searchSeason key seasNum
   files <- liftIO $ listFiles inFiles
   renameOps <- liftEither $ renameFiles (episodes season) files
-  liftIO $ putStrLn $ renameMsg files
-  liftIO $ printRenameOps renameOps >> putStrLn ""
-  awaitConfirmation forceRename
-  lift $ executeRename renameOps
+  runRenameOps renameOps (renameMsg renameOps) forceRename
   where
     renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
     searchSeason k = case searchQuery of
@@ -61,10 +58,7 @@ undoRename :: UndoOptions -> Tvmv ()
 undoRename (UndoOptions forceRename maybeLogFileName) = do
   renameOps <- mkTvmv $ readLog maybeLogFileName
   let reversedOps = map undoRenameOp renameOps
-  liftIO $ putStrLn $ undoMsg reversedOps
-  liftIO $ printRenameOps reversedOps >> putStrLn ""
-  awaitConfirmation forceRename
-  lift $ executeRename reversedOps
+  runRenameOps reversedOps (undoMsg reversedOps) forceRename
   where
     undoMsg f = printf "Undoing will result in the following %d rename operations...\n" (length f)
     readLog (Just fileName) = readLogFile fileName
@@ -81,10 +75,18 @@ searchByName env (SearchOptions maybeApiKey searchQuery) = do
   where
     resultsMsg r = printf "Found %d results" (length r)
 
+-- Helper shared by `rename` and `undo` operations.
+runRenameOps :: [RenameOp] -> String -> Bool -> Tvmv ()
+runRenameOps ops message forceRename = do
+  liftIO $ putStrLn message
+  liftIO $ printRenameOps ops >> putStrLn ""
+  awaitConfirmation forceRename
+  lift $ executeRename ops
+
 -- Given a `force` flag, either waits for the user to confirm an action, or
 -- does nothing at all!
 awaitConfirmation :: Bool -> Tvmv ()
-awaitConfirmation True = liftIO $ putStrLn "`force` flag is set, proceeding with operation...\n"
+awaitConfirmation True = liftIO $ putStrLn "`force` flag is set, proceeding...\n"
 awaitConfirmation False = do
   liftIO $ putStrLn "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
   input <- liftIO getChar
