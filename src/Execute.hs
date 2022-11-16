@@ -1,29 +1,15 @@
 module Execute
-  ( Env (..),
+  ( Env (..), -- re-export, for convenience
     execCommand,
-    populateAPIKey,
   )
 where
 
-import API (APIKey, searchSeasonById, searchSeasonByName, searchShowByName)
-import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
-import Control.Applicative ((<|>))
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Class (lift)
+import Command (Command (..))
 import Error (Error (..))
-import File (listFiles)
-import Log (printAndWriteLog, printLog, readLatestLogFile, readLogFile)
-import Rename (RenameOp, executeRename, printRenameOps, renameFiles, undoRenameOp)
-import Show (Season (..), printShows)
-import Text.Printf (printf)
-import Tvmv (Tvmv, liftEither, mkTvmv, runTvmv)
-
--- Wrapper for other envinroment-related stuff we might need to execute a
--- command, in addition to the parsed-out CLI args.
-data Env = Env
-  { apiKeyEnvVar :: Maybe APIKey,
-    apiKeyFile :: Maybe APIKey
-  }
+import Exec.Commands (renameSeason, searchByName, undoRename)
+import Exec.Env (Env (..))
+import Log (printAndWriteLog, printLog)
+import Tvmv (Tvmv, runTvmv)
 
 execCommand :: Env -> Command -> IO (Either Error ())
 execCommand env (Mv mvOpts) = runWithLog $ renameSeason env mvOpts
@@ -37,79 +23,3 @@ runWithLog = runTvmv printAndWriteLog
 -- Run the Tvmv, print the results ONLY. (No log file.)
 runNoLog :: Tvmv a -> IO (Either Error a)
 runNoLog = runTvmv printLog
-
--- Rename the files of a TV season.
-renameSeason :: Env -> MvOptions -> Tvmv ()
-renameSeason env (MvOptions maybeApiKey forceRename searchQuery seasNum inFiles) = do
-  key <- liftEither $ populateAPIKey maybeApiKey env
-  liftIO $ putStrLn "Fetching show data from API..."
-  season <- searchSeason key seasNum
-  files <- liftIO $ listFiles inFiles
-  renameOps <- liftEither $ renameFiles (episodes season) files
-  runRenameOps renameOps (renameMsg renameOps) forceRename
-  where
-    renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
-    searchSeason k = case searchQuery of
-      (Name n) -> searchSeasonByName k n
-      (Id i) -> searchSeasonById k i
-
--- Undo a previously-run rename operation, given a log file.
-undoRename :: UndoOptions -> Tvmv ()
-undoRename (UndoOptions forceRename maybeLogFileName) = do
-  renameOps <- mkTvmv $ readLog maybeLogFileName
-  let reversedOps = map undoRenameOp renameOps
-  runRenameOps reversedOps (undoMsg reversedOps) forceRename
-  where
-    undoMsg f = printf "Undoing will result in the following %d rename operations...\n" (length f)
-    readLog (Just fileName) = readLogFile fileName
-    readLog Nothing = readLatestLogFile
-
--- Query the configured API for a show with the given name.
-searchByName :: Env -> SearchOptions -> Tvmv ()
-searchByName env (SearchOptions maybeApiKey searchQuery) = do
-  key <- liftEither $ populateAPIKey maybeApiKey env
-  liftIO $ putStrLn "Querying API..."
-  tvShowResults <- searchShowByName key searchQuery
-  liftIO $ putStrLn $ resultsMsg tvShowResults
-  liftIO $ printShows tvShowResults
-  where
-    resultsMsg r = printf "Found %d results" (length r)
-
--- Helper shared by `rename` and `undo` operations.
-runRenameOps :: [RenameOp] -> String -> Bool -> Tvmv ()
-runRenameOps ops message forceRename = do
-  liftIO $ putStrLn message
-  liftIO $ printRenameOps ops >> putStrLn ""
-  awaitConfirmation forceRename
-  lift $ executeRename ops
-
--- Given a `force` flag, either waits for the user to confirm an action, or
--- does nothing at all!
-awaitConfirmation :: Bool -> Tvmv ()
-awaitConfirmation True = liftIO $ putStrLn "`force` flag is set, proceeding...\n"
-awaitConfirmation False = do
-  liftIO $ putStrLn "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
-  input <- liftIO getChar
-  liftEither $ confirm input
-  where
-    confirm 'y' = Right ()
-    confirm 'Y' = Right ()
-    confirm _ = Left UserAbort -- default is to bail
-
--- We check for API key in the following places, in the following order:
---
--- 1) CLI args. If it doesn't exist in CLI args, then check...
--- 2) The env var. If it doesn't exist in the env var, then check...
--- 3) The contents of a specific file. If it doesn't exist there, then...
---
--- ...return an error! This allows one to easily override the key in a
--- particular terminal session or even a particular call to `tvmv`. And gives
--- some flexibility to people who have different security needs/cares.
-populateAPIKey :: Maybe APIKey -> Env -> Either Error APIKey
-populateAPIKey (Just cliArgsKey) _ = Right cliArgsKey -- CLI args take precedence
-populateAPIKey Nothing env = case envOrFile of
-  Just k -> Right k
-  Nothing -> Left missingKeyError
-  where
-    envOrFile = apiKeyEnvVar env <|> apiKeyFile env -- otherwise try these, in this order
-    missingKeyError = InvalidInput "Missing API key! Please provide via command line args, env var, or file"

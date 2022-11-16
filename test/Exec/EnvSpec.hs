@@ -1,7 +1,7 @@
-module ExecuteSpec (spec) where
+module Exec.EnvSpec (spec) where
 
 import Data.Either (isLeft)
-import Execute
+import Exec.Env
 import Test.Hspec
 
 spec :: Spec

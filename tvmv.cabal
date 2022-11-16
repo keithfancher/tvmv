@@ -29,6 +29,8 @@ library
       API.TMDB
       Command
       Error
+      Exec.Commands
+      Exec.Env
       Execute
       File
       Log
@@ -79,7 +81,7 @@ test-suite tvmv-test
   main-is: Spec.hs
   other-modules:
       API.TMDBSpec
-      ExecuteSpec
+      Exec.EnvSpec
       FileSpec
       LogSpec
       RenameSpec
