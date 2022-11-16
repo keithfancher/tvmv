@@ -25,10 +25,10 @@ data MvOptions = MvOptions
   { -- APIKey might not be present in the CLI options. If this is Nothing, we'll
     -- check an env var and a file down the road. But it IS required eventually.
     apiKey :: Maybe APIKey,
+    force :: Bool, -- do not wait for user confirmation
     searchKey :: SearchKey,
     seasonNum :: Int,
     seasonFiles :: InFiles
-    -- TODO: flags, maybe a separate data struct, func to get defaults?
   }
 
 data SearchOptions = SearchOptions
@@ -37,6 +37,7 @@ data SearchOptions = SearchOptions
   }
 
 data UndoOptions = UndoOptions
-  { -- if a logFile is't specified, we'll try to read the most recent one in the current directory
+  { force :: Bool,
+    -- if a logFile is't specified, we'll try to read the most recent one in the current directory
     logFile :: Maybe FilePath
   }

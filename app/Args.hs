@@ -51,6 +51,7 @@ mvOptionsParser :: Parser MvOptions
 mvOptionsParser =
   MvOptions
     <$> apiKeyParser
+    <*> forceFlagParser
     <*> searchKeyParser
     <*> option
       auto
@@ -70,6 +71,14 @@ apiKeyParser =
         <> metavar "API_KEY"
         <> help "Your TMDB API key. You can also pass this in via an env var or a file -- see the README for details!"
         <> value Nothing -- If not specified, it's Nothing
+    )
+
+forceFlagParser :: Parser Bool
+forceFlagParser =
+  switch
+    ( long "force"
+        <> short 'f'
+        <> help "Do not wait for user confirmation before renaming files. (By default, tvmv will ask you before it makes any file changes.)"
     )
 
 maybeApiKeyReader :: ReadM (Maybe APIKey)
@@ -130,7 +139,8 @@ searchOptionsParser =
 undoOptionsParser :: Parser UndoOptions
 undoOptionsParser =
   UndoOptions
-    <$> argument
+    <$> forceFlagParser
+    <*> argument
       maybeLogFileReader
       ( metavar "TVMV_LOG_FILE"
           <> help "A log file from a previous rename operation. If omitted, tvmv will look for the MOST RECENT log file in the CURRENT directory."

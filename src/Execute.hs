@@ -40,7 +40,7 @@ runNoLog = runTvmv printLog
 
 -- Rename the files of a TV season.
 renameSeason :: Env -> MvOptions -> Tvmv ()
-renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
+renameSeason env (MvOptions maybeApiKey forceRename searchQuery seasNum inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
   liftIO $ putStrLn "Fetching show data from API..."
   season <- searchSeason key seasNum
@@ -48,7 +48,7 @@ renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
   renameOps <- liftEither $ renameFiles (episodes season) files
   liftIO $ putStrLn $ renameMsg files
   liftIO $ printRenameOps renameOps >> putStrLn ""
-  awaitConfirmation
+  awaitConfirmation forceRename
   lift $ executeRename renameOps
   where
     renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
@@ -58,12 +58,12 @@ renameSeason env (MvOptions maybeApiKey searchQuery seasNum inFiles) = do
 
 -- Undo a previously-run rename operation, given a log file.
 undoRename :: UndoOptions -> Tvmv ()
-undoRename (UndoOptions maybeLogFileName) = do
+undoRename (UndoOptions forceRename maybeLogFileName) = do
   renameOps <- mkTvmv $ readLog maybeLogFileName
   let reversedOps = map undoRenameOp renameOps
   liftIO $ putStrLn $ undoMsg reversedOps
   liftIO $ printRenameOps reversedOps >> putStrLn ""
-  awaitConfirmation
+  awaitConfirmation forceRename
   lift $ executeRename reversedOps
   where
     undoMsg f = printf "Undoing will result in the following %d rename operations...\n" (length f)
@@ -81,8 +81,11 @@ searchByName env (SearchOptions maybeApiKey searchQuery) = do
   where
     resultsMsg r = printf "Found %d results" (length r)
 
-awaitConfirmation :: Tvmv ()
-awaitConfirmation = do
+-- Given a `force` flag, either waits for the user to confirm an action, or
+-- does nothing at all!
+awaitConfirmation :: Bool -> Tvmv ()
+awaitConfirmation True = liftIO $ putStrLn "`force` flag is set, proceeding with operation...\n"
+awaitConfirmation False = do
   liftIO $ putStrLn "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
   input <- liftIO getChar
   liftEither $ confirm input
