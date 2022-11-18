@@ -52,6 +52,7 @@ mvOptionsParser =
   MvOptions
     <$> apiKeyParser
     <*> forceFlagParser
+    <*> noLogFlagParser
     <*> searchKeyParser
     <*> option
       auto
@@ -80,6 +81,15 @@ forceFlagParser =
         <> short 'f'
         <> help "Do not wait for user confirmation before renaming files. (By default, tvmv will ask you before it makes any file changes.)"
     )
+
+noLogFlagParser :: Parser Bool
+noLogFlagParser =
+  switch
+    ( long "no-log"
+        <> short 'x'
+          <> help "Do not write a log of rename operations. (Note that without a log, you can't use the `undo` command.)"
+    )
+
 
 maybeApiKeyReader :: ReadM (Maybe APIKey)
 maybeApiKeyReader = eitherReader $ \s ->

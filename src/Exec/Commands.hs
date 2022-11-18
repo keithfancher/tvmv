@@ -20,7 +20,7 @@ import Tvmv (Tvmv, liftEither, mkTvmv)
 
 -- Rename the files of a TV season.
 renameSeason :: Env -> MvOptions -> Tvmv ()
-renameSeason env (MvOptions maybeApiKey forceRename searchQuery seasNum inFiles) = do
+renameSeason env (MvOptions maybeApiKey forceRename _ searchQuery seasNum inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
   liftIO $ putStrLn "Fetching show data from API..."
   season <- searchSeason key seasNum

@@ -26,6 +26,7 @@ data MvOptions = MvOptions
     -- check an env var and a file down the road. But it IS required eventually.
     apiKey :: Maybe APIKey,
     force :: Bool, -- do not wait for user confirmation
+    noLog :: Bool, -- don't write a log file
     searchKey :: SearchKey,
     seasonNum :: Int,
     seasonFiles :: InFiles

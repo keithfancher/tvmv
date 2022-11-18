@@ -4,7 +4,7 @@ module Execute
   )
 where
 
-import Command (Command (..))
+import Command (Command (..), noLog)
 import Error (Error (..))
 import Exec.Commands (renameSeason, searchByName, undoRename)
 import Exec.Env (Env (..))
@@ -12,7 +12,9 @@ import Log (printAndWriteLog, printLog)
 import Tvmv (Tvmv, runTvmv)
 
 execCommand :: Env -> Command -> IO (Either Error ())
-execCommand env (Mv mvOpts) = runWithLog $ renameSeason env mvOpts
+execCommand env (Mv mvOpts) = run $ renameSeason env mvOpts
+  where
+    run = if noLog mvOpts then runNoLog else runWithLog
 execCommand env (Search searchOpts) = runNoLog $ searchByName env searchOpts
 execCommand _ (Undo undoOpts) = runNoLog $ undoRename undoOpts
 

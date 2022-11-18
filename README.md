@@ -173,8 +173,9 @@ Note that the file paths in the log files are absolute, so `undo` will work
 even if you move the log file. It will **not** work, however, if you move the
 TV episode files themselves.
 
-(**COMING SOON:** CLI option to not write a log file. Or default to not
-logging?)
+If you don't want to write a log when using the `mv` command, simply pass the
+`--no-log` flag (aka `-x`). You will *not* be able to use the `undo` command
+without a log, however.
 
 ### Other options / Getting help
 
