@@ -7,6 +7,7 @@ where
 
 import API (searchSeasonById, searchSeasonByName, searchShowByName)
 import Command (MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
+import Control.Monad.Except (liftEither)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
 import Error (Error (..))
@@ -16,7 +17,7 @@ import Log (readLatestLogFile, readLogFile)
 import Rename (RenameOp, executeRename, printRenameOps, renameFiles, undoRenameOp)
 import Show (Season (..), printShows)
 import Text.Printf (printf)
-import Tvmv (Tvmv, liftEither, mkTvmv)
+import Tvmv (Tvmv, mkTvmv)
 
 -- Rename the files of a TV season.
 renameSeason :: Env -> MvOptions -> Tvmv ()
@@ -61,7 +62,7 @@ runRenameOps ops message forceRename = do
   liftIO $ putStrLn message
   liftIO $ printRenameOps ops >> putStrLn ""
   awaitConfirmation forceRename
-  lift $ executeRename ops
+  executeRename ops
 
 -- Given a `force` flag, either waits for the user to confirm an action, or
 -- does nothing at all!

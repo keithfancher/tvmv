@@ -11,7 +11,8 @@ module Rename
 where
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Writer (WriterT, tell)
+import Control.Monad.Trans (MonadIO)
+import Control.Monad.Writer.Class (MonadWriter, tell)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Error (Error (..))
@@ -46,13 +47,13 @@ episodeNameTemplate :: FilePath
 episodeNameTemplate = "%s - %dx%02d - %s"
 
 -- Actually rename the files. Accumulate a "log" of rename ops.
-executeRename :: [RenameOp] -> WriterT [RenameResult] IO ()
+executeRename :: (MonadIO m, MonadWriter [RenameResult] m) => [RenameOp] -> m ()
 executeRename = mapM_ executeRenameSingle
 
 -- Rename a single file on the file system. Assuming an IO Exception isn't
 -- thrown, that op will be added to the Writer values for later logging.
 -- TODO: Catch exceptions? Could also push failures into the Writer.
-executeRenameSingle :: RenameOp -> WriterT [RenameResult] IO ()
+executeRenameSingle :: (MonadIO m, MonadWriter [RenameResult] m) => RenameOp -> m ()
 executeRenameSingle (RenameOp old new) = do
   liftIO $ Dir.renameFile old new
   tell [RenameResult (RenameOp old new) True]
@@ -60,6 +61,7 @@ executeRenameSingle (RenameOp old new) = do
 printRenameResults :: [RenameResult] -> IO ()
 printRenameResults = printList prettyRenameResult
 
+-- TODO: make these relative to current dir when printing, probably
 printRenameOps :: [RenameOp] -> IO ()
 printRenameOps = printList prettyRenameOp
 
