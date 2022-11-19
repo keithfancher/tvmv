@@ -6,11 +6,9 @@ module Tvmv
   )
 where
 
-import Control.Monad.Except (MonadError)
-import Control.Monad.Trans (MonadIO)
-import Control.Monad.Trans.Except (ExceptT (..), runExceptT)
-import Control.Monad.Trans.Writer (WriterT (..), runWriterT)
-import Control.Monad.Writer (MonadWriter)
+import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Writer (MonadWriter, WriterT (..))
 import Error (Error)
 import Rename (RenameResult)
 

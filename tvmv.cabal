@@ -56,7 +56,6 @@ library
     , text
     , themoviedb
     , time
-    , transformers
   default-language: Haskell2010
 
 executable tvmv

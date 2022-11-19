@@ -47,7 +47,6 @@ library:
   source-dirs: src
   dependencies:
   - themoviedb
-  - transformers
   - mtl
   - time
 
