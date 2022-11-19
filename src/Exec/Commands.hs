@@ -5,7 +5,7 @@ module Exec.Commands
   )
 where
 
-import API (searchSeasonById, searchSeasonByName, searchShowByName)
+import API (APIWrapper, searchSeasonById, searchSeasonByName, searchShowByName)
 import Command (MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
 import Control.Monad.Except (liftEither)
 import Control.Monad.IO.Class (liftIO)
@@ -19,8 +19,8 @@ import Text.Printf (printf)
 import Tvmv (Tvmv, mkTvmv)
 
 -- Rename the files of a TV season.
-renameSeason :: Env -> MvOptions -> Tvmv ()
-renameSeason env (MvOptions maybeApiKey forceRename _ searchQuery seasNum inFiles) = do
+renameSeason :: Env -> APIWrapper Tvmv -> MvOptions -> Tvmv ()
+renameSeason env withApi (MvOptions maybeApiKey forceRename _ searchQuery seasNum inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
   liftIO $ putStrLn "Fetching show data from API..."
   season <- searchSeason key seasNum
@@ -30,8 +30,8 @@ renameSeason env (MvOptions maybeApiKey forceRename _ searchQuery seasNum inFile
   where
     renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
     searchSeason k = case searchQuery of
-      (Name n) -> searchSeasonByName k n
-      (Id i) -> searchSeasonById k i
+      (Name n) -> searchSeasonByName withApi k n
+      (Id i) -> searchSeasonById withApi k i
 
 -- Undo a previously-run rename operation, given a log file.
 undoRename :: UndoOptions -> Tvmv ()
@@ -45,11 +45,11 @@ undoRename (UndoOptions forceRename maybeLogFileName) = do
     readLog Nothing = readLatestLogFile
 
 -- Query the configured API for a show with the given name.
-searchByName :: Env -> SearchOptions -> Tvmv ()
-searchByName env (SearchOptions maybeApiKey searchQuery) = do
+searchByName :: Env -> APIWrapper Tvmv -> SearchOptions -> Tvmv ()
+searchByName env withApi (SearchOptions maybeApiKey searchQuery) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
   liftIO $ putStrLn "Querying API..."
-  tvShowResults <- searchShowByName key searchQuery
+  tvShowResults <- searchShowByName withApi key searchQuery
   liftIO $ putStrLn $ resultsMsg tvShowResults
   liftIO $ printShows tvShowResults
   where
