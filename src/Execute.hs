@@ -6,22 +6,41 @@ where
 
 import API (APIWrapper, tmdbApiWrapper)
 import Command (Command (..), noLog)
+import Control.Monad.Except (MonadError)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Writer.Class (MonadWriter)
 import Error (Error (..))
 import Exec.Commands (renameSeason, searchByName, undoRename)
 import Exec.Env (Env (..))
 import Log (printAndWriteLog, printLog)
+import Rename (RenameResult)
 import Tvmv (Tvmv, runTvmv)
 
+-- Execute a command with the default API
 execCommand :: Env -> Command -> IO (Either Error ())
-execCommand env = execCommandWithAPI env defaultApi
+execCommand env command = run $ execCommandWithAPI env defaultApi command
+  where
+    run = selectRunner command
 
--- TODO: make this generic, not over Tvmv
-execCommandWithAPI :: Env -> APIWrapper Tvmv -> Command -> IO (Either Error ())
-execCommandWithAPI env withApi (Mv mvOpts) = run $ renameSeason env withApi mvOpts
+-- Execute a command with any other API.
+execCommandWithAPI ::
+  (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
+  Env ->
+  APIWrapper m ->
+  Command ->
+  m ()
+execCommandWithAPI env withApi (Mv mvOpts) = renameSeason env withApi mvOpts
+execCommandWithAPI env withApi (Search searchOpts) = searchByName env withApi searchOpts
+execCommandWithAPI _ _ (Undo undoOpts) = undoRename undoOpts
+
+-- Different commands have different logging behavior, and therefore different
+-- runners.
+selectRunner :: Command -> (Tvmv a -> IO (Either Error a))
+selectRunner (Mv mvOpts) = run
   where
     run = if noLog mvOpts then runNoLog else runWithLog
-execCommandWithAPI env withApi (Search searchOpts) = runNoLog $ searchByName env withApi searchOpts
-execCommandWithAPI _ _ (Undo undoOpts) = runNoLog $ undoRename undoOpts
+selectRunner (Search _) = runNoLog
+selectRunner (Undo _) = runNoLog
 
 -- Run the Tvmv, print the results from its writer AND write a log file.
 runWithLog :: Tvmv a -> IO (Either Error a)
