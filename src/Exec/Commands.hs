@@ -7,19 +7,24 @@ where
 
 import API (APIWrapper, searchSeasonById, searchSeasonByName, searchShowByName)
 import Command (MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
-import Control.Monad.Except (liftEither)
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Except (MonadError, liftEither)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Writer (MonadWriter)
 import Error (Error (..))
 import Exec.Env (Env, populateAPIKey)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
-import Rename (RenameOp, executeRename, printRenameOps, renameFiles, undoRenameOp)
+import Rename (RenameOp, RenameResult, executeRename, printRenameOps, renameFiles, undoRenameOp)
 import Show (Season (..), printShows)
 import Text.Printf (printf)
-import Tvmv (Tvmv, mkTvmv)
 
 -- Rename the files of a TV season.
-renameSeason :: Env -> APIWrapper Tvmv -> MvOptions -> Tvmv ()
+renameSeason ::
+  (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
+  Env ->
+  APIWrapper m ->
+  MvOptions ->
+  m ()
 renameSeason env withApi (MvOptions maybeApiKey forceRename _ searchQuery seasNum inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
   liftIO $ putStrLn "Fetching show data from API..."
@@ -34,9 +39,12 @@ renameSeason env withApi (MvOptions maybeApiKey forceRename _ searchQuery seasNu
       (Id i) -> searchSeasonById withApi k i
 
 -- Undo a previously-run rename operation, given a log file.
-undoRename :: UndoOptions -> Tvmv ()
+undoRename ::
+  (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
+  UndoOptions ->
+  m ()
 undoRename (UndoOptions forceRename maybeLogFileName) = do
-  renameOps <- mkTvmv $ readLog maybeLogFileName
+  renameOps <- readLog maybeLogFileName
   let reversedOps = map undoRenameOp renameOps
   runRenameOps reversedOps (undoMsg reversedOps) forceRename
   where
@@ -45,7 +53,12 @@ undoRename (UndoOptions forceRename maybeLogFileName) = do
     readLog Nothing = readLatestLogFile
 
 -- Query the configured API for a show with the given name.
-searchByName :: Env -> APIWrapper Tvmv -> SearchOptions -> Tvmv ()
+searchByName ::
+  (MonadIO m, MonadError Error m) =>
+  Env ->
+  APIWrapper m ->
+  SearchOptions ->
+  m ()
 searchByName env withApi (SearchOptions maybeApiKey searchQuery) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
   liftIO $ putStrLn "Querying API..."
@@ -56,7 +69,12 @@ searchByName env withApi (SearchOptions maybeApiKey searchQuery) = do
     resultsMsg r = printf "Found %d results" (length r)
 
 -- Helper shared by `rename` and `undo` operations.
-runRenameOps :: [RenameOp] -> String -> Bool -> Tvmv ()
+runRenameOps ::
+  (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
+  [RenameOp] ->
+  String ->
+  Bool ->
+  m ()
 runRenameOps ops message forceRename = do
   liftIO $ putStrLn message
   liftIO $ printRenameOps ops >> putStrLn ""
@@ -65,7 +83,7 @@ runRenameOps ops message forceRename = do
 
 -- Given a `force` flag, either waits for the user to confirm an action, or
 -- does nothing at all!
-awaitConfirmation :: Bool -> Tvmv ()
+awaitConfirmation :: (MonadIO m, MonadError Error m) => Bool -> m ()
 awaitConfirmation True = liftIO $ putStrLn "`force` flag is set, proceeding...\n"
 awaitConfirmation False = do
   liftIO $ putStrLn "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)

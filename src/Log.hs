@@ -10,6 +10,8 @@ module Log
   )
 where
 
+import Control.Monad.Except (MonadError, liftEither, throwError)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.List (isInfixOf, sortBy)
 import Data.Maybe (listToMaybe)
 import qualified Data.Text as T
@@ -58,11 +60,11 @@ successfulOps r = map op onlySuccesses
 
 -- Find the most recent tvmv log file in the CURRENT directory and attempt to
 -- read it. If we don't find a log or if it's invalid, will return an Error.
-readLatestLogFile :: IO (Either Error [RenameOp])
+readLatestLogFile :: (MonadIO m, MonadError Error m) => m [RenameOp]
 readLatestLogFile = do
-  files <- listDirectory "."
+  files <- liftIO $ listDirectory "."
   case getLatestLog files of
-    Nothing -> return $ Left $ UndoError "No tvmv log file found in current directory"
+    Nothing -> throwError $ UndoError "No tvmv log file found in current directory"
     Just latestLog -> readLogFile latestLog
 
 -- Given a list of files, find the most recent tvmv log file, if there is one.
@@ -75,11 +77,11 @@ getLatestLog paths = listToMaybe sortedLogFiles
 
 -- Attempt to read in a log file, which is actually valid Haskell, and parse
 -- out the logged operations.
-readLogFile :: FilePath -> IO (Either Error [RenameOp])
+readLogFile :: (MonadIO m, MonadError Error m) => FilePath -> m [RenameOp]
 readLogFile logFile = do
-  putStrLn $ "Reading previously-completed operations from log file: " <> logFile
-  text <- TIO.readFile logFile
-  return $ renameOpsFromText text
+  liftIO $ putStrLn $ "Reading previously-completed operations from log file: " <> logFile
+  text <- liftIO $ TIO.readFile logFile
+  liftEither $ renameOpsFromText text
 
 renameOpsFromText :: T.Text -> Either Error [RenameOp]
 renameOpsFromText t = case readMaybe (T.unpack t) of

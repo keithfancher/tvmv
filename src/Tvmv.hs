@@ -23,7 +23,7 @@ newtype Tvmv a = Tvmv (ExceptT Error (WriterT [RenameResult] IO) a)
     ( Functor,
       Applicative,
       Monad,
-      MonadIO, -- TODO: do I actually need all these?
+      MonadIO,
       MonadError Error,
       MonadWriter [RenameResult]
     )
