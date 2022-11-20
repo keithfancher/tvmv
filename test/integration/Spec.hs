@@ -1,16 +1,13 @@
-import API (APIKey, APIWrapper (..))
-import Command (Command (..), MvOptions (..), SearchKey (..), UndoOptions (..), logFile)
-import qualified Data.Text as T
+import API.Stub (testAPI)
+import Command (Command (..), MvOptions (..), SearchKey (..), UndoOptions (..))
 import qualified Data.Text.IO as TIO
 import Error (Error)
 import Execute (Env (..), execCommandWithAPI, selectRunner)
 import File (InFiles (..), sortCaseInsensitive)
 import Log (getLatestLog)
-import Show (Episode (..), ItemId, Season (..), TvShow (..))
 import System.Directory (createDirectoryIfMissing, listDirectory, removePathForcibly)
 import System.FilePath ((</>))
 import Test.Hspec
-import Tvmv (Tvmv)
 
 main :: IO ()
 main = hspec spec
@@ -118,7 +115,7 @@ cleanup = do
 removeLatestLogFile :: IO ()
 removeLatestLogFile = do
   pwdFiles <- listDirectory "."
-  mapM_ removePathForcibly (getLatestLog pwdFiles)
+  mapM_ removePathForcibly (getLatestLog pwdFiles) -- if one doesn't exist, do nothing
 
 testTempDir :: FilePath
 testTempDir = "it-test-tmp"
@@ -133,42 +130,3 @@ expectedResults =
     "Agatha Christie's Poirot - 12x03 - Murder on the Orient Express.mp4",
     "Agatha Christie's Poirot - 12x04 - The Clocks.mp4"
   ]
-
-testAPI :: APIWrapper Tvmv
-testAPI =
-  APIWrapper
-    { getShow = getShowStub,
-      getSeason = getSeasonStub,
-      queryShows = queryShowsStub
-    }
-
-getShowStub :: Monad m => APIKey -> ItemId -> m TvShow
-getShowStub _ _ = return poirotShowData
-
-getSeasonStub :: Monad m => APIKey -> TvShow -> Int -> m Season
-getSeasonStub _ _ _ = return Season {seasonNumber = 12, episodes = poirotSeasonEps}
-
-poirotSeasonEps :: [Episode]
-poirotSeasonEps =
-  [ Episode 1 "Three Act Tragedy" 12 poirotName,
-    Episode 2 "Hallowe'en Party" 12 poirotName,
-    Episode 3 "Murder on the Orient Express" 12 poirotName,
-    Episode 4 "The Clocks" 12 poirotName
-  ]
-
-queryShowsStub :: Monad m => APIKey -> T.Text -> m [TvShow]
-queryShowsStub _ _ = return [poirotShowData]
-
-poirotName :: T.Text
-poirotName = "Agatha Christie's Poirot"
-
-poirotShowData :: TvShow
-poirotShowData =
-  TvShow
-    { showId = 790,
-      showName = poirotName,
-      seasons = [],
-      description = "!!!",
-      numberOfSeasons = 0,
-      numberOfEpisodes = 0
-    }
