@@ -1,6 +1,8 @@
 module Execute
   ( Env (..), -- re-export, for convenience
     execCommand,
+    execCommandWithAPI,
+    selectRunner,
   )
 where
 
