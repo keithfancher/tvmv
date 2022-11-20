@@ -199,3 +199,38 @@ for now, it just does its thing.
 
 That said: let me know if it doesn't work for your use-case! I built this
 mostly with my own needs in mind.
+
+## Running tests
+
+There are two test suites: `unit` and `integration`. The following will run
+them both, which is the default:
+
+```
+$ stack test
+```
+
+Or you can run either one individually:
+
+```
+$ stack test :unit
+$ stack test :integration
+```
+
+The unit tests are pure and isolated, as you'd expect. The integration tests
+will create and rename actual files on your actual file system (and then clean
+up when they're done, of course).
+
+Note that, despite being called "integration tests", they do *not* connect to
+any real external API (and of course no API key is required). The
+"integration" in this case is with the filesystem.
+
+There are currently no (automated) full end-to-end tests, but I provided a bit
+of test data to play with, e.g.:
+
+```
+$ stack build
+$ stack exec tvmv -- mv -n poirot -s 12 test/data/
+$ stack exec tvmv -- undo
+```
+Of course since these are real calls to the application, you *will* need an
+API key for this.
