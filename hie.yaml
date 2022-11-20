@@ -22,7 +22,8 @@
 # it manually.)
 #
 # Anyway, assuming you don't add any more components, this shouldn't have to
-# change.
+# change. (And if it does, check out the output of `stack ide targets` for help
+# figuring out what goes where.)
 #
 # Love,
 # Past-Self
@@ -34,5 +35,8 @@ cradle:
     - path: "./app"
       component: "tvmv:exe:tvmv"
 
-    - path: "./test"
-      component: "tvmv:test:tvmv-test"
+    - path: "./test/unit"
+      component: "tvmv:test:unit"
+
+    - path: "./test/integration"
+      component: "tvmv:test:integration"

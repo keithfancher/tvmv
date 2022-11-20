@@ -82,7 +82,30 @@ executable tvmv
     , tvmv
   default-language: Haskell2010
 
-test-suite tvmv-test
+test-suite integration
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_tvmv
+  hs-source-dirs:
+      test/integration
+  default-extensions:
+      OverloadedStrings
+      DuplicateRecordFields
+      FlexibleContexts
+      TypeSynonymInstances
+      GeneralizedNewtypeDeriving
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , directory
+    , filepath
+    , hspec
+    , text
+    , tvmv
+  default-language: Haskell2010
+
+test-suite unit
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
@@ -93,7 +116,7 @@ test-suite tvmv-test
       RenameSpec
       Paths_tvmv
   hs-source-dirs:
-      test
+      test/unit
   default-extensions:
       OverloadedStrings
       DuplicateRecordFields
