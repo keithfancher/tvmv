@@ -9,8 +9,8 @@ where
 
 import API (APIKey)
 import qualified Data.Text as T
+import Domain.Show (ItemId)
 import File (InFiles)
-import Show (ItemId)
 
 -- The three commands
 data Command

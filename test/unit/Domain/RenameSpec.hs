@@ -1,9 +1,9 @@
-module RenameSpec (spec) where
+module Domain.RenameSpec (spec) where
 
 import Data.Either (isLeft)
 import qualified Data.Text as T
-import Rename
-import Show (Episode (..))
+import Domain.Rename
+import Domain.Show (Episode (..))
 import Test.Hspec
 
 spec :: Spec

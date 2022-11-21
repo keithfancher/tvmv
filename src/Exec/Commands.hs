@@ -10,12 +10,12 @@ import Command (MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions 
 import Control.Monad.Except (MonadError, liftEither)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
-import Error (Error (..))
+import Domain.Error (Error (..))
+import Domain.Rename (RenameOp, RenameResult, executeRename, printRenameOps, renameFiles, undoRenameOp)
+import Domain.Show (Season (..), printShows)
 import Exec.Env (Env, populateAPIKey)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
-import Rename (RenameOp, RenameResult, executeRename, printRenameOps, renameFiles, undoRenameOp)
-import Show (Season (..), printShows)
 import Text.Printf (printf)
 
 -- Rename the files of a TV season.

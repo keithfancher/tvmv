@@ -6,7 +6,7 @@ where
 
 import API (APIKey)
 import Control.Applicative ((<|>))
-import Error (Error (..))
+import Domain.Error (Error (..))
 
 -- Wrapper for other envinroment-related stuff we might need to execute a
 -- command, in addition to the parsed-out CLI args.

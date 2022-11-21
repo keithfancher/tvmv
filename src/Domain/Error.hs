@@ -1,4 +1,4 @@
-module Error (Error (..)) where
+module Domain.Error (Error (..)) where
 
 data Error
   = APIError String

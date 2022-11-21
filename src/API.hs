@@ -11,9 +11,9 @@ where
 import qualified API.TMDB as TMDB
 import Control.Monad.Except (MonadError, liftEither)
 import qualified Data.Text as T
-import Error (Error (..))
-import Show (ItemId, Season (..), TvShow (..))
-import Tvmv (Tvmv)
+import Domain.Error (Error (..))
+import Domain.Show (ItemId, Season (..), TvShow (..))
+import Monad.Tvmv (Tvmv)
 
 type APIKey = T.Text
 

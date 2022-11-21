@@ -1,4 +1,4 @@
-module Rename
+module Domain.Rename
   ( RenameOp (..),
     RenameResult (..),
     executeRename,
@@ -15,8 +15,8 @@ import Control.Monad.Trans (MonadIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import Error (Error (..))
-import Show (Episode (..))
+import Domain.Error (Error (..))
+import Domain.Show (Episode (..))
 import qualified System.Directory as Dir
 import System.FilePath (replaceBaseName)
 import Text.Printf (printf)

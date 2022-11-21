@@ -1,4 +1,4 @@
-module Tvmv
+module Monad.Tvmv
   ( Tvmv,
     Logger,
     mkTvmv,
@@ -9,8 +9,8 @@ where
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Writer (MonadWriter, WriterT (..))
-import Error (Error)
-import Rename (RenameResult)
+import Domain.Error (Error)
+import Domain.Rename (RenameResult)
 
 -- Wrap the transformer stack!
 --

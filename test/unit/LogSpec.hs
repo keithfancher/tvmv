@@ -2,8 +2,8 @@ module LogSpec (spec) where
 
 import Data.Either (isLeft)
 import qualified Data.Text as T
+import Domain.Rename (RenameOp (..), RenameResult (..))
 import Log
-import Rename (RenameOp (..), RenameResult (..))
 import Test.Hspec
 
 spec :: Spec

@@ -2,8 +2,8 @@ module API.Stub (testAPI) where
 
 import API (APIKey, APIWrapper (..))
 import qualified Data.Text as T
-import Show (Episode (..), ItemId, Season (..), TvShow (..))
-import Tvmv (Tvmv)
+import Domain.Show (Episode (..), ItemId, Season (..), TvShow (..))
+import Monad.Tvmv (Tvmv)
 
 -- Just a simple stub! Hard-coded to return season 12 of Poirot for now, but
 -- should be easy to flesh it out if we need more complex tests.

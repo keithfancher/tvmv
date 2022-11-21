@@ -17,12 +17,12 @@ import Data.Maybe (listToMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
-import Error (Error (..))
-import Rename (RenameOp, RenameResult (..), printRenameResults)
+import Domain.Error (Error (..))
+import Domain.Rename (RenameOp, RenameResult (..), printRenameResults)
 import System.Directory (listDirectory)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
-import Tvmv (Logger)
+import Monad.Tvmv (Logger)
 
 tvmvLogBaseFilename :: FilePath
 tvmvLogBaseFilename = "tvmv-log"

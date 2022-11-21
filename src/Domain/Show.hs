@@ -1,4 +1,4 @@
-module Show
+module Domain.Show
   ( Episode (..),
     Season (..),
     TvShow (..),

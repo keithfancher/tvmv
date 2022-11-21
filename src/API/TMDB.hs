@@ -7,10 +7,10 @@ module API.TMDB
 where
 
 import qualified Data.Text as T
-import Error (Error (..))
+import Domain.Error (Error (..))
+import Domain.Show (Episode (..), ItemId, Season (..), TvShow (..))
+import Monad.Tvmv (Tvmv, mkTvmv)
 import qualified Network.API.TheMovieDB as TMDB
-import Show (Episode (..), ItemId, Season (..), TvShow (..))
-import Tvmv (Tvmv, mkTvmv)
 
 type APIKey = T.Text
 

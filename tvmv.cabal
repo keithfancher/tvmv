@@ -28,15 +28,15 @@ library
       API
       API.TMDB
       Command
-      Error
+      Domain.Error
+      Domain.Rename
+      Domain.Show
       Exec.Commands
       Exec.Env
       Execute
       File
       Log
-      Rename
-      Show
-      Tvmv
+      Monad.Tvmv
   other-modules:
       Paths_tvmv
   hs-source-dirs:
@@ -111,10 +111,10 @@ test-suite unit
   main-is: Spec.hs
   other-modules:
       API.TMDBSpec
+      Domain.RenameSpec
       Exec.EnvSpec
       FileSpec
       LogSpec
-      RenameSpec
       Paths_tvmv
   hs-source-dirs:
       test/unit

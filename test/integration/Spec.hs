@@ -1,7 +1,7 @@
 import API.Stub (testAPI)
 import Command (Command (..), MvOptions (..), SearchKey (..), UndoOptions (..))
 import qualified Data.Text.IO as TIO
-import Error (Error)
+import Domain.Error (Error)
 import Execute (Env (..), execCommandWithAPI, selectRunner)
 import File (InFiles (..), sortCaseInsensitive)
 import Log (getLatestLog)
