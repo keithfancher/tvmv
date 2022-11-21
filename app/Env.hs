@@ -1,8 +1,8 @@
 module Env (populateEnv) where
 
-import API (APIKey)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
+import Domain.API (APIKey)
 import Execute (Env (..))
 import System.Directory (XdgDirectory (..), doesFileExist, getXdgDirectory)
 import System.Environment (lookupEnv)

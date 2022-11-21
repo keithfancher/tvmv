@@ -1,35 +1,21 @@
 module API
-  ( APIKey,
-    APIWrapper (..),
+  ( defaultAPI,
     searchSeasonById,
     searchSeasonByName,
     searchShowByName,
-    tmdbApiWrapper,
   )
 where
 
-import qualified API.TMDB as TMDB
+import API.TMDB (tmdbApiWrapper)
 import Control.Monad.Except (MonadError, liftEither)
 import qualified Data.Text as T
+import Domain.API (APIKey, APIWrapper (..))
 import Domain.Error (Error (..))
 import Domain.Show (ItemId, Season (..), TvShow (..))
 import Monad.Tvmv (Tvmv)
 
-type APIKey = T.Text
-
-data APIWrapper m = APIWrapper
-  { getShow :: APIKey -> ItemId -> m TvShow,
-    getSeason :: APIKey -> TvShow -> Int -> m Season,
-    queryShows :: APIKey -> T.Text -> m [TvShow]
-  }
-
-tmdbApiWrapper :: APIWrapper Tvmv
-tmdbApiWrapper =
-  APIWrapper
-    { getShow = TMDB.getShow,
-      getSeason = TMDB.getSeason,
-      queryShows = TMDB.queryShows
-    }
+defaultAPI :: APIWrapper Tvmv
+defaultAPI = tmdbApiWrapper
 
 -- Search for a show with the given name and, using the FIRST match for that
 -- name, return the episode data for the given season.

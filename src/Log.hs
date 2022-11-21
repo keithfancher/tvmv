@@ -19,10 +19,10 @@ import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, RenameResult (..), printRenameResults)
+import Monad.Tvmv (Logger)
 import System.Directory (listDirectory)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
-import Monad.Tvmv (Logger)
 
 tvmvLogBaseFilename :: FilePath
 tvmvLogBaseFilename = "tvmv-log"

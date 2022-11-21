@@ -1,33 +1,38 @@
 module API.TMDB
-  ( getShow,
-    getSeason,
-    queryShows,
-    mapTvShow,
+  ( mapTvShow,
+    tmdbApiWrapper,
   )
 where
 
 import qualified Data.Text as T
+import Domain.API (APIKey, APIWrapper (..))
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..), ItemId, Season (..), TvShow (..))
 import Monad.Tvmv (Tvmv, mkTvmv)
 import qualified Network.API.TheMovieDB as TMDB
 
-type APIKey = T.Text
+tmdbApiWrapper :: APIWrapper Tvmv
+tmdbApiWrapper =
+  APIWrapper
+    { getShow = getShow',
+      getSeason = getSeason',
+      queryShows = queryShows'
+    }
 
 -- Get data for a single show. Note that this only fetches certain top-level
 -- data for the show, it does NOT get all the season/episode data.
-getShow :: APIKey -> ItemId -> Tvmv TvShow
-getShow apiKey itemId = toTvmv apiKey $ getShowTMDB itemId
+getShow' :: APIKey -> ItemId -> Tvmv TvShow
+getShow' apiKey itemId = toTvmv apiKey $ getShowTMDB itemId
 
 -- Given the show data, we can pull down the data for a given season, and all
 -- its episodes.
-getSeason :: APIKey -> TvShow -> Int -> Tvmv Season
-getSeason apiKey showData seasonNum = toTvmv apiKey $ getSeasonTMDB showData seasonNum
+getSeason' :: APIKey -> TvShow -> Int -> Tvmv Season
+getSeason' apiKey showData seasonNum = toTvmv apiKey $ getSeasonTMDB showData seasonNum
 
 -- Get list of shows from TMDB that match the given query. Again, this only
 -- contains the top-level data for each returned show.
-queryShows :: APIKey -> T.Text -> Tvmv [TvShow]
-queryShows apiKey nameQuery = toTvmv apiKey $ queryShowsTMDB nameQuery
+queryShows' :: APIKey -> T.Text -> Tvmv [TvShow]
+queryShows' apiKey nameQuery = toTvmv apiKey $ queryShowsTMDB nameQuery
 
 getShowTMDB :: ItemId -> TMDB.TheMovieDB TvShow
 getShowTMDB itemId = do

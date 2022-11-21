@@ -4,8 +4,8 @@ module Exec.Env
   )
 where
 
-import API (APIKey)
 import Control.Applicative ((<|>))
+import Domain.API (APIKey)
 import Domain.Error (Error (..))
 
 -- Wrapper for other envinroment-related stuff we might need to execute a

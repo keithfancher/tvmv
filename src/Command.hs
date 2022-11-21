@@ -7,8 +7,8 @@ module Command
   )
 where
 
-import API (APIKey)
 import qualified Data.Text as T
+import Domain.API (APIKey)
 import Domain.Show (ItemId)
 import File (InFiles)
 

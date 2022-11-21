@@ -5,11 +5,12 @@ module Exec.Commands
   )
 where
 
-import API (APIWrapper, searchSeasonById, searchSeasonByName, searchShowByName)
+import API (searchSeasonById, searchSeasonByName, searchShowByName)
 import Command (MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
 import Control.Monad.Except (MonadError, liftEither)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
+import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, RenameResult, executeRename, printRenameOps, renameFiles, undoRenameOp)
 import Domain.Show (Season (..), printShows)

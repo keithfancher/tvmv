@@ -1,8 +1,8 @@
 module Args (cliOptParser) where
 
-import API (APIKey)
 import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
 import qualified Data.Text as T
+import Domain.API (APIKey)
 import File (InFiles, mkInFiles)
 import Options.Applicative
 
@@ -87,9 +87,8 @@ noLogFlagParser =
   switch
     ( long "no-log"
         <> short 'x'
-          <> help "Do not write a log of rename operations. (Note that without a log, you can't use the `undo` command.)"
+        <> help "Do not write a log of rename operations. (Note that without a log, you can't use the `undo` command.)"
     )
-
 
 maybeApiKeyReader :: ReadM (Maybe APIKey)
 maybeApiKeyReader = eitherReader $ \s ->

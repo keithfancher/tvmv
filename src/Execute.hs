@@ -6,11 +6,12 @@ module Execute
   )
 where
 
-import API (APIWrapper, tmdbApiWrapper)
+import API (defaultAPI)
 import Command (Command (..), noLog)
 import Control.Monad.Except (MonadError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Writer.Class (MonadWriter)
+import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameResult)
 import Exec.Commands (renameSeason, searchByName, undoRename)
@@ -20,7 +21,7 @@ import Monad.Tvmv (Tvmv, runTvmv)
 
 -- Execute a command with the default API
 execCommand :: Env -> Command -> IO (Either Error ())
-execCommand env command = run $ execCommandWithAPI env defaultApi command
+execCommand env command = run $ execCommandWithAPI env defaultAPI command
   where
     run = selectRunner command
 
@@ -51,6 +52,3 @@ runWithLog = runTvmv printAndWriteLog
 -- Run the Tvmv, print the results ONLY. (No log file.)
 runNoLog :: Tvmv a -> IO (Either Error a)
 runNoLog = runTvmv printLog
-
-defaultApi :: APIWrapper Tvmv
-defaultApi = tmdbApiWrapper

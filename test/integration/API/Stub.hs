@@ -1,7 +1,7 @@
 module API.Stub (testAPI) where
 
-import API (APIKey, APIWrapper (..))
 import qualified Data.Text as T
+import Domain.API (APIKey, APIWrapper (..))
 import Domain.Show (Episode (..), ItemId, Season (..), TvShow (..))
 import Monad.Tvmv (Tvmv)
 

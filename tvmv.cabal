@@ -28,6 +28,7 @@ library
       API
       API.TMDB
       Command
+      Domain.API
       Domain.Error
       Domain.Rename
       Domain.Show
