@@ -34,6 +34,7 @@ library
       Domain.Show
       Exec.Commands
       Exec.Env
+      Exec.Rename
       Execute
       File
       Log

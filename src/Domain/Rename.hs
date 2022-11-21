@@ -1,7 +1,6 @@
 module Domain.Rename
   ( RenameOp (..),
     RenameResult (..),
-    executeRename,
     renameFile,
     renameFiles,
     undoRenameOp,
@@ -10,14 +9,10 @@ module Domain.Rename
   )
 where
 
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans (MonadIO)
-import Control.Monad.Writer.Class (MonadWriter, tell)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..))
-import qualified System.Directory as Dir
 import System.FilePath (replaceBaseName)
 import Text.Printf (printf)
 
@@ -45,18 +40,6 @@ data RenameResult = RenameResult
 -- seasons/episodes. But for now, this is a sane default.
 episodeNameTemplate :: FilePath
 episodeNameTemplate = "%s - %dx%02d - %s"
-
--- Actually rename the files. Accumulate a "log" of rename ops.
-executeRename :: (MonadIO m, MonadWriter [RenameResult] m) => [RenameOp] -> m ()
-executeRename = mapM_ executeRenameSingle
-
--- Rename a single file on the file system. Assuming an IO Exception isn't
--- thrown, that op will be added to the Writer values for later logging.
--- TODO: Catch exceptions? Could also push failures into the Writer.
-executeRenameSingle :: (MonadIO m, MonadWriter [RenameResult] m) => RenameOp -> m ()
-executeRenameSingle (RenameOp old new) = do
-  liftIO $ Dir.renameFile old new
-  tell [RenameResult (RenameOp old new) True]
 
 printRenameResults :: [RenameResult] -> IO ()
 printRenameResults = printList prettyRenameResult
