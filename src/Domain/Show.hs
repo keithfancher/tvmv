@@ -3,13 +3,11 @@ module Domain.Show
     Season (..),
     TvShow (..),
     ItemId,
-    printShows,
     showInfoBrief,
   )
 where
 
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
 
 -- A unique ID used for a given API resource.
 --
@@ -59,14 +57,6 @@ showInfoBrief s =
     trim str
       | T.length str > 80 = T.take 78 str <> "..."
       | otherwise = str
-
--- Print out summaries for a list of shows.
-printShows :: [TvShow] -> IO ()
-printShows [] = return ()
-printShows s = TIO.putStrLn (T.intercalate sep showSummaries)
-  where
-    showSummaries = map showInfoBrief s
-    sep = "\n\n"
 
 toText :: Show a => a -> T.Text
 toText = T.pack . show

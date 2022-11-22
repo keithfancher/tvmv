@@ -13,11 +13,12 @@ import Control.Monad.Writer (MonadWriter)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, RenameResult, printRenameOps, renameFiles, undoRenameOp)
-import Domain.Show (Season (..), printShows)
+import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Rename (executeRename)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
+import Print (prettyPrintListLn)
 import Text.Printf (printf)
 
 -- Rename the files of a TV season.
@@ -66,7 +67,7 @@ searchByName env withApi (SearchOptions maybeApiKey searchQuery) = do
   liftIO $ putStrLn "Querying API..."
   tvShowResults <- searchShowByName withApi key searchQuery
   liftIO $ putStrLn $ resultsMsg tvShowResults
-  liftIO $ printShows tvShowResults
+  liftIO $ prettyPrintListLn tvShowResults
   where
     resultsMsg r = printf "Found %d results" (length r)
 
