@@ -30,7 +30,7 @@ renameSeason ::
   m ()
 renameSeason env withApi (MvOptions maybeApiKey forceRename _ searchQuery seasNum inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
-  liftIO $ putStrLn "Fetching show data from API..."
+  putStrLn' "Fetching show data from API..."
   season <- searchSeason key seasNum
   files <- liftIO $ listFiles inFiles
   renameOps <- liftEither $ renameFiles (episodes season) files
@@ -64,9 +64,9 @@ searchByName ::
   m ()
 searchByName env withApi (SearchOptions maybeApiKey searchQuery) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
-  liftIO $ putStrLn "Querying API..."
+  putStrLn' "Querying API..."
   tvShowResults <- searchShowByName withApi key searchQuery
-  liftIO $ putStrLn $ resultsMsg tvShowResults
+  putStrLn' $ resultsMsg tvShowResults
   liftIO $ prettyPrintListLn tvShowResults
   where
     resultsMsg r = printf "Found %d results" (length r)
@@ -79,21 +79,25 @@ runRenameOps ::
   Bool ->
   m ()
 runRenameOps ops message forceRename = do
-  liftIO $ putStrLn message
+  putStrLn' message
   relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
-  liftIO $ prettyPrintListLn relativeOps >> putStrLn ""
+  liftIO $ prettyPrintListLn relativeOps >> putStrLn' ""
   awaitConfirmation forceRename
   executeRename ops
 
 -- Given a `force` flag, either waits for the user to confirm an action, or
 -- does nothing at all!
 awaitConfirmation :: (MonadIO m, MonadError Error m) => Bool -> m ()
-awaitConfirmation True = liftIO $ putStrLn "`force` flag is set, proceeding...\n"
+awaitConfirmation True = putStrLn' "`force` flag is set, proceeding...\n"
 awaitConfirmation False = do
-  liftIO $ putStrLn "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
+  putStrLn' "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
   input <- liftIO getChar
   liftEither $ confirm input
   where
     confirm 'y' = Right ()
     confirm 'Y' = Right ()
     confirm _ = Left UserAbort -- default is to bail
+
+-- Wrapper for less lifting :')
+putStrLn' :: MonadIO m => String -> m ()
+putStrLn' = liftIO . putStrLn
