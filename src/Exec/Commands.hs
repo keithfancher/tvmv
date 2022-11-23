@@ -67,7 +67,7 @@ searchByName env withApi (SearchOptions maybeApiKey searchQuery) = do
   putStrLn' "Querying API..."
   tvShowResults <- searchShowByName withApi key searchQuery
   putStrLn' $ resultsMsg tvShowResults
-  liftIO $ prettyPrintListLn tvShowResults
+  prettyPrintListLn tvShowResults
   where
     resultsMsg r = printf "Found %d results" (length r)
 
@@ -81,7 +81,7 @@ runRenameOps ::
 runRenameOps ops message forceRename = do
   putStrLn' message
   relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
-  liftIO $ prettyPrintListLn relativeOps >> putStrLn' ""
+  prettyPrintListLn relativeOps >> putStrLn' ""
   awaitConfirmation forceRename
   executeRename ops
 

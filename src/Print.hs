@@ -1,5 +1,6 @@
 module Print (Pretty (..)) where
 
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Domain.Rename (RenameOp (..), RenameResult (..))
@@ -7,21 +8,21 @@ import Domain.Show (TvShow, showInfoBrief)
 
 class Pretty a where
   prettyText :: a -> T.Text -- only one required function
-  prettyPrint :: a -> IO ()
-  prettyPrintLn :: a -> IO ()
+  prettyPrint :: MonadIO m => a -> m ()
+  prettyPrintLn :: MonadIO m => a -> m ()
   prettyList :: [a] -> T.Text
-  prettyPrintList :: [a] -> IO ()
-  prettyPrintListLn :: [a] -> IO ()
+  prettyPrintList :: MonadIO m => [a] -> m ()
+  prettyPrintListLn :: MonadIO m => [a] -> m ()
 
   -- Default implementations:
-  prettyPrint = TIO.putStr . prettyText
-  prettyPrintLn = TIO.putStrLn . prettyText
+  prettyPrint = liftIO . TIO.putStr . prettyText
+  prettyPrintLn = liftIO . TIO.putStrLn . prettyText
   prettyList xs = T.intercalate defaultSeparator (map prettyText xs)
     where
       defaultSeparator = "\n\n"
-  prettyPrintList = TIO.putStr . prettyList
+  prettyPrintList = liftIO . TIO.putStr . prettyList
   prettyPrintListLn [] = return () -- don't want to print nothing and a newline
-  prettyPrintListLn xs = TIO.putStrLn . prettyList $ xs
+  prettyPrintListLn xs = liftIO . TIO.putStrLn . prettyList $ xs
 
 instance Pretty TvShow where
   prettyText = showInfoBrief
