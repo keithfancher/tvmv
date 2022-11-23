@@ -2,6 +2,7 @@ module Print (Pretty (..)) where
 
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
+import Domain.Rename (RenameOp (..), RenameResult (..))
 import Domain.Show (TvShow, showInfoBrief)
 
 class Pretty a where
@@ -24,3 +25,15 @@ class Pretty a where
 
 instance Pretty TvShow where
   prettyText = showInfoBrief
+
+instance Pretty RenameOp where
+  prettyText renameOp = old <> " ->\n" <> new
+    where
+      old = T.pack $ oldPath renameOp
+      new = T.pack $ newPath renameOp
+
+instance Pretty RenameResult where
+  prettyText r = prettyText (op r) <> "\n" <> result (success r)
+    where
+      result True = "Sucess!"
+      result False = "ERROR :("

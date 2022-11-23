@@ -18,8 +18,9 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Domain.Error (Error (..))
-import Domain.Rename (RenameOp, RenameResult (..), printRenameResults)
+import Domain.Rename (RenameOp, RenameResult (..))
 import Monad.Tvmv (Logger)
+import Print (prettyPrintListLn)
 import System.Directory (listDirectory)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
@@ -38,7 +39,7 @@ writeLogFile results = do
 -- Print only, don't write a log file.
 printLog :: Logger
 printLog [] = return () -- don't print if empty
-printLog results = printRenameResults results
+printLog results = prettyPrintListLn results
 
 -- Print AND log. As you might expect.
 printAndWriteLog :: Logger

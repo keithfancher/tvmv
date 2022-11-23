@@ -12,7 +12,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
-import Domain.Rename (RenameOp, RenameResult, printRenameOps, renameFiles, undoRenameOp)
+import Domain.Rename (RenameOp, RenameResult, renameFiles, undoRenameOp)
 import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Rename (executeRename)
@@ -80,7 +80,7 @@ runRenameOps ::
   m ()
 runRenameOps ops message forceRename = do
   liftIO $ putStrLn message
-  liftIO $ printRenameOps ops >> putStrLn ""
+  liftIO $ prettyPrintListLn ops >> putStrLn ""
   awaitConfirmation forceRename
   executeRename ops
 

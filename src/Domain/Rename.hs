@@ -4,13 +4,10 @@ module Domain.Rename
     renameFile,
     renameFiles,
     undoRenameOp,
-    printRenameResults,
-    printRenameOps,
   )
 where
 
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..))
 import System.FilePath (replaceBaseName)
@@ -40,31 +37,6 @@ data RenameResult = RenameResult
 -- seasons/episodes. But for now, this is a sane default.
 episodeNameTemplate :: FilePath
 episodeNameTemplate = "%s - %dx%02d - %s"
-
-printRenameResults :: [RenameResult] -> IO ()
-printRenameResults = printList prettyRenameResult
-
--- TODO: make these relative to current dir when printing, probably
-printRenameOps :: [RenameOp] -> IO ()
-printRenameOps = printList prettyRenameOp
-
--- Print a list of things that can be turned to Text.
-printList :: (a -> T.Text) -> [a] -> IO ()
-printList toText rs = TIO.putStrLn (T.intercalate "\n\n" listAsText)
-  where
-    listAsText = map toText rs
-
-prettyRenameResult :: RenameResult -> T.Text
-prettyRenameResult r = prettyRenameOp (op r) <> "\n" <> result (success r)
-  where
-    result True = "Sucess!"
-    result False = "ERROR :("
-
-prettyRenameOp :: RenameOp -> T.Text
-prettyRenameOp renameOp = old <> " ->\n" <> new
-  where
-    old = T.pack $ oldPath renameOp
-    new = T.pack $ newPath renameOp
 
 -- Strike that, reverse it!
 undoRenameOp :: RenameOp -> RenameOp
