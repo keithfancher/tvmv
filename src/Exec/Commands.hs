@@ -15,7 +15,7 @@ import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, RenameResult, renameFiles, undoRenameOp)
 import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
-import Exec.Rename (executeRename)
+import Exec.Rename (executeRename, makeOpRelative)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
 import Print (prettyPrintListLn)
@@ -80,7 +80,8 @@ runRenameOps ::
   m ()
 runRenameOps ops message forceRename = do
   liftIO $ putStrLn message
-  liftIO $ prettyPrintListLn ops >> putStrLn ""
+  relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
+  liftIO $ prettyPrintListLn relativeOps >> putStrLn ""
   awaitConfirmation forceRename
   executeRename ops
 

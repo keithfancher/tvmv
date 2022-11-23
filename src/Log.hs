@@ -19,6 +19,7 @@ import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, RenameResult (..))
+import Exec.Rename (makeResultRelative)
 import Monad.Tvmv (Logger)
 import Print (prettyPrintListLn)
 import System.Directory (listDirectory)
@@ -39,7 +40,9 @@ writeLogFile results = do
 -- Print only, don't write a log file.
 printLog :: Logger
 printLog [] = return () -- don't print if empty
-printLog results = prettyPrintListLn results
+printLog results = do
+  relativeResults <- mapM makeResultRelative results -- print relative paths for readability
+  prettyPrintListLn relativeResults
 
 -- Print AND log. As you might expect.
 printAndWriteLog :: Logger
