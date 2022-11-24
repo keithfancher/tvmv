@@ -18,8 +18,8 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Domain.Error (Error (..))
-import Domain.Rename (RenameOp, RenameResult (..))
-import Exec.Rename (makeResultRelative)
+import Domain.Rename (RenameOp)
+import Exec.Rename (RenameResult (..), makeResultRelative)
 import Monad.Tvmv (Logger)
 import Print (prettyPrintListLn)
 import System.Directory (listDirectory)

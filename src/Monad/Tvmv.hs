@@ -10,7 +10,7 @@ import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Writer (MonadWriter, WriterT (..))
 import Domain.Error (Error)
-import Domain.Rename (RenameResult)
+import Exec.Rename (RenameResult)
 
 -- Wrap the transformer stack!
 --

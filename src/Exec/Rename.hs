@@ -1,15 +1,23 @@
 module Exec.Rename
-  ( executeRename,
+  ( RenameResult (..),
+    executeRename,
     makeOpRelative,
     makeResultRelative,
   )
 where
 
+import Control.Exception (try)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
-import Domain.Rename (RenameOp (..), RenameResult (..))
+import Domain.Rename (RenameOp (..))
 import System.Directory (makeRelativeToCurrentDirectory)
 import qualified System.Directory as Dir
+
+data RenameResult = RenameResult
+  { op :: RenameOp,
+    success :: Bool -- TODO: capture error messages too
+  }
+  deriving (Eq, Show)
 
 -- Actually rename the files on the file system. Accumulate a "log" of rename
 -- ops.
@@ -20,9 +28,16 @@ executeRename = mapM_ executeRenameSingle
 -- thrown, that op will be added to the Writer values for later logging.
 -- TODO: Catch exceptions? Could also push failures into the Writer.
 executeRenameSingle :: (MonadIO m, MonadWriter [RenameResult] m) => RenameOp -> m ()
-executeRenameSingle (RenameOp old new) = do
-  liftIO $ Dir.renameFile old new
-  tell [RenameResult (RenameOp old new) True]
+executeRenameSingle renameOp = do
+  renameResults <- tryRename (oldPath renameOp) (newPath renameOp)
+  tell [mkResult renameOp renameResults]
+
+tryRename :: MonadIO m => FilePath -> FilePath -> m (Either IOError ())
+tryRename old new = liftIO $ try (Dir.renameFile old new)
+
+mkResult :: RenameOp -> Either IOError () -> RenameResult
+mkResult o (Left err) = RenameResult {op = o, success = False}
+mkResult o (Right _) = RenameResult {op = o, success = True}
 
 -- Replace the paths in a RenameOp with paths relative to the current directory.
 makeOpRelative :: MonadIO m => RenameOp -> m RenameOp

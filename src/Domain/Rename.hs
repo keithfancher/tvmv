@@ -1,6 +1,5 @@
 module Domain.Rename
   ( RenameOp (..),
-    RenameResult (..),
     renameFile,
     renameFiles,
     undoRenameOp,
@@ -20,12 +19,6 @@ data RenameOp = RenameOp
     newPath :: FilePath
   }
   deriving (Eq, Show, Read)
-
-data RenameResult = RenameResult
-  { op :: RenameOp,
-    success :: Bool -- TODO: capture error messages too
-  }
-  deriving (Eq, Show)
 
 -- "[show] - [season]x[ep] - [ep name]"
 -- e.g. "Buffy the Vampire Slayer - 4x10 - Hush"

@@ -3,8 +3,9 @@ module Print (Pretty (..)) where
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import Domain.Rename (RenameOp (..), RenameResult (..))
+import Domain.Rename (RenameOp (..))
 import Domain.Show (TvShow, showInfoBrief)
+import Exec.Rename (RenameResult (..))
 
 class Pretty a where
   prettyText :: a -> T.Text -- only one required function
