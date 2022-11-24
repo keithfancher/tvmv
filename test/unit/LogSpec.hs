@@ -35,8 +35,8 @@ spec = do
 
 renameResults :: [RenameResult]
 renameResults =
-  [ RenameResult {op = opEp1, success = True},
-    RenameResult {op = opEp2, success = False}
+  [ Success opEp1,
+    Failure opEp2 (userError "Permission denied or something")
   ]
 
 successesAsText :: T.Text

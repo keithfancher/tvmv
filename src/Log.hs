@@ -19,7 +19,7 @@ import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp)
-import Exec.Rename (RenameResult (..), makeResultRelative)
+import Exec.Rename (RenameResult (..), getOp, makeResultRelative)
 import Monad.Tvmv (Logger)
 import Print (prettyPrintListLn)
 import System.Directory (listDirectory)
@@ -58,9 +58,11 @@ getLogText results = textify successes
     successes = successfulOps results
 
 successfulOps :: [RenameResult] -> [RenameOp]
-successfulOps r = map op onlySuccesses
+successfulOps r = map getOp onlySuccesses
   where
-    onlySuccesses = filter success r
+    onlySuccesses = filter isSuccess r
+    isSuccess (Success _) = True
+    isSuccess (Failure _ _) = False
 
 -- Find the most recent tvmv log file in the CURRENT directory and attempt to
 -- read it. If we don't find a log or if it's invalid, will return an Error.
