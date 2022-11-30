@@ -12,7 +12,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
-import Domain.Rename (RenameOp, renameFiles, undoRenameOp)
+import Domain.Rename (RenameOp, matchEpisodes, renameFiles, undoRenameOp)
 import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
@@ -33,7 +33,8 @@ renameSeason env withApi (MvOptions maybeApiKey forceRename _ searchQuery seasNu
   putStrLn' "Fetching show data from API..."
   season <- searchSeason key seasNum
   files <- liftIO $ listFiles inFiles
-  renameOps <- liftEither $ renameFiles (episodes season) files
+  matchedFiles <- liftEither $ matchEpisodes (episodes season) files
+  let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) forceRename
   where
     renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)

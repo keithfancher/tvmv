@@ -1,5 +1,7 @@
 module Domain.Rename
   ( RenameOp (..),
+    MatchedEpisodes, -- note NOT exporting constructor(s) here
+    matchEpisodes,
     renameFile,
     renameFiles,
     undoRenameOp,
@@ -20,6 +22,14 @@ data RenameOp = RenameOp
   }
   deriving (Eq, Show, Read)
 
+-- A set of files and their associated Episode data. These two fields MUST be
+-- the same length. Use the `matchEpisodes` function to construct this type.
+data MatchedEpisodes = MatchedEpisodes
+  { episodes :: [Episode],
+    files :: [FilePath]
+  }
+  deriving (Eq, Show)
+
 -- "[show] - [season]x[ep] - [ep name]"
 -- e.g. "Buffy the Vampire Slayer - 4x10 - Hush"
 --
@@ -35,20 +45,23 @@ episodeNameTemplate = "%s - %dx%02d - %s"
 undoRenameOp :: RenameOp -> RenameOp
 undoRenameOp (RenameOp old new) = RenameOp {oldPath = new, newPath = old}
 
+-- (Attempt to) tie together a set of files and Episode data. Fail if the lists
+-- are different lengths.
+matchEpisodes :: [Episode] -> [FilePath] -> Either Error MatchedEpisodes
+matchEpisodes eps inFiles
+  | length eps /= length inFiles = Left $ RenameError "Mismatched number of episodes and filenames"
+  | otherwise = Right MatchedEpisodes {episodes = eps, files = inFiles}
+
 -- Given data for a list of episodes and a list of current FilePaths, generate
 -- RenameOps for all the episodes. (Most common use-case here would be with a
 -- season, though it technically could be any group of episodes.)
 --
 -- NOTE: The ORDER MATTERS here. The files must be in the same order as the
 -- episode data, as that's how they're paired.
---
--- TODO: Allow partial matches? Probably useful. Opt-in?
-renameFiles :: [Episode] -> [FilePath] -> Either Error [RenameOp]
-renameFiles eps inFiles
-  | length eps /= length inFiles = Left $ RenameError "Mismatched number of episodes and filenames"
-  | otherwise = Right (map toRenameOp epsAndFiles)
+renameFiles :: MatchedEpisodes -> [RenameOp]
+renameFiles matchedEps = map toRenameOp epsAndFiles
   where
-    epsAndFiles = zip eps inFiles
+    epsAndFiles = zip (episodes matchedEps) (files matchedEps)
     toRenameOp = uncurry renameFile -- uncurry? magic!
 
 -- Given a full file path and the episode metadata for that file, generate a
