@@ -50,8 +50,12 @@ undoRenameOp (RenameOp old new) = RenameOp {oldPath = new, newPath = old}
 -- are different lengths.
 matchEpisodes :: [Episode] -> [FilePath] -> Either Error MatchedEpisodes
 matchEpisodes eps inFiles
-  | length eps /= length inFiles = Left $ RenameError "Mismatched number of episodes and filenames"
+  | numEps /= numFiles = Left $ RenameError errorMessage
   | otherwise = Right UnsafeMatchedEpisodes {episodes = eps, files = inFiles}
+  where
+    numEps = length eps
+    numFiles = length inFiles
+    errorMessage = printf "Mismatched number of episodes (%d) and files (%d)" numEps numFiles
 
 -- Allow partial matches. Creates a `MatchedEpisodes` object when given (a
 -- certain class of) mismatched files/eps. Specifically, this is for the case
@@ -65,11 +69,13 @@ matchEpisodes eps inFiles
 -- file subset, put them in a directory, etc.
 matchEpisodesAllowPartial :: [Episode] -> [FilePath] -> Either Error MatchedEpisodes
 matchEpisodesAllowPartial eps inFiles
-  | length eps >= numFiles = Right $ UnsafeMatchedEpisodes {episodes = partialEps, files = inFiles}
-  | otherwise = Left $ RenameError "Mismatched number of episodes and filenames: too many files"
+  | numEps >= numFiles = Right $ UnsafeMatchedEpisodes {episodes = partialEps, files = inFiles}
+  | otherwise = Left $ RenameError errorMessage
   where
+    numEps = length eps
     numFiles = length inFiles
     partialEps = take numFiles eps
+    errorMessage = printf "Mismatched number of episodes (%d) and files (%d) -- too many files!" numEps numFiles
 
 -- Given data for a list of episodes and a list of current FilePaths, generate
 -- RenameOps for all the episodes. (Most common use-case here would be with a
