@@ -17,7 +17,6 @@ import Exec.Rename (RenameResult)
 -- Note that order of these matters. Specifically, we want access to the
 -- accumulated Writer values even in the case of failure/Left, so we can log
 -- what *did* succeed in the case of a partial failure.
--- type Tvmv a = ExceptT Error (WriterT [RenameResult] IO) a
 newtype Tvmv a = Tvmv (ExceptT Error (WriterT [RenameResult] IO) a)
   deriving
     ( Functor,
