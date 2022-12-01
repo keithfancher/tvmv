@@ -25,7 +25,7 @@ data RenameOp = RenameOp
 
 -- A set of files and their associated Episode data. These two fields MUST be
 -- the same length. Use the `matchEpisodes` function to construct this type.
-data MatchedEpisodes = MatchedEpisodes
+data MatchedEpisodes = UnsafeMatchedEpisodes
   { episodes :: [Episode],
     files :: [FilePath]
   }
@@ -51,7 +51,7 @@ undoRenameOp (RenameOp old new) = RenameOp {oldPath = new, newPath = old}
 matchEpisodes :: [Episode] -> [FilePath] -> Either Error MatchedEpisodes
 matchEpisodes eps inFiles
   | length eps /= length inFiles = Left $ RenameError "Mismatched number of episodes and filenames"
-  | otherwise = Right MatchedEpisodes {episodes = eps, files = inFiles}
+  | otherwise = Right UnsafeMatchedEpisodes {episodes = eps, files = inFiles}
 
 -- Allow partial matches. Creates a `MatchedEpisodes` object when given (a
 -- certain class of) mismatched files/eps. Specifically, this is for the case
@@ -65,7 +65,7 @@ matchEpisodes eps inFiles
 -- file subset, put them in a directory, etc.
 matchEpisodesAllowPartial :: [Episode] -> [FilePath] -> Either Error MatchedEpisodes
 matchEpisodesAllowPartial eps inFiles
-  | length eps >= numFiles = Right $ MatchedEpisodes {episodes = partialEps, files = inFiles}
+  | length eps >= numFiles = Right $ UnsafeMatchedEpisodes {episodes = partialEps, files = inFiles}
   | otherwise = Left $ RenameError "Mismatched number of episodes and filenames: too many files"
   where
     numFiles = length inFiles
