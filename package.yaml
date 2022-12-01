@@ -31,6 +31,7 @@ default-extensions:
 - FlexibleContexts # more useful type constraints
 - TypeSynonymInstances # make a type alias an instance of a type class
 - GeneralizedNewtypeDeriving # derive Monad, etc, basically, in my transformer newtype
+- LambdaCase
 
 ghc-options:
 - -Wall

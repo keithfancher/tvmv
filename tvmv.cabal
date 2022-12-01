@@ -50,6 +50,7 @@ library
       FlexibleContexts
       TypeSynonymInstances
       GeneralizedNewtypeDeriving
+      LambdaCase
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
@@ -75,6 +76,7 @@ executable tvmv
       FlexibleContexts
       TypeSynonymInstances
       GeneralizedNewtypeDeriving
+      LambdaCase
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -99,6 +101,7 @@ test-suite integration
       FlexibleContexts
       TypeSynonymInstances
       GeneralizedNewtypeDeriving
+      LambdaCase
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -127,6 +130,7 @@ test-suite unit
       FlexibleContexts
       TypeSynonymInstances
       GeneralizedNewtypeDeriving
+      LambdaCase
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5

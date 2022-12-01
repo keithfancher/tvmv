@@ -100,10 +100,9 @@ allowPartialParser =
     )
 
 maybeApiKeyReader :: ReadM (Maybe APIKey)
-maybeApiKeyReader = eitherReader $ \s ->
-  case s of
-    "" -> Right Nothing
-    anythingNonEmpty -> Right $ Just $ T.pack anythingNonEmpty
+maybeApiKeyReader = eitherReader $ \case
+  "" -> Right Nothing
+  anythingNonEmpty -> Right $ Just $ T.pack anythingNonEmpty
 
 inFilesParser :: Parser InFiles
 inFilesParser = mkInFiles <$> filePathsParser
@@ -166,7 +165,6 @@ undoOptionsParser =
       )
 
 maybeLogFileReader :: ReadM (Maybe FilePath)
-maybeLogFileReader = eitherReader $ \s ->
-  case s of
-    "" -> Right Nothing
-    anythingNonEmpty -> Right $ Just anythingNonEmpty
+maybeLogFileReader = eitherReader $ \case
+  "" -> Right Nothing
+  anythingNonEmpty -> Right $ Just anythingNonEmpty
