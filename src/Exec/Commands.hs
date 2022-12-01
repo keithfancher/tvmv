@@ -12,7 +12,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
-import Domain.Rename (RenameOp, matchEpisodes, renameFiles, undoRenameOp)
+import Domain.Rename (RenameOp, matchEpisodes, matchEpisodesAllowPartial, renameFiles, undoRenameOp)
 import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
@@ -28,15 +28,16 @@ renameSeason ::
   APIWrapper m ->
   MvOptions ->
   m ()
-renameSeason env withApi (MvOptions maybeApiKey forceRename _ searchQuery seasNum inFiles) = do
+renameSeason env withApi (MvOptions maybeApiKey forceRename _ partialMatches searchQuery seasNum inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
   putStrLn' "Fetching show data from API..."
   season <- searchSeason key seasNum
   files <- liftIO $ listFiles inFiles
-  matchedFiles <- liftEither $ matchEpisodes (episodes season) files
+  matchedFiles <- liftEither $ match (episodes season) files
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) forceRename
   where
+    match = if partialMatches then matchEpisodesAllowPartial else matchEpisodes
     renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
     searchSeason k = case searchQuery of
       (Name n) -> searchSeasonByName withApi k n

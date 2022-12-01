@@ -151,13 +151,22 @@ If you don't trust this behavior, or if you prefer something guaranteed to be
 repeatable (or scriptable?), you can match a show by its unique ID using the
 `-i` flag. As mentioned above, you can get a show's id via `tvmv search`.
 
-**NOTE:** Currently, `tvmv` will throw an error if the number of files passed
-does not match the number of episodes in a season. This is a safety feature,
+#### Matching the number of episodes and files
+
+By default, `tvmv` will throw an error if the number of files passed in does
+not match the number of episodes in a given season. This is a safety feature,
 designed to keep you from shooting yourself in the foot, but might be
 undesirable in certain cases.
 
-(**COMING SOON:** Option to override this behavior? Or an extra confirmation
-step before proceeding, rather than an error?)
+For example, if you only have the first `n` episodes of a season, but still
+want to easily rename them. Or if the TMDB data includes "extra" stuff at the
+end of a season. In these cases, you can pass the `--allow-partial` flag to
+the `mv` command (aka `-p`) and the error-checking will become less strict.
+
+(Note that, even with this flag, `tvmv` will still throw an error if you have
+more *files* than episodes. In this case, you can simply glob for the files
+you want to rename or put them in a directory. It doesn't quite make sense to
+pass more files than there are episodes to `tvmv`.)
 
 ### Log files
 

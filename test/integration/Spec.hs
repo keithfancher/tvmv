@@ -73,6 +73,7 @@ mvOptions =
     { apiKey = Just "ExistsButDoesntMatter",
       force = True, -- do not pause to confirm
       noLog = False, -- we want a log!
+      allowPartial = False, -- don't allow partial matches
       searchKey = Id 790, -- Poirot! by ID
       seasonNum = 12,
       seasonFiles = Dir testTempDir

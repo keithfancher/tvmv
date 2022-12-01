@@ -53,6 +53,7 @@ mvOptionsParser =
     <$> apiKeyParser
     <*> forceFlagParser
     <*> noLogFlagParser
+    <*> allowPartialParser
     <*> searchKeyParser
     <*> option
       auto
@@ -88,6 +89,14 @@ noLogFlagParser =
     ( long "no-log"
         <> short 'x'
         <> help "Do not write a log of rename operations. (Note that without a log, you can't use the `undo` command.)"
+    )
+
+allowPartialParser :: Parser Bool
+allowPartialParser =
+  switch
+    ( long "allow-partial"
+        <> short 'p'
+        <> help "Allow mismatched number of episodes/files. (i.e. you have an incomplete set of files.) See README for more details."
     )
 
 maybeApiKeyReader :: ReadM (Maybe APIKey)

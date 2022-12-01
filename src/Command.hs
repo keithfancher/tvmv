@@ -27,6 +27,7 @@ data MvOptions = MvOptions
     apiKey :: Maybe APIKey,
     force :: Bool, -- do not wait for user confirmation
     noLog :: Bool, -- don't write a log file
+    allowPartial :: Bool, -- allow partial matches of episodes/files
     searchKey :: SearchKey,
     seasonNum :: Int,
     seasonFiles :: InFiles
