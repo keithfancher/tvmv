@@ -2,6 +2,7 @@ module Domain.Rename
   ( RenameOp (..),
     MatchedEpisodes, -- note NOT exporting constructor(s) here
     matchEpisodes,
+    matchEpisodesAllowPartial,
     renameFile,
     renameFiles,
     undoRenameOp,
@@ -51,6 +52,24 @@ matchEpisodes :: [Episode] -> [FilePath] -> Either Error MatchedEpisodes
 matchEpisodes eps inFiles
   | length eps /= length inFiles = Left $ RenameError "Mismatched number of episodes and filenames"
   | otherwise = Right MatchedEpisodes {episodes = eps, files = inFiles}
+
+-- Allow partial matches. Creates a `MatchedEpisodes` object when given (a
+-- certain class of) mismatched files/eps. Specifically, this is for the case
+-- where (e.g.) the user only has the first "n" files of a season. Or
+-- alternatively, if the API data has a bunch of extra stuff the user doesn't
+-- have. (This is common with specials, e.g.) In other words, this allows the
+-- case where there are more EPISODES than FILES.
+--
+-- Note that this function still disallows the inverse case: more files than
+-- episodes. It doesn't really make sense... worst case, user can glob for the
+-- file subset, put them in a directory, etc.
+matchEpisodesAllowPartial :: [Episode] -> [FilePath] -> Either Error MatchedEpisodes
+matchEpisodesAllowPartial eps inFiles
+  | length eps >= numFiles = Right $ MatchedEpisodes {episodes = partialEps, files = inFiles}
+  | otherwise = Left $ RenameError "Mismatched number of episodes and filenames: too many files"
+  where
+    numFiles = length inFiles
+    partialEps = take numFiles eps
 
 -- Given data for a list of episodes and a list of current FilePaths, generate
 -- RenameOps for all the episodes. (Most common use-case here would be with a

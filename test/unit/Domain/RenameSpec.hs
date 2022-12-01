@@ -18,6 +18,16 @@ spec = do
     it "returns a success value if the input lists are the same length" $ do
       matchEpisodes [welcomeEp, hushEp] ["two filenames", "and two eps"] `shouldSatisfy` isRight
 
+  describe "matchEpisodesAllowPartial" $ do
+    it "allows a match if there are more episodes than files" $ do
+      matchEpisodesAllowPartial [welcomeEp, hushEp] ["only one file"] `shouldSatisfy` isRight
+
+    it "allows an empty list of files" $ do
+      matchEpisodesAllowPartial [welcomeEp, hushEp] [] `shouldSatisfy` isRight
+
+    it "still returns an error value if there are more files than episodes" $ do
+      matchEpisodesAllowPartial [welcomeEp] ["two filenames", "but one ep"] `shouldSatisfy` isLeft
+
   describe "renameFiles" $ do
     it "generates the correct file names" $ do
       let matchedEps = matchEpisodes [welcomeEp, hushEp] welcomeHushFileNames
