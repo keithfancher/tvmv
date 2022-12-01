@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Args (cliOptParser)
-import Domain.Error (Error (..))
+import Domain.Error (errorMessage)
 import Env (populateEnv)
 import Execute (execCommand)
 import Options.Applicative (execParser)
@@ -12,7 +12,5 @@ main = do
   env <- populateEnv
   result <- execCommand env command
   case result of
-    -- Specal case for user abort, so it's a bit "nicer":
-    Left UserAbort -> putStrLn "Operation aborted! No files have been renamed."
-    Left e -> putStrLn $ "Failed with: " <> show e
+    Left e -> putStrLn $ errorMessage e
     Right _ -> return ()
