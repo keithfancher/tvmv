@@ -4,7 +4,7 @@ module Domain.API
   )
 where
 
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Domain.Show (ItemId, Season, TvShow)
 
 type APIKey = T.Text

@@ -8,7 +8,7 @@ where
 
 import API.TMDB (tmdbApiWrapper)
 import Control.Monad.Except (MonadError, liftEither)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Domain.API (APIKey, APIWrapper (..))
 import Domain.Error (Error (..))
 import Domain.Show (ItemId, Season (..), TvShow (..))

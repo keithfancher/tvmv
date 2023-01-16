@@ -9,7 +9,7 @@ module Domain.Rename
   )
 where
 
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..))
 import System.FilePath (replaceBaseName)

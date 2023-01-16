@@ -1,8 +1,8 @@
-import qualified API.TMDBSpec
-import qualified Domain.RenameSpec
-import qualified Exec.EnvSpec
-import qualified FileSpec
-import qualified LogSpec
+import API.TMDBSpec qualified
+import Domain.RenameSpec qualified
+import Exec.EnvSpec qualified
+import FileSpec qualified
+import LogSpec qualified
 import Test.Hspec
 
 main :: IO ()

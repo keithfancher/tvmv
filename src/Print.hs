@@ -1,8 +1,8 @@
 module Print (Pretty (..)) where
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
+import Data.Text qualified as T
+import Data.Text.IO qualified as TIO
 import Domain.Rename (RenameOp (..))
 import Domain.Show (TvShow, showInfoBrief)
 import Exec.Rename (RenameResult (..), getOp)

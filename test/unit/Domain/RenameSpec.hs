@@ -1,7 +1,7 @@
 module Domain.RenameSpec (spec) where
 
 import Data.Either (isLeft, isRight)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Domain.Rename
 import Domain.Show (Episode (..))
 import Test.Hspec

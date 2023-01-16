@@ -1,7 +1,7 @@
 module Args (cliOptParser) where
 
 import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Domain.API (APIKey)
 import File (InFiles, mkInFiles)
 import Options.Applicative

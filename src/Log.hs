@@ -14,8 +14,8 @@ import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.List (isInfixOf, sortBy)
 import Data.Maybe (listToMaybe)
-import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
+import Data.Text qualified as T
+import Data.Text.IO qualified as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp)

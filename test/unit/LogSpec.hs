@@ -1,7 +1,7 @@
 module LogSpec (spec) where
 
 import Data.Either (isLeft)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Domain.Rename (RenameOp (..))
 import Exec.Rename (RenameResult (..))
 import Log

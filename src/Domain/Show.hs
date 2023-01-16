@@ -7,7 +7,7 @@ module Domain.Show
   )
 where
 
-import qualified Data.Text as T
+import Data.Text qualified as T
 
 -- A unique ID used for a given API resource.
 --

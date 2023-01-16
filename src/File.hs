@@ -9,7 +9,7 @@ module File
 where
 
 import Data.List (sortBy)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import System.Directory (listDirectory, makeAbsolute)
 import System.FilePath ((</>))
 

@@ -4,12 +4,12 @@ module API.TMDB
   )
 where
 
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Domain.API (APIKey, APIWrapper (..))
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..), ItemId, Season (..), TvShow (..))
 import Monad.Tvmv (Tvmv, mkTvmv)
-import qualified Network.API.TheMovieDB as TMDB
+import Network.API.TheMovieDB qualified as TMDB
 
 tmdbApiWrapper :: APIWrapper Tvmv
 tmdbApiWrapper =

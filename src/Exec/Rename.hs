@@ -12,7 +12,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
 import Domain.Rename (RenameOp (..))
 import System.Directory (makeRelativeToCurrentDirectory)
-import qualified System.Directory as Dir
+import System.Directory qualified as Dir
 
 -- Not quite an Either, since we want the op to exist even in failure cases.
 data RenameResult = Success RenameOp | Failure RenameOp IOError

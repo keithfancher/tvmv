@@ -2,7 +2,7 @@ module API.TMDBSpec (spec) where
 
 import API.TMDB
 import Domain.Show (Episode (..), Season (..), TvShow (..))
-import qualified Network.API.TheMovieDB as TMDB
+import Network.API.TheMovieDB qualified as TMDB
 import Test.Hspec
 
 spec :: Spec
