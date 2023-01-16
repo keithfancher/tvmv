@@ -12,7 +12,7 @@ where
 import Data.Text qualified as T
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..))
-import System.FilePath (replaceBaseName)
+import System.FilePath (makeValid, replaceBaseName)
 import Text.Printf (printf)
 
 -- Contains a rename "op" for a single file. Either to be performed or which
@@ -100,9 +100,29 @@ renameFile ep inFile = RenameOp {oldPath = inFile, newPath = newFullPath}
 -- Generate the filename -- note, NOT the full path, nor the extension.
 generateBaseFileName :: Episode -> FilePath
 generateBaseFileName ep =
-  printf
-    episodeNameTemplate
-    (T.unpack $ episodeShowName ep)
-    (episodeSeasonNumber ep)
-    (episodeNumber ep)
-    (T.unpack $ episodeName ep)
+  makeValidFileName $
+    printf
+      episodeNameTemplate
+      (T.unpack $ episodeShowName ep)
+      (episodeSeasonNumber ep)
+      (episodeNumber ep)
+      (T.unpack $ episodeName ep)
+
+-- Could also consider being more strict, just using the "POSIX portable file
+-- name character set"?
+makeValidFileName :: FilePath -> FilePath
+makeValidFileName = makeValid . removeDelimiters
+
+-- Technically a filename is "valid" even if it contains path delimiters (at
+-- least according to `System.FilePath`, since it just assumes it's a full
+-- path). That doesn't work for our case though, e.g. if the title of an
+-- episode is `Stuff/things that Buffy does`, we don't want it to create a
+-- `Stuff` directory. Also apparently newlines can exist in a filename?!
+removeDelimiters :: FilePath -> FilePath
+removeDelimiters = map replaceSlashes
+  where
+    replaceSlashes '/' = '-'
+    replaceSlashes '\\' = '-'
+    replaceSlashes '\n' = ' '
+    replaceSlashes '\r' = ' '
+    replaceSlashes nonSlash = nonSlash

@@ -44,6 +44,13 @@ spec = do
             newPath = "/root/buffy/season 4/Buffy the Vampire Slayer - 4x10 - Hush.mkv"
           }
 
+    it "makes invalid file names valid" $ do
+      renameFile invalidNameEp "/root/buffy/season 42/buff 42.666.mkv"
+        `shouldBe` RenameOp
+          { oldPath = "/root/buffy/season 42/buff 42.666.mkv",
+            newPath = "/root/buffy/season 42/Buffy the Vampire Slayer - 42x666 - The A-B-Cs of dusting vamps and the 1-2-3s of dating them.mkv"
+          }
+
   describe "undoRenameOp" $ do
     it "flip the old/new args for a given op" $ do
       undoRenameOp RenameOp {oldPath = "old/path/to/file.mkv", newPath = "new/path/to/file.mkv"}
@@ -85,5 +92,15 @@ hushEp =
     { episodeNumber = 10,
       episodeName = "Hush",
       episodeSeasonNumber = 4,
+      episodeShowName = buffy
+    }
+
+invalidNameEp :: Episode
+invalidNameEp =
+  Episode
+    { episodeNumber = 666,
+      -- Note the various invalid (filename) characters D:
+      episodeName = "The A/B/Cs of dusting vamps\nand the 1\\2\\3s of dating them",
+      episodeSeasonNumber = 42,
       episodeShowName = buffy
     }
