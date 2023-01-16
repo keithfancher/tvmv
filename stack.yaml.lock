@@ -13,8 +13,8 @@ packages:
     hackage: themoviedb-1.2.2
 snapshots:
 - completed:
-    sha256: 0ced7f93245307212900d760c1322dfb527c4b902868c11ccac37f48b7d4ebb9
-    size: 619200
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/29.yaml
+    sha256: 4905c93319aa94aa53da8f41d614d7bacdbfe6c63a8c6132d32e6e62f24a9af4
+    size: 649315
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/6.yaml
   original:
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/29.yaml
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/6.yaml
