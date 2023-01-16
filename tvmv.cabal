@@ -45,12 +45,9 @@ library
   hs-source-dirs:
       src
   default-extensions:
-      OverloadedStrings
       DuplicateRecordFields
-      FlexibleContexts
-      TypeSynonymInstances
-      GeneralizedNewtypeDeriving
       LambdaCase
+      OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
@@ -60,7 +57,7 @@ library
     , text
     , themoviedb
     , time
-  default-language: Haskell2010
+  default-language: GHC2021
 
 executable tvmv
   main-is: Main.hs
@@ -71,12 +68,9 @@ executable tvmv
   hs-source-dirs:
       app
   default-extensions:
-      OverloadedStrings
       DuplicateRecordFields
-      FlexibleContexts
-      TypeSynonymInstances
-      GeneralizedNewtypeDeriving
       LambdaCase
+      OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -85,7 +79,7 @@ executable tvmv
     , optparse-applicative
     , text
     , tvmv
-  default-language: Haskell2010
+  default-language: GHC2021
 
 test-suite integration
   type: exitcode-stdio-1.0
@@ -96,12 +90,9 @@ test-suite integration
   hs-source-dirs:
       test/integration
   default-extensions:
-      OverloadedStrings
       DuplicateRecordFields
-      FlexibleContexts
-      TypeSynonymInstances
-      GeneralizedNewtypeDeriving
       LambdaCase
+      OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -110,7 +101,7 @@ test-suite integration
     , hspec
     , text
     , tvmv
-  default-language: Haskell2010
+  default-language: GHC2021
 
 test-suite unit
   type: exitcode-stdio-1.0
@@ -125,12 +116,9 @@ test-suite unit
   hs-source-dirs:
       test/unit
   default-extensions:
-      OverloadedStrings
       DuplicateRecordFields
-      FlexibleContexts
-      TypeSynonymInstances
-      GeneralizedNewtypeDeriving
       LambdaCase
+      OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -140,4 +128,4 @@ test-suite unit
     , text
     , themoviedb
     , tvmv
-  default-language: Haskell2010
+  default-language: GHC2021
