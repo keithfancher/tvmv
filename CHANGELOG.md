@@ -8,4 +8,9 @@ and this project adheres to the
 
 ## Unreleased
 
-## 0.1.0.0 - YYYY-MM-DD
+## 0.1.0 - 2023-01-19
+
+### Added
+
+- Everything! First complete release. See `README.md` for more details about
+  its various features, &c.
