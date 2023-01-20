@@ -3,8 +3,22 @@
 Bulk-rename TV episode files with minimal fuss. Integrates with
 [TMDB](https://www.themoviedb.org/).
 
-**NOTE:** `tvmv` is feature-complete and works great, but I'm still polishing
-up its first release. I would consider it *beta* software.
+## Table of Contents
+
+* [Quickstart / Demo](#quickstart--demo)
+* [Overview](#overview)
+* [Prerequisite: an API key](#prerequisite-an-api-key)
+* [Build requirements](#build-requirements)
+* [Binary installation](#binary-installation)
+* [Using tvmv](#using-tvmv)
+  + [API key location](#api-key-location)
+  + [tvmv commands](#tvmv-commands)
+  + [A note on the mv command and show-matching](#a-note-on-the-mv-command-and-show-matching)
+     * [Matching the number of episodes and files](#matching-the-number-of-episodes-and-files)
+  + [Log files](#log-files)
+  + [Other options / Getting help](#other-options--getting-help)
+  + [Configuration / Customization?](#configuration--customization)
+* [Running tests](#running-tests)
 
 ## Quickstart / Demo
 
@@ -65,8 +79,13 @@ By default, this installs the `tvmv` binary into `~/.local/bin`. You may need
 to add this directory to your `PATH`. (Or just put the binary wherever you
 like. There are no ancillary files to worry about.)
 
-Note that I don't currently provide any pre-built binaries. Perhaps after I've
-tagged the first official "release"...
+## Binary installation
+
+If you've downloaded a binary release, you can simply extract the `tvmv`
+executable somewhere in your `PATH`. No installation process is required.
+(Other than configuring your API key, as covered in the following section.)
+
+To uninstall, simply remove the binary.
 
 ## Using tvmv
 
