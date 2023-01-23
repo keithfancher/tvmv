@@ -3,6 +3,7 @@
 Bulk-rename TV episode files with minimal fuss. Integrates with
 [TMDB](https://www.themoviedb.org/).
 
+
 ## Table of Contents
 
 * [Quickstart / Demo](#quickstart--demo)
@@ -19,6 +20,7 @@ Bulk-rename TV episode files with minimal fuss. Integrates with
   + [Other options / Getting help](#other-options--getting-help)
   + [Configuration / Customization?](#configuration--customization)
 * [Running tests](#running-tests)
+
 
 ## Quickstart / Demo
 
@@ -48,12 +50,14 @@ $ ls -1
 "Agatha Christie's Poirot - 12x04 - The Clocks.mp4"
 ```
 
+
 ## Overview
 
 tvmv is a minimal, (almost-)zero-config command-line tool to bulk-rename your
 ripped or (legally!) downloaded TV episode files. It has sane defaults, talks
 to a sane API, and produces useful filenames that are compatible with Plex,
 Kodi, and most other media servers.
+
 
 ## Prerequisite: an API key
 
@@ -62,6 +66,7 @@ TMDB](https://www.themoviedb.org/documentation/api). Sorry for the hassle! It
 only takes a minute to sign up and **it's free**. Feel free to put `tvmv` as
 the app-in-question in the sign-up form if it asks. (This is why I say
 "minimal fuss" and not "no fuss".)
+
 
 ## Build requirements
 
@@ -79,6 +84,7 @@ By default, this installs the `tvmv` binary into `~/.local/bin`. You may need
 to add this directory to your `PATH`. (Or just put the binary wherever you
 like. There are no ancillary files to worry about.)
 
+
 ## Binary installation
 
 If you've downloaded a binary release, you can simply extract the `tvmv`
@@ -86,6 +92,7 @@ executable somewhere in your `PATH`. No installation process is required.
 (Other than configuring your API key, as covered in the following section.)
 
 To uninstall, simply remove the binary.
+
 
 ## Using tvmv
 
@@ -227,6 +234,7 @@ for now, it just does its thing.
 
 That said: let me know if it doesn't work for your use-case! I built this
 mostly with my own needs in mind.
+
 
 ## Running tests
 
