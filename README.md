@@ -137,7 +137,9 @@ are three ways to pass `tvmv` your API key:
 1. Via the command line (the `-k` or `--api-key` options).
 2. Via the `TMDB_API_KEY` environment variable.
 3. Via a file: `$XDG_CONFIG_HOME/tvmv/tmdb-api-key`. (On most unix-like
-   systems, that would resolve to: `~/.config/tvmv/tmdb-api-key`.)
+   systems, that would resolve to: `~/.config/tvmv/tmdb-api-key`. On a Windows
+   system, it would be something like
+   `C:/Users/<user>/AppData/Roaming/tvmv/tmdb-api-key`.)
 
 Important note: `tvmv` will look for your API key in those locations **in that
 order**. If you need to swap out API keys for a given run or a given terminal
