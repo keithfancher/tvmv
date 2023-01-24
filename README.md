@@ -1,7 +1,16 @@
 # tvmv
 
-Bulk-rename TV episode files with minimal fuss. Integrates with
-[TMDB](https://www.themoviedb.org/).
+A command-line tool to bulk-rename TV episode files with minimal fuss.
+
+Integrates with [TMDB](https://www.themoviedb.org/). Uses API metadata to
+automatically rename your files to something media-server-friendly. (For Plex,
+Kodi, &c.)
+
+```
+$ tvmv mv -n buffy -s 7
+```
+
+That's all there is to it!
 
 
 ## Table of Contents
@@ -9,8 +18,9 @@ Bulk-rename TV episode files with minimal fuss. Integrates with
 * [Quickstart / Demo](#quickstart--demo)
 * [Overview](#overview)
 * [Prerequisite: an API key](#prerequisite-an-api-key)
-* [Build requirements](#build-requirements)
-* [Binary installation](#binary-installation)
+* [Installation](#installation)
+  + [Building from source](#building-from-source)
+  + [Binary installation](#binary-installation)
 * [Using tvmv](#using-tvmv)
   + [API key location](#api-key-location)
   + [tvmv commands](#tvmv-commands)
@@ -23,6 +33,10 @@ Bulk-rename TV episode files with minimal fuss. Integrates with
 
 
 ## Quickstart / Demo
+
+First download the latest release for your platform from [the releases
+page](https://github.com/keithfancher/tvmv/releases). With that out of the
+way...
 
 ```
 # You'll need a (free!) TheMovieDB API key. Pass it in via the CLI, an env
@@ -68,15 +82,30 @@ the app-in-question in the sign-up form if it asks. (This is why I say
 "minimal fuss" and not "no fuss".)
 
 
-## Build requirements
+## Installation
+
+You've got two options:
+
+1. Build from source. Not recommended unless you need a particular
+   cutting-edge feature that isn't included in the latest binary release. (But
+   don't worry: building isn't *complicated*. It's just *slow*.)
+2. Installing a binary
+   [release](https://github.com/keithfancher/tvmv/releases). The
+   quick-and-easy route.
+
+More details below.
+
+### Building from source
 
 We use `stack` as our build tool. You can [install it
 directly](https://docs.haskellstack.org/en/stable/install_and_upgrade/#install-stack)
 or via [GHCup](https://www.haskell.org/ghcup/), whatever floats your boat.
 
-Once you've got `stack` installed, it takes care of the rest:
+Once you've got `stack` installed, navigate to the root of the `tvmv` project
+directory (where the `package.yaml` file is located), and `stack build`:
 
 ```
+$ cd tvmv
 $ stack build
 $ stack install
 ```
@@ -84,12 +113,13 @@ By default, this installs the `tvmv` binary into `~/.local/bin`. You may need
 to add this directory to your `PATH`. (Or just put the binary wherever you
 like. There are no ancillary files to worry about.)
 
+### Binary installation
 
-## Binary installation
-
-If you've downloaded a binary release, you can simply extract the `tvmv`
-executable somewhere in your `PATH`. No installation process is required.
-(Other than configuring your API key, as covered in the following section.)
+If you've downloaded [a binary
+release](https://github.com/keithfancher/tvmv/releases), you can simply
+extract the `tvmv` executable somewhere in your `PATH`. No installation
+process is required. (Other than configuring your API key, as covered in the
+following section.)
 
 To uninstall, simply remove the binary.
 
