@@ -31,14 +31,13 @@ data MatchedEpisodes = UnsafeMatchedEpisodes
   }
   deriving (Eq, Show)
 
--- "[show] - [season]x[ep] - [ep name]"
--- e.g. "Buffy the Vampire Slayer - 4x10 - Hush"
+-- A `printf` template for our episode filenames.
 --
--- Note that this zero-pads the *episode* number but not the season, for
--- example: "Buffy the Vampire Slayer - 4x08 - Pangs"
+-- "[show name] - s[season#]e[ep#] - [ep name]"
+-- e.g. "Buffy the Vampire Slayer - s04e10 - Hush"
 --
--- Could make this a config option, or try to be smart based on total number of
--- seasons/episodes. But for now, this is a sane default.
+-- Note that this zero-pads both the episode number and the season, for
+-- example: "Buffy the Vampire Slayer - s04e08 - Pangs"
 episodeNameTemplate :: FilePath
 episodeNameTemplate = "%s - s%02de%02d - %s"
 
