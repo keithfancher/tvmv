@@ -40,7 +40,7 @@ data MatchedEpisodes = UnsafeMatchedEpisodes
 -- Could make this a config option, or try to be smart based on total number of
 -- seasons/episodes. But for now, this is a sane default.
 episodeNameTemplate :: FilePath
-episodeNameTemplate = "%s - %dx%02d - %s"
+episodeNameTemplate = "%s - s%02de%02d - %s"
 
 -- Strike that, reverse it!
 undoRenameOp :: RenameOp -> RenameOp

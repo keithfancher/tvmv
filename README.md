@@ -58,10 +58,10 @@ $ tvmv mv -n poirot -s 12
 
 # ...ahh, much better!
 $ ls -1
-"Agatha Christie's Poirot - 12x01 - Three Act Tragedy.mp4"
-"Agatha Christie's Poirot - 12x02 - Hallowe'en Party.mp4"
-"Agatha Christie's Poirot - 12x03 - Murder on the Orient Express.mp4"
-"Agatha Christie's Poirot - 12x04 - The Clocks.mp4"
+"Agatha Christie's Poirot - s12e01 - Three Act Tragedy.mp4"
+"Agatha Christie's Poirot - s12e02 - Hallowe'en Party.mp4"
+"Agatha Christie's Poirot - s12e03 - Murder on the Orient Express.mp4"
+"Agatha Christie's Poirot - s12e04 - The Clocks.mp4"
 ```
 
 

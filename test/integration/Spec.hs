@@ -126,8 +126,8 @@ initialFiles = ["ep1.mp4", "Ep2.mp4", "EP3.mp4", "ep4.mp4"]
 
 expectedResults :: [FilePath]
 expectedResults =
-  [ "Agatha Christie's Poirot - 12x01 - Three Act Tragedy.mp4",
-    "Agatha Christie's Poirot - 12x02 - Hallowe'en Party.mp4",
-    "Agatha Christie's Poirot - 12x03 - Murder on the Orient Express.mp4",
-    "Agatha Christie's Poirot - 12x04 - The Clocks.mp4"
+  [ "Agatha Christie's Poirot - s12e01 - Three Act Tragedy.mp4",
+    "Agatha Christie's Poirot - s12e02 - Hallowe'en Party.mp4",
+    "Agatha Christie's Poirot - s12e03 - Murder on the Orient Express.mp4",
+    "Agatha Christie's Poirot - s12e04 - The Clocks.mp4"
   ]

@@ -41,14 +41,14 @@ spec = do
       renameFile hushEp "/root/buffy/season 4/buff 4.10.mkv"
         `shouldBe` RenameOp
           { oldPath = "/root/buffy/season 4/buff 4.10.mkv",
-            newPath = "/root/buffy/season 4/Buffy the Vampire Slayer - 4x10 - Hush.mkv"
+            newPath = "/root/buffy/season 4/Buffy the Vampire Slayer - s04e10 - Hush.mkv"
           }
 
     it "makes invalid file names valid" $ do
       renameFile invalidNameEp "/root/buffy/season 42/buff 42.666.mkv"
         `shouldBe` RenameOp
           { oldPath = "/root/buffy/season 42/buff 42.666.mkv",
-            newPath = "/root/buffy/season 42/Buffy the Vampire Slayer - 42x666 - The A-B-Cs of dusting vamps and the 1-2-3s of dating them.mkv"
+            newPath = "/root/buffy/season 42/Buffy the Vampire Slayer - s42e666 - The A-B-Cs of dusting vamps and the 1-2-3s of dating them.mkv"
           }
 
   describe "undoRenameOp" $ do
@@ -66,11 +66,11 @@ expectedRenameOps :: [RenameOp]
 expectedRenameOps =
   [ RenameOp
       { oldPath = "/root/buffy/season 1/buff 1.1.mkv",
-        newPath = "/root/buffy/season 1/Buffy the Vampire Slayer - 1x01 - Welcome to the Hellmouth.mkv"
+        newPath = "/root/buffy/season 1/Buffy the Vampire Slayer - s01e01 - Welcome to the Hellmouth.mkv"
       },
     RenameOp
       { oldPath = "/root/buffy/season 4/buff 4.10.mkv",
-        newPath = "/root/buffy/season 4/Buffy the Vampire Slayer - 4x10 - Hush.mkv"
+        newPath = "/root/buffy/season 4/Buffy the Vampire Slayer - s04e10 - Hush.mkv"
       }
   ]
 
