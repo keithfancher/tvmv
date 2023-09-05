@@ -15,6 +15,7 @@ import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, matchEpisodes, matchEpisodesAllowPartial, renameFiles, undoRenameOp)
 import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
+import Exec.Filter (filterFiles)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
@@ -33,7 +34,8 @@ renameSeason env withApi (MvOptions maybeApiKey forceRename _ partialMatches sea
   putStrLn' "Fetching show data from API..."
   season <- searchSeason key seasNum
   files <- liftIO $ listFiles inFiles
-  matchedFiles <- liftEither $ match (episodes season) files
+  filteredFiles <- liftIO $ filterFiles files
+  matchedFiles <- liftEither $ match (episodes season) filteredFiles
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) forceRename
   where

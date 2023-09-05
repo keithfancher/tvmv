@@ -1,0 +1,1 @@
+Just a dummy log file to help test that log files are properly ignored when renaming files.
