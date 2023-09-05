@@ -13,7 +13,7 @@ where
 
 import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.List (isInfixOf, sortBy)
+import Data.List (isPrefixOf, sortBy)
 import Data.Maybe (listToMaybe)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
@@ -24,6 +24,7 @@ import Exec.Rename (RenameResult (..), getOp, makeResultRelative)
 import Monad.Tvmv (Logger)
 import Print (prettyPrintListLn)
 import System.Directory (listDirectory)
+import System.FilePath (takeFileName)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
 
@@ -83,7 +84,9 @@ getLatestLog paths = listToMaybe sortedLogFiles
 
 -- Is a given filename a tvmv log file?
 isLogFile :: FilePath -> Bool
-isLogFile = isInfixOf tvmvLogBaseFilename
+isLogFile f = tvmvLogBaseFilename `isPrefixOf` fileWithoutPath
+  where
+    fileWithoutPath = takeFileName f
 
 -- Attempt to read in a log file, which is actually valid Haskell, and parse
 -- out the logged operations.
