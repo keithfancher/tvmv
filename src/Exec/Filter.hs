@@ -1,6 +1,8 @@
 module Exec.Filter (filterFiles) where
 
+import Control.Monad (filterM)
 import Log (isLogFile)
+import System.Directory (doesDirectoryExist)
 
 -- Filter out any unwanted files or file types.
 --
@@ -10,6 +12,11 @@ import Log (isLogFile)
 -- 2. Directories! We don't want the user to have to care about running tvmv in
 --    a folder with video files *and* directories. It should do the right thing.
 filterFiles :: [FilePath] -> IO [FilePath]
-filterFiles inFiles = return $ filter notLogFile inFiles
+filterFiles = filterM notLogOrDirectory
   where
-    notLogFile = not . isLogFile -- TODO: filter directories
+    notLogOrDirectory f = do
+      let notLog = notLogFile f
+      notDir <- notDirectory f
+      return $ notLog && notDir
+    notLogFile = not . isLogFile
+    notDirectory f = not <$> doesDirectoryExist f -- `doesDirectoryExist` is basically `isDirectory`.
