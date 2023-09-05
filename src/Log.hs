@@ -7,6 +7,7 @@ module Log
     printLog,
     getLogText,
     getLatestLog,
+    isLogFile,
   )
 where
 
@@ -78,8 +79,11 @@ getLatestLog :: [FilePath] -> Maybe FilePath
 getLatestLog paths = listToMaybe sortedLogFiles
   where
     sortedLogFiles = sortDesc $ filter isLogFile paths
-    isLogFile = isInfixOf tvmvLogBaseFilename
     sortDesc = sortBy (flip compare) -- magic!
+
+-- Is a given filename a tvmv log file?
+isLogFile :: FilePath -> Bool
+isLogFile = isInfixOf tvmvLogBaseFilename
 
 -- Attempt to read in a log file, which is actually valid Haskell, and parse
 -- out the logged operations.
