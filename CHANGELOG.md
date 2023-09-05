@@ -16,6 +16,12 @@ and this project adheres to the
   [Plex](https://support.plex.tv/articles/naming-and-organizing-your-tv-show-files/#toc-0)
   and
   [Kodi](https://kodi.wiki/view/Naming_video_files/Episodes#Single_Episode_Files).
+- Filter directories and `tvmv` log files from the input file list when
+  running a `mv` operation. This makes it possible to run `tvmv` multiple
+  times without the resulting log files causing `Mismatched number of
+  episodes...` errors. Also makes it possible to run `tvmv` in a directory
+  which contains video files *and* subdirectories, without having to glob
+  specifically for the video files.
 
 
 ## 0.1.0 - 2023-01-19
