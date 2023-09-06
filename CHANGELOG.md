@@ -27,6 +27,8 @@ and this project adheres to the
   episodes...` errors. Also makes it possible to run `tvmv` in a directory
   which contains video files *and* subdirectories, without having to glob
   specifically for the video files.
+- Show more of each TV show description in `search` output. One line was
+  simply too short to be useful.
 
 
 ## 0.1.0 - 2023-01-19

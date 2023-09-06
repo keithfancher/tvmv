@@ -49,6 +49,7 @@ library:
   - themoviedb
   - mtl
   - time
+  - word-wrap
 
 executables:
   tvmv:

@@ -8,6 +8,7 @@ module Domain.Show
 where
 
 import Data.Text qualified as T
+import Text.Wrap (defaultWrapSettings, wrapTextToLines)
 
 -- A unique ID used for a given API resource.
 --
@@ -22,6 +23,7 @@ data TvShow = TvShow
     showName :: T.Text,
     seasons :: [Season],
     description :: T.Text, -- Some "flavor text"
+    -- TODO: Would "year" be useful here too? If the data is available from the API, that is.
     numberOfSeasons :: Int,
     numberOfEpisodes :: Int,
     -- Can/should be populated by the API code, will be API-specific. If it's
@@ -55,14 +57,23 @@ showInfoBrief s =
     <> "\nName:\t"
     <> showName s
     <> "\nBlurb:\t"
-    <> trim (description s)
+    <> wrapAndTrim (description s)
     <> url (showUrl s)
   where
-    trim str
-      | T.length str > 80 = T.take 78 str <> "..."
-      | otherwise = str
     url Nothing = ""
     url (Just u) = "\nLink:\t" <> u
+
+-- Format the show blurb for text console output. Wrap the text at 78 chars and
+-- only grab the first 3 lines for longer results.
+wrapAndTrim :: T.Text -> T.Text
+wrapAndTrim t = trimmedLines <> suffix
+  where
+    trimmedLines = T.intercalate "\n\t" $ take numLinesToTake wrappedLines
+    wrappedLines = wrapTextToLines defaultWrapSettings lineCharWidth t
+    lineCharWidth = 78
+    numLinesToTake = 3
+    -- Show that we've cut something off, if that's the case:
+    suffix = if length wrappedLines > numLinesToTake then "..." else ""
 
 toText :: Show a => a -> T.Text
 toText = T.pack . show

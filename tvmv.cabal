@@ -58,6 +58,7 @@ library
     , text
     , themoviedb
     , time
+    , word-wrap
   default-language: GHC2021
 
 executable tvmv
