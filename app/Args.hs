@@ -5,13 +5,14 @@ import Data.Text qualified as T
 import Domain.API (APIKey)
 import File (InFiles, mkInFiles)
 import Options.Applicative
+import Version (currentVersion)
 
 cliOptParser :: ParserInfo Command
 cliOptParser =
   info
     (commandParser <**> helper)
     ( fullDesc
-        <> header "tvmv: Bulk-rename your TV episode files with minimal fuss."
+        <> header ("tvmv: Bulk-rename your TV episode files with minimal fuss. (v" <> currentVersion <> ")")
         <> progDesc "For help with a specific command, run: tvmv [COMMAND] -h"
     )
 

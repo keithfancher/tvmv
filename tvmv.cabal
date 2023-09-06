@@ -66,6 +66,7 @@ executable tvmv
   other-modules:
       Args
       Env
+      Version
       Paths_tvmv
   hs-source-dirs:
       app
