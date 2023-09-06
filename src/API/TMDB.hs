@@ -76,10 +76,13 @@ mapTvShow s =
       seasons = map mapSeason (TMDB.tvSeasons s),
       description = TMDB.tvOverview s,
       numberOfSeasons = TMDB.tvNumberOfSeasons s,
-      numberOfEpisodes = TMDB.tvNumberOfEpisodes s
+      numberOfEpisodes = TMDB.tvNumberOfEpisodes s,
+      showUrl = Just $ buildUrl (TMDB.tvID s)
     }
   where
     mapSeason = mapTvSeason (TMDB.tvName s) -- map with the given name
+    buildUrl showId = "https://www.themoviedb.org/tv/" <> toText showId
+    toText = T.pack . show
 
 mapTvSeason :: T.Text -> TMDB.Season -> Season
 mapTvSeason n s =

@@ -23,7 +23,10 @@ data TvShow = TvShow
     seasons :: [Season],
     description :: T.Text, -- Some "flavor text"
     numberOfSeasons :: Int,
-    numberOfEpisodes :: Int
+    numberOfEpisodes :: Int,
+    -- Can/should be populated by the API code, will be API-specific. If it's
+    -- not populated (`Nothing`), the field will not be shown:
+    showUrl :: Maybe T.Text
   }
   deriving (Eq, Show)
 
@@ -53,10 +56,13 @@ showInfoBrief s =
     <> showName s
     <> "\nBlurb:\t"
     <> trim (description s)
+    <> url (showUrl s)
   where
     trim str
       | T.length str > 80 = T.take 78 str <> "..."
       | otherwise = str
+    url Nothing = ""
+    url (Just u) = "\nLink:\t" <> u
 
 toText :: Show a => a -> T.Text
 toText = T.pack . show

@@ -9,6 +9,11 @@ and this project adheres to the
 
 ## Unreleased
 
+### Added
+
+- Show a URL for each returned TV show in the `search` results list. Handy to
+  find more info about a show, verify you've got the right ID, etc.
+
 ### Changed
 
 - Use the `s##e##` episode-naming convention rather than `#x##`. (e.g.

@@ -58,7 +58,8 @@ resultShow =
       seasons = [resultSeason],
       description = "Good stuff",
       numberOfSeasons = 7,
-      numberOfEpisodes = 666
+      numberOfEpisodes = 666,
+      showUrl = Just "https://www.themoviedb.org/tv/12345"
     }
 
 resultSeason :: Season

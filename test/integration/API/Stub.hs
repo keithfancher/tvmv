@@ -43,5 +43,6 @@ poirotShowData =
       seasons = [],
       description = "!!!",
       numberOfSeasons = 0,
-      numberOfEpisodes = 0
+      numberOfEpisodes = 0,
+      showUrl = Nothing
     }
