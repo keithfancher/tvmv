@@ -30,6 +30,7 @@ That's all there is to it!
   + [Other options / Getting help](#other-options--getting-help)
   + [Configuration / Customization?](#configuration--customization)
 * [Running tests](#running-tests)
+* [FAQ](#faq)
 
 
 ## Quickstart / Demo
@@ -226,6 +227,9 @@ more *files* than episodes. In this case, you can simply glob for the files
 you want to rename or put them in a directory. It doesn't quite make sense to
 pass more files than there are episodes to `tvmv`.)
 
+See [the FAQ](#faq) for more information and caveats about `tvmv`'s
+episode-matching logic.
+
 ### Log files
 
 When you do an `mv` operation, `tvmv` will (by default) write a log of any
@@ -302,3 +306,78 @@ $ stack exec tvmv -- undo
 ```
 Of course since these are real calls to the application, you *will* need an
 API key for this.
+
+
+## FAQ
+
+### What exactly does tvmv do?
+
+It fetches TV episode metadata from an API, then uses that metadata to
+automatically rename TV episode files into a media-server-friendly (and
+human-friendly) format.
+
+### How does tvmv decide that a given file corresponds to a given episode of a show?
+
+1. *Currently*, `tvmv`'s logic is Very Dumb and Very Limited. It sorts files
+   in lexicographic order and matches accordingly to the list of episodes from
+   the configured API. That's it. And it works for, like, 90% of the cases
+   I've come across. But it *can* cause problems! (See next question below.)
+2. *In the near future*, `tvmv` will first attempt to parse out season/episode
+   numbers from the filenames/paths directly. Only if that fails will it fall
+   back to the dumber "lexicographic sorting" approach. (There will probably
+   be some manual overrides as well.) This will allow for greater flexibility
+   and require less care on the user's part.
+
+### What are the problems with the current approach and how can I work around them?
+
+The current (lexicographic sorting) approach starts to fall short in a couple
+of cases:
+
+1. **If you only have a limited subset of the episodes.** Say for example you
+   only have episodes 1, 2, and 4. In this case, `tvmv` will (incorrectly)
+   assume that the 4th episode is actually episode 3. (Which is why I
+   *currently* recommend using `tvmv` only on full seasons of a show... though
+   technically you can still use it if you have a *contiguous starting*
+   portion of a season, via the `-p` flag. In other words, if you have the
+   first *n* episodes.)
+2. **If your episodes don't (lexicographically) sort correctly.** For example,
+   if you have files whose episode numbers aren't zero-padded, the sorting can
+   go wrong, e.g.:
+   ```
+   ep1.mp4
+   ep10.mp4
+   ep2.mp4
+   ```
+   In this case, you'll have to zero-pad the episode numbers for `tvmv` to
+   work correctly. (For now. Sorry.)
+ 
+### Is there a GUI?
+
+Nope, it's a command-line tool. It probably wouldn't be hard to build a GUI on
+top of it, but that's not a priority for me at the moment. (Calling `tvmv mv
+-n buffy -s 7` is quick and easy! That's really all there is to it.)
+
+### How is this different from \[bulk-rename tool X\]?
+
+Many folks have suggested tools like PowerRename and Bulk Rename Utility as
+alternatives. Here's why these tools are different:
+
+1. These are generic, pattern-based bulk-rename tools. They're great! But they
+   don't automatically pull TV episode metadata from an API, which is what
+   `tvmv` does.
+2. Most of these tools are Windows-only. (I don't use Windows.)
+
+### What about FileBot?
+
+FileBot is super-cool. But it has a *ton* of features I don't use, need, or
+want, and the functionality that I *do* want (pulling data from an API and
+renaming files) isn't quite worth the price tag for me.
+
+Also, I don't need a JRE to use `tvmv` ;)
+
+### Sonarr/Radarr?
+
+These tools are fantastic, and I highly recommend them if you need/want the
+functionality they provide. But they are *way* overkill for my needs. To
+install software like this simply to pull API data and rename files is... too
+much! (For me, at least.)
