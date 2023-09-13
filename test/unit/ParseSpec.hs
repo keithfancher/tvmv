@@ -15,5 +15,7 @@ testResultSet (input, expected) = parseFilename input `shouldBe` Right expected
 inputOutputWellFormed :: [(String, SeasonEpNum)]
 inputOutputWellFormed =
   [ ("1x21", SeasonEpNum {seasonNum = 1, episodeNum = 21}),
-    ("001x021", SeasonEpNum {seasonNum = 1, episodeNum = 21})
+    ("001x021", SeasonEpNum {seasonNum = 1, episodeNum = 21}),
+    ("s01e21", SeasonEpNum {seasonNum = 1, episodeNum = 21}),
+    ("s001e021", SeasonEpNum {seasonNum = 1, episodeNum = 21})
   ]
