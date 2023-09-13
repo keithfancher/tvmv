@@ -40,6 +40,7 @@ library
       File
       Log
       Monad.Tvmv
+      Parse
       Print
   other-modules:
       Paths_tvmv
@@ -55,6 +56,7 @@ library
     , directory
     , filepath
     , mtl
+    , parsec
     , text
     , themoviedb
     , time
@@ -115,6 +117,7 @@ test-suite unit
       Exec.EnvSpec
       FileSpec
       LogSpec
+      ParseSpec
       Paths_tvmv
   hs-source-dirs:
       test/unit
