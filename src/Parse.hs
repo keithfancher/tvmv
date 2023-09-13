@@ -30,23 +30,18 @@ parseFilename = parse fullFilename err
 fullFilename :: Parser SeasonEpNum
 fullFilename = do
   _ <- leadingChars
-  seasonEpNumCutTrailing
+  nums <- seasonEpNum
+  _ <- many anyChar
+  return nums
   where
+    seasonEpNum = seasonEpNumXFormat <|> seasonEpNumSEFormat
     -- Consume characters until we succeed in parsing ep/season num. We need a
     -- version of our parser that doesn't *consume* our ep/season number here,
     -- since `manyTill` throws that bit away.
     leadingChars = manyTill anyChar epNumLookAhead
     -- The combination of `try` and `lookAhead` allows checking for a
     -- successful parse without consuming any input:
-    epNumLookAhead = try $ lookAhead seasonEpNumCutTrailing
-
--- Consumes (and discards) any trailing characters after successfully parsing
--- out season and ep numbers.
-seasonEpNumCutTrailing :: Parser SeasonEpNum
-seasonEpNumCutTrailing = do
-  seasonEpNum <- seasonEpNumXFormat <|> seasonEpNumSEFormat
-  _ <- many anyChar
-  return seasonEpNum
+    epNumLookAhead = try $ lookAhead seasonEpNum
 
 -- Consumes, e.g., "2x12"
 seasonEpNumXFormat :: Parser SeasonEpNum
