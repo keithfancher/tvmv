@@ -30,16 +30,16 @@ parseFilename = parse parser err
 seasonEpNumXFormat :: Parser SeasonEpNum
 seasonEpNumXFormat = do
   s <- parseInt
-  _ <- char 'x'
+  _ <- char 'x' <|> char 'X'
   e <- parseInt
   return SeasonEpNum {seasonNum = s, episodeNum = e}
 
 -- e.g. "s02e12"
 seasonEpNumSEFormat :: Parser SeasonEpNum
 seasonEpNumSEFormat = do
-  _ <- char 's'
+  _ <- char 's' <|> char 'S'
   s <- parseInt
-  _ <- char 'e'
+  _ <- char 'e' <|> char 'E'
   e <- parseInt
   return SeasonEpNum {seasonNum = s, episodeNum = e}
 
