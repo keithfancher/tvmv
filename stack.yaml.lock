@@ -11,6 +11,34 @@ packages:
       size: 2090
   original:
     hackage: themoviedb-1.2.2
+- completed:
+    hackage: hspec-2.11.4@sha256:424280c999a5815758c9cfbd2c4ff3df7650027b53ef4aacb40966f4c78443e0,1714
+    pantry-tree:
+      sha256: bbce6bab076d1973f9b108b7e8f0929e63ac3072a4df831439b4e57298a57e30
+      size: 584
+  original:
+    hackage: hspec-2.11.4
+- completed:
+    hackage: hspec-core-2.11.4@sha256:1d996912bfb66b0b5ba236ab72d5f66a1573fe8d00becd3c8825c5d9692709c7,6765
+    pantry-tree:
+      sha256: 8560d1ffd1a9202b75cf850ae741abc7cda57cbfe943662f16a62ad83a263343
+      size: 6230
+  original:
+    hackage: hspec-core-2.11.4
+- completed:
+    hackage: hspec-discover-2.11.4@sha256:5014056bf2ba6d9f4fff4367660b380bff7551363d487982e6753ec5dc1c25d9,2169
+    pantry-tree:
+      sha256: f73db9792a59e3109947417dc3e3aeee8fa267f001a2b737a199ad31ce0209f1
+      size: 829
+  original:
+    hackage: hspec-discover-2.11.4
+- completed:
+    hackage: hspec-expectations-0.8.4@sha256:4237f094a7931202ff57ac6475542b0b314b50a7024550e2b6eb87cfb0d4ff93,1702
+    pantry-tree:
+      sha256: 87681840d430b84686f83f1ab8b5873b09c349775698665233443914acf9ba2b
+      size: 741
+  original:
+    hackage: hspec-expectations-0.8.4
 snapshots:
 - completed:
     sha256: 5a59b2a405b3aba3c00188453be172b85893cab8ebc352b1ef58b0eae5d248a2
