@@ -1,6 +1,6 @@
 module Args (cliOptParser) where
 
-import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
+import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), SeasonSelection (..), UndoOptions (..))
 import Data.Text qualified as T
 import Domain.API (APIKey)
 import File (InFiles, mkInFiles)
@@ -56,14 +56,31 @@ mvOptionsParser =
     <*> noLogFlagParser
     <*> allowPartialParser
     <*> searchKeyParser
-    <*> option
+    <*> seasonNumParser
+    <*> inFilesParser
+
+seasonNumParser :: Parser SeasonSelection
+seasonNumParser = integerSeasonParser <|> autoSeasonFlag
+
+integerSeasonParser :: Parser SeasonSelection
+integerSeasonParser =
+  SeasonNum
+    <$> option
       auto
       ( long "season"
           <> short 's'
           <> help "The season number for the files you're renaming. tvmv operates in units of seasons."
           <> metavar "SEASON_NUM"
       )
-    <*> inFilesParser
+
+autoSeasonFlag :: Parser SeasonSelection
+autoSeasonFlag =
+  flag' -- Note use of `flag'`! "Builder for a flag parser without a default value."
+    Auto
+    ( long "auto-detect"
+        <> short 'a'
+        <> help "Instead of specifying a season, tvmv will attempt to determine the season based on the input file names."
+    )
 
 apiKeyParser :: Parser (Maybe APIKey)
 apiKeyParser =

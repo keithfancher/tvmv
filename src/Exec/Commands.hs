@@ -6,7 +6,7 @@ module Exec.Commands
 where
 
 import API (searchSeasonById, searchSeasonByName, searchShowByName)
-import Command (MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..))
+import Command (MvOptions (..), SearchKey (..), SearchOptions (..), SeasonSelection (..), UndoOptions (..))
 import Control.Monad.Except (MonadError, liftEither)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
@@ -32,7 +32,7 @@ renameSeason ::
 renameSeason env withApi (MvOptions maybeApiKey forceRename _ partialMatches searchQuery seasNum inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
   putStrLn' "Fetching show data from API..."
-  season <- searchSeason key seasNum
+  season <- searchSeason key $ getSeasonNum seasNum
   files <- liftIO $ listFiles inFiles
   filteredFiles <- liftIO $ filterFiles files
   matchedFiles <- liftEither $ match (episodes season) filteredFiles
@@ -44,6 +44,9 @@ renameSeason env withApi (MvOptions maybeApiKey forceRename _ partialMatches sea
     searchSeason k = case searchQuery of
       (Name n) -> searchSeasonByName withApi k n
       (Id i) -> searchSeasonById withApi k i
+    -- TODO! A temporary shim, of course
+    getSeasonNum (SeasonNum n) = n
+    getSeasonNum Auto = undefined
 
 -- Undo a previously-run rename operation, given a log file.
 undoRename ::

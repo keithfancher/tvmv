@@ -3,6 +3,7 @@ module Command
     MvOptions (..),
     SearchKey (..),
     SearchOptions (..),
+    SeasonSelection (..),
     UndoOptions (..),
   )
 where
@@ -21,6 +22,10 @@ data Command
 -- Search by name or by ID
 data SearchKey = Name T.Text | Id ItemId
 
+-- Specify the season number or indicate that it should be auto-detected from
+-- the input files.
+data SeasonSelection = SeasonNum Int | Auto
+
 data MvOptions = MvOptions
   { -- APIKey might not be present in the CLI options. If this is Nothing, we'll
     -- check an env var and a file down the road. But it IS required eventually.
@@ -29,7 +34,7 @@ data MvOptions = MvOptions
     noLog :: Bool, -- don't write a log file
     allowPartial :: Bool, -- allow partial matches of episodes/files
     searchKey :: SearchKey,
-    seasonNum :: Int,
+    seasonNum :: SeasonSelection,
     seasonFiles :: InFiles
   }
 
