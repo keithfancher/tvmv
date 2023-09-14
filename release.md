@@ -3,6 +3,8 @@
 All manual steps for now. Will automate when it gets annoying!
 
 - [ ] Run `stack test` again, just for good measure.
+- [ ] A "real" end-to-end test as well, e.g.:
+    `stack exec tvmv -- mv -n poirot -s 12 test/data/`
 - [ ] Update version string in `package.yaml` (and run `stack build`
   afterwards to update the auto-generated `cabal` file as well).
 - [ ] Update version string in `app/Version.hs`.
