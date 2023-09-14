@@ -15,6 +15,11 @@ spec = do
     it "parses all well-formed full filenames" $ do
       mapM_ testResultSet inputOutputFullFilename
 
+    it "parses all well-formed full paths" $ do
+      mapM_ testResultSet inputOutputFullPath
+
+-- Given a tuple of (input, expected output), asserts that the expected result
+-- is returned when the input is parsed.
 testResultSet :: (String, SeasonEpNum) -> Expectation
 testResultSet (input, expected) = parseFilename input `shouldBe` Right expected
 
@@ -41,4 +46,10 @@ inputOutputFullFilename =
   [ ("A pretty cool TV show - 1x21 - An alright episode", SeasonEpNum {seasonNum = 1, episodeNum = 21}),
     ("Buffy - s09e99 - Buffy's wedding", SeasonEpNum {seasonNum = 9, episodeNum = 99}),
     ("Poirot - s035e123 - A confusing s12e04 episode title", SeasonEpNum {seasonNum = 35, episodeNum = 123})
+  ]
+
+inputOutputFullPath :: [(String, SeasonEpNum)]
+inputOutputFullPath =
+  [ ("/home/jimbo/tv/A show - 1x21 - An episode.mkv", SeasonEpNum {seasonNum = 1, episodeNum = 21}),
+    ("/media/0x12dumbdirectory/Poirot - s035e123 - s12e04 baaad.mp4", SeasonEpNum {seasonNum = 35, episodeNum = 123})
   ]

@@ -4,6 +4,7 @@ module Parse
   )
 where
 
+import System.FilePath (takeFileName)
 import Text.Parsec (ParseError, anyChar, char, lookAhead, many, many1, manyTill, parse, try, (<|>))
 import Text.Parsec.Char (digit)
 import Text.Parsec.String (Parser)
@@ -21,8 +22,9 @@ data SeasonEpNum = SeasonEpNum
 -- TODO: Actually, map this `ParseError` to an error in our domain. The calling
 -- code shouldn't have to depend on Parsec!
 parseFilename :: FilePath -> Either ParseError SeasonEpNum
-parseFilename = parse fullFilename err
+parseFilename fullFilePath = parse fullFilename err fileName
   where
+    fileName = takeFileName fullFilePath -- Strip the leading path, if it exists
     err = "" -- used only in errors, we don't need it
 
 -- Parses out the season number and episode number, ignoring all leading and
