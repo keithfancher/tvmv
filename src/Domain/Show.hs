@@ -23,7 +23,6 @@ data TvShow = TvShow
     showName :: T.Text,
     seasons :: [Season],
     description :: T.Text, -- Some "flavor text"
-    -- TODO: Would "year" be useful here too? If the data is available from the API, that is.
     numberOfSeasons :: Int,
     numberOfEpisodes :: Int,
     -- Can/should be populated by the API code, will be API-specific. If it's
