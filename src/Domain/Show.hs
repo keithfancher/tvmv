@@ -12,10 +12,10 @@ import Text.Wrap (defaultWrapSettings, wrapTextToLines)
 
 -- A unique ID used for a given API resource.
 --
--- TODO: Int or Text? Both TheTVDB and TheMovieDB use integers, though IMDB's
--- API would require a string. Text is probably most flexible, would require
--- fewer code changes if swapping out APIs. Probably change this and map
--- accordingly.
+-- If/when I add other APIs in the future, might want to change this to a
+-- string and map accordingly. Both TheTVDB and TheMovieDB use integer IDs,
+-- though IMDB's API would require a string. String is most flexible, would
+-- require fewer code changes if swapping out APIs.
 type ItemId = Int
 
 data TvShow = TvShow
