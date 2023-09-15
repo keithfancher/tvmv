@@ -33,8 +33,7 @@ renameSeason env withApi (MvOptions maybeApiKey forceRename _ partialMatches sea
   key <- liftEither $ populateAPIKey maybeApiKey env
   putStrLn' "Fetching show data from API..."
   season <- searchSeason key $ getSeasonNum seasNum
-  files <- liftIO $ listFiles inFiles
-  filteredFiles <- liftIO $ filterFiles files
+  filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
   matchedFiles <- liftEither $ match (episodes season) filteredFiles
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) forceRename
