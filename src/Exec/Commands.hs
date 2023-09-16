@@ -22,7 +22,7 @@ import Domain.Rename (RenameOp, matchEpisodes, matchEpisodesAllowPartial, rename
 import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Filter (filterFiles)
-import Exec.Match (ParseResults (..), ParsedFile, getSeasons, parseFilePaths)
+import Exec.Match (ParseResults (..), ParsedFile, getSeasons, matchParsedEpisodes, parseFilePaths)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
@@ -37,12 +37,14 @@ renameSeason ::
   MvOptions ->
   m ()
 renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQuery seasonSelection inFiles) = do
-  key <- liftEither $ populateAPIKey maybeApiKey env
+  apiKey <- liftEither $ populateAPIKey maybeApiKey env
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
   let (ParseResults parsedFiles _) = parseFilePaths filteredFiles -- TODO: show parse failures to user as well
   putStrLn' "Fetching show data from API..."
-  seasonData <- getSeason seasonSelection parsedFiles >>= searchSeason key
-  matchedFiles <- liftEither $ match (episodes seasonData) filteredFiles
+  episodeData <- episodes <$> (getSeasonNum seasonSelection parsedFiles >>= searchSeason apiKey)
+  matchedFiles <- liftEither $ case seasonSelection of
+    SeasonNum _ -> match episodeData filteredFiles -- lexicographic sort, "dumb" matching
+    Auto -> matchParsedEpisodes parsedFiles episodeData -- matching parsed filenames, "smart" or "auto" matching
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) force
   where
