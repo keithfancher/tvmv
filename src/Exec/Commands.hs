@@ -22,10 +22,10 @@ import Domain.Rename (RenameOp, matchEpisodes, matchEpisodesAllowPartial, rename
 import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Filter (filterFiles)
-import Exec.Match (ParseResults (..), ParsedFile, getSeasons, matchParsedEpisodes, parseFilePaths)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
+import Match (ParseResults (..), ParsedFile, getSeasons, matchParsedEpisodes, parseFilePaths)
 import Print (prettyPrintListLn)
 import Text.Printf (printf)
 

@@ -1,4 +1,4 @@
-module Exec.Match
+module Match
   ( ParsedFile,
     ParseResults (..),
     getSeasons,

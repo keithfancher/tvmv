@@ -35,11 +35,11 @@ library
       Exec.Commands
       Exec.Env
       Exec.Filter
-      Exec.Match
       Exec.Rename
       Execute
       File
       Log
+      Match
       Monad.Tvmv
       Parse
       Print
