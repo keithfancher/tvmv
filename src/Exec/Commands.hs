@@ -5,6 +5,12 @@ module Exec.Commands
   )
 where
 
+-- This module does all the hairy orchestration of IO stuff, tying all the
+-- disparate pieces together to actually execute each `tvmv` command. This is a
+-- good place to start to get a good high-level sense of the operations each
+-- command performs. (Note that, thanks to the magic of `mtl`, these functions
+-- are not coupled to any particular monad or monad transformer stack.)
+
 import API (searchSeasonById, searchSeasonByName, searchShowByName)
 import Command (MvOptions (..), SearchKey (..), SearchOptions (..), SeasonSelection (..), UndoOptions (..))
 import Control.Monad.Except (MonadError, liftEither)
@@ -23,6 +29,7 @@ import Print (prettyPrintListLn)
 import Text.Printf (printf)
 
 -- Rename the files of a TV season.
+-- Rename the files of a TV season. This puts the `mv` in tvmv!
 renameSeason ::
   (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
   Env ->
@@ -48,6 +55,7 @@ renameSeason env withApi (MvOptions maybeApiKey forceRename _ partialMatches sea
     getSeasonNum Auto = undefined
 
 -- Undo a previously-run rename operation, given a log file.
+-- Undo a previously-run rename operation, given a log file. The `undo` command.
 undoRename ::
   (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
   UndoOptions ->
@@ -62,6 +70,7 @@ undoRename (UndoOptions forceRename maybeLogFileName) = do
     readLog Nothing = readLatestLogFile
 
 -- Query the configured API for a show with the given name.
+-- Query the configured API for a show with the given name. The `search` command!
 searchByName ::
   (MonadIO m, MonadError Error m) =>
   Env ->
