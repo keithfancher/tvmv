@@ -48,7 +48,7 @@ matchParsedEpisodes results epList = case matchedEps of
 
 -- Given a single parsed filepath and its season/episode numbers, find and
 -- attach its Episode data. Nothing, if there's no matching data.
-matchEpisode :: [Episode] -> (FilePath, SeasonEpNum) -> Maybe (FilePath, Episode)
+matchEpisode :: [Episode] -> ParsedFile -> Maybe (FilePath, Episode)
 matchEpisode epList (path, seasonEpNum) = (path,) <$> findEp seasonEpNum -- creating a tuple is partially apply-able!
   where
     findEp seasEpNum = find (epsEqual seasEpNum) epList
