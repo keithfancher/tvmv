@@ -8,7 +8,7 @@ module Exec.Match
 where
 
 import Data.Either (partitionEithers)
-import Data.List (find)
+import Data.List (find, nub)
 import Domain.Error (Error (..))
 import Domain.Rename (MatchedEpisodes, matchEpisodes)
 import Domain.Show (Episode (..))
@@ -33,9 +33,9 @@ parseFilePaths files = ParseResults {successes = s, failures = f}
 
 -- Extract all the seasons from a list of parsed filenames.
 getSeasons :: [ParsedFile] -> [Int]
-getSeasons = map season
+getSeasons parsedFiles = nub $ map seasonNum parsedFiles -- `nub` removes dupes from the list
   where
-    season (_, SeasonEpNum s _) = s -- extract season from a single result
+    seasonNum (_, SeasonEpNum s _) = s -- extract season number from a single result
 
 -- Match the parsed filenames with corresponding API episode data.
 matchParsedEpisodes :: [ParsedFile] -> [Episode] -> Either Error MatchedEpisodes

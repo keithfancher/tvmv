@@ -16,7 +16,6 @@ import Command (MvOptions (..), SearchKey (..), SearchOptions (..), SeasonSelect
 import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
-import Data.List (nub)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, matchEpisodes, matchEpisodesAllowPartial, renameFiles, undoRenameOp)
@@ -57,9 +56,9 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
 -- auto-detection, pull the season from the parsed input file list. For now, we
 -- only support a single season. If the input files span multiple seasons,
 -- fail. For now!
-getSeason :: (MonadError Error m) => SeasonSelection -> [ParsedFile] -> m Int
-getSeason (SeasonNum n) _ = return n
-getSeason Auto parsedFiles = case nub $ getSeasons parsedFiles of -- `nub` removes dupes from the list
+getSeasonNum :: (MonadError Error m) => SeasonSelection -> [ParsedFile] -> m Int
+getSeasonNum (SeasonNum n) _ = return n
+getSeasonNum Auto parsedFiles = case getSeasons parsedFiles of
   [s] -> return s -- exactly one season is a success, return that season
   _ -> throwError $ ParseError "All input files must be from a single season"
 
