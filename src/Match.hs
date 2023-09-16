@@ -8,7 +8,7 @@ module Match
 where
 
 import Data.Either (partitionEithers)
-import Data.List (find, nub)
+import Data.List (find, nub, sort)
 import Domain.Error (Error (..))
 import Domain.Rename (MatchedEpisodes, matchEpisodes)
 import Domain.Show (Episode (..))
@@ -31,9 +31,10 @@ parseFilePaths files = ParseResults {successes = s, failures = f}
   where
     (f, s) = partitionEithers $ map parseFile files
 
--- Extract all the seasons from a list of parsed filenames.
+-- Extract all the season numbers from a list of parsed filenames. For your
+-- consumption pleasure, they come back sorted.
 getSeasons :: [ParsedFile] -> [Int]
-getSeasons parsedFiles = nub $ map seasonNum parsedFiles -- `nub` removes dupes from the list
+getSeasons parsedFiles = sort $ nub $ map seasonNum parsedFiles -- `nub` removes dupes from the list
   where
     seasonNum (_, SeasonEpNum s _) = s -- extract season number from a single result
 
