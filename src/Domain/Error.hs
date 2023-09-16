@@ -9,6 +9,7 @@ data Error
   | RenameError String
   | UndoError String
   | InvalidInput String
+  | ParseError String
   | UserAbort
   deriving (Eq, Show)
 

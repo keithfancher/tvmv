@@ -13,22 +13,23 @@ where
 
 import API (searchSeasonById, searchSeasonByName, searchShowByName)
 import Command (MvOptions (..), SearchKey (..), SearchOptions (..), SeasonSelection (..), UndoOptions (..))
-import Control.Monad.Except (MonadError, liftEither)
+import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
+import Data.List (nub)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, matchEpisodes, matchEpisodesAllowPartial, renameFiles, undoRenameOp)
 import Domain.Show (Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Filter (filterFiles)
+import Exec.Match (ParseResults (..), ParsedFile, getSeasons, parseFilePaths)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
 import Print (prettyPrintListLn)
 import Text.Printf (printf)
 
--- Rename the files of a TV season.
 -- Rename the files of a TV season. This puts the `mv` in tvmv!
 renameSeason ::
   (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
@@ -36,25 +37,32 @@ renameSeason ::
   APIWrapper m ->
   MvOptions ->
   m ()
-renameSeason env withApi (MvOptions maybeApiKey forceRename _ partialMatches searchQuery seasNum inFiles) = do
+renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQuery seasonSelection inFiles) = do
   key <- liftEither $ populateAPIKey maybeApiKey env
-  putStrLn' "Fetching show data from API..."
-  season <- searchSeason key $ getSeasonNum seasNum
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
-  matchedFiles <- liftEither $ match (episodes season) filteredFiles
+  let (ParseResults parsedFiles _) = parseFilePaths filteredFiles -- TODO: show parse failures to user as well
+  putStrLn' "Fetching show data from API..."
+  seasonData <- getSeason seasonSelection parsedFiles >>= searchSeason key
+  matchedFiles <- liftEither $ match (episodes seasonData) filteredFiles
   let renameOps = renameFiles matchedFiles
-  runRenameOps renameOps (renameMsg renameOps) forceRename
+  runRenameOps renameOps (renameMsg renameOps) force
   where
     match = if partialMatches then matchEpisodesAllowPartial else matchEpisodes
     renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
     searchSeason k = case searchQuery of
       (Name n) -> searchSeasonByName withApi k n
       (Id i) -> searchSeasonById withApi k i
-    -- TODO! A temporary shim, of course
-    getSeasonNum (SeasonNum n) = n
-    getSeasonNum Auto = undefined
 
--- Undo a previously-run rename operation, given a log file.
+-- If the user has specified a season, simply return that. In the case of
+-- auto-detection, pull the season from the parsed input file list. For now, we
+-- only support a single season. If the input files span multiple seasons,
+-- fail. For now!
+getSeason :: (MonadError Error m) => SeasonSelection -> [ParsedFile] -> m Int
+getSeason (SeasonNum n) _ = return n
+getSeason Auto parsedFiles = case nub $ getSeasons parsedFiles of -- `nub` removes dupes from the list
+  [s] -> return s -- exactly one season is a success, return that season
+  _ -> throwError $ ParseError "All input files must be from a single season"
+
 -- Undo a previously-run rename operation, given a log file. The `undo` command.
 undoRename ::
   (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
@@ -69,7 +77,6 @@ undoRename (UndoOptions forceRename maybeLogFileName) = do
     readLog (Just fileName) = readLogFile fileName
     readLog Nothing = readLatestLogFile
 
--- Query the configured API for a show with the given name.
 -- Query the configured API for a show with the given name. The `search` command!
 searchByName ::
   (MonadIO m, MonadError Error m) =>
