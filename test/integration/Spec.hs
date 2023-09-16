@@ -1,5 +1,5 @@
 import API.Stub (testAPI)
-import Command (Command (..), MvOptions (..), SearchKey (..), UndoOptions (..))
+import Command (Command (..), MvOptions (..), SearchKey (..), SeasonSelection (..), UndoOptions (..))
 import Data.Text.IO qualified as TIO
 import Domain.Error (Error)
 import Execute (Env (..), execCommandWithAPI, selectRunner)
@@ -75,7 +75,7 @@ mvOptions =
       noLog = False, -- we want a log!
       allowPartial = False, -- don't allow partial matches
       searchKey = Id 790, -- Poirot! by ID
-      seasonNum = 12,
+      seasonNum = SeasonNum 12,
       seasonFiles = Dir testTempDir
     }
 
