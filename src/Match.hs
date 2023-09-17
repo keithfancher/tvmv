@@ -1,7 +1,6 @@
 module Match
   ( ParsedFile,
     ParseResults (..),
-    getSeasons,
     matchParsedEpisodes,
     parseFilePaths,
   )
@@ -20,14 +19,18 @@ type ParseFailure = FilePath
 type ParsedFile = (FilePath, SeasonEpNum)
 
 data ParseResults = ParseResults
-  { successes :: [ParsedFile],
+  { -- Successfully parsed out season and episode numbers, attached to filenames
+    successes :: [ParsedFile],
+    -- A list of all included seasons in the (successfully parsed) input files
+    seasonNumbers :: [Int],
+    -- Any file paths that failed to parse are also returned, for error messages, etc.
     failures :: [ParseFailure]
   }
 
 -- Attempt to parse the given file paths. Return both successfully parsed files
 -- and a list of the failures.
 parseFilePaths :: [FilePath] -> ParseResults
-parseFilePaths files = ParseResults {successes = s, failures = f}
+parseFilePaths files = ParseResults {successes = s, failures = f, seasonNumbers = getSeasons s}
   where
     (f, s) = partitionEithers $ map parseFile files
 

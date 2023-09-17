@@ -25,7 +25,7 @@ import Exec.Filter (filterFiles)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
-import Match (ParseResults (..), ParsedFile, getSeasons, matchParsedEpisodes, parseFilePaths)
+import Match (ParseResults (..), matchParsedEpisodes, parseFilePaths)
 import Print (prettyPrintListLn)
 import Text.Printf (printf)
 
@@ -39,12 +39,12 @@ renameSeason ::
 renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQuery seasonSelection inFiles) = do
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
-  let (ParseResults parsedFiles _) = parseFilePaths filteredFiles -- TODO: show parse failures to user as well
+  let parseResults = parseFilePaths filteredFiles -- TODO: show parse failures to user as well
   putStrLn' "Fetching show data from API..."
-  episodeData <- episodes <$> (getSeasonNum seasonSelection parsedFiles >>= searchSeason apiKey)
+  episodeData <- episodes <$> (getSeasonNum seasonSelection parseResults >>= searchSeason apiKey)
   matchedFiles <- liftEither $ case seasonSelection of
     SeasonNum _ -> match episodeData filteredFiles -- lexicographic sort, "dumb" matching
-    Auto -> matchParsedEpisodes parsedFiles episodeData -- matching parsed filenames, "smart" or "auto" matching
+    Auto -> matchParsedEpisodes (successes parseResults) episodeData -- matching parsed filenames, "smart" or "auto" matching
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) force
   where
@@ -58,9 +58,9 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
 -- auto-detection, pull the season from the parsed input file list. For now, we
 -- only support a single season. If the input files span multiple seasons,
 -- fail. For now!
-getSeasonNum :: (MonadError Error m) => SeasonSelection -> [ParsedFile] -> m Int
+getSeasonNum :: (MonadError Error m) => SeasonSelection -> ParseResults -> m Int
 getSeasonNum (SeasonNum n) _ = return n
-getSeasonNum Auto parsedFiles = case getSeasons parsedFiles of
+getSeasonNum Auto parseResults = case seasonNumbers parseResults of
   [s] -> return s -- exactly one season is a success, return that season
   _ -> throwError $ ParseError "All input files must be from a single season"
 
