@@ -118,6 +118,7 @@ test-suite unit
       Exec.EnvSpec
       FileSpec
       LogSpec
+      MatchSpec
       ParseSpec
       Paths_tvmv
   hs-source-dirs:

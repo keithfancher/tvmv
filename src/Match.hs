@@ -26,6 +26,7 @@ data ParseResults = ParseResults
     -- Any file paths that failed to parse are also returned, for error messages, etc.
     failures :: [ParseFailure]
   }
+  deriving (Eq, Show)
 
 -- Attempt to parse the given file paths. Return both successfully parsed files
 -- and a list of the failures.
