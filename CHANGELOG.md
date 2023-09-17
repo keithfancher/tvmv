@@ -7,6 +7,18 @@ and this project adheres to the
 [Haskell Package Versioning Policy](https://pvp.haskell.org/).
 
 
+## Unreleased
+
+### Added
+
+- Parsing/auto-detection of season/episode numbers with the new
+  `--auto-detect` (or `-a`) CLI flag. Instead of specifying a season number
+  with `-s`, use the `-a` option to automatically parse that data from the
+  input filenames. This does away with many annoying limitations in previous
+  versions of `tvmv`. (The need to operate on an entire season at once, for
+  example.) See the `README` for more details!
+
+
 ## 0.2.0 - 2023-09-08
 
 ### Added
