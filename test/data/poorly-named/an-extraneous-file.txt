@@ -1,0 +1,3 @@
+With the `-a` option, an extraneous file is fine. tvmv will just leave that file alone!
+
+Go ahead, try it out, e.g.: `tvmv mv -n poirot -a`
