@@ -16,6 +16,7 @@ import Command (MvOptions (..), SearchKey (..), SearchOptions (..), SeasonSelect
 import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
+import Data.List (intercalate)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp, matchEpisodes, matchEpisodesAllowPartial, renameFiles, undoRenameOp)
@@ -27,6 +28,7 @@ import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
 import Match (ParseResults (..), matchParsedEpisodes, parseFilePaths)
 import Print (prettyPrintListLn)
+import System.Directory (makeRelativeToCurrentDirectory)
 import Text.Printf (printf)
 
 -- Rename the files of a TV season. This puts the `mv` in tvmv!
@@ -39,12 +41,13 @@ renameSeason ::
 renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQuery seasonSelection inFiles) = do
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
-  let parseResults = parseFilePaths filteredFiles -- TODO: show parse failures to user as well
+  let parseResults = parseFilePaths filteredFiles
+  showParseFailures seasonSelection parseResults
   putStrLn' "Fetching show data from API..."
   episodeData <- episodes <$> (getSeasonNum seasonSelection parseResults >>= searchSeason apiKey)
   matchedFiles <- liftEither $ case seasonSelection of
     SeasonNum _ -> match episodeData filteredFiles -- lexicographic sort, "dumb" matching
-    Auto -> matchParsedEpisodes (successes parseResults) episodeData -- matching parsed filenames, "smart" or "auto" matching
+    Auto -> matchParsedEpisodes (successes parseResults) episodeData -- parsed filenames, "smart" matching
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) force
   where
@@ -53,6 +56,17 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
     searchSeason k = case searchQuery of
       (Name n) -> searchSeasonByName withApi k n
       (Id i) -> searchSeasonById withApi k i
+
+showParseFailures :: (MonadIO m) => SeasonSelection -> ParseResults -> m ()
+showParseFailures (SeasonNum _) _ = return () -- No parsing
+showParseFailures Auto (ParseResults _ _ []) = return () -- No failures!
+showParseFailures Auto (ParseResults _ _ failures) = do
+  putStrLn' "Failed to parse season/episode numbers from the following files:"
+  f <- liftIO withNewLines
+  putStrLn' $ f <> "\n"
+  where
+    withNewLines = intercalate "\n" <$> relativeFailures
+    relativeFailures = mapM makeRelativeToCurrentDirectory failures
 
 -- If the user has specified a season, simply return that. In the case of
 -- auto-detection, pull the season from the parsed input file list. For now, we
