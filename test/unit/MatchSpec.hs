@@ -13,7 +13,6 @@ spec = do
       parseFilePaths inputFiles `shouldBe` parsedFiles
 
   describe "matchParsedEpisodes" $ do
-    -- TODO: test failures!
     it "matches successfully parsed filenames with episode API data" $ do
       matchParsedEpisodes (successes parsedFiles) episodeData `shouldBe` matchedEpisodes
 
@@ -22,7 +21,8 @@ inputFiles =
   [ "Poirot - 1x23 - He catches a cold.mkv",
     "Some un-parseable jibber-jabber",
     "Poirot s12e4.mp4",
-    "Poirot s003e19 - Shut up, Hastings.mp4"
+    "Poirot s003e19 - Shut up, Hastings.mp4",
+    "s20e06 - something unmatchable, episode doesn't exist.mp4"
   ]
 
 parsedFiles :: ParseResults
@@ -37,9 +37,12 @@ parsedFiles =
           ),
           ( "Poirot s003e19 - Shut up, Hastings.mp4",
             SeasonEpNum {seasonNum = 3, episodeNum = 19}
+          ),
+          ( "s20e06 - something unmatchable, episode doesn't exist.mp4",
+            SeasonEpNum {seasonNum = 20, episodeNum = 6}
           )
         ],
-      seasonNumbers = [1, 3, 12],
+      seasonNumbers = [1, 3, 12, 20],
       failures = ["Some un-parseable jibber-jabber"]
     }
 
@@ -60,7 +63,7 @@ matchedEpisodes :: MatchResults
 matchedEpisodes =
   MatchResults
     { matchSuccesses = matchEpisodes' $ zip episodeData matchedFilePaths,
-      matchFailures = []
+      matchFailures = ["s20e06 - something unmatchable, episode doesn't exist.mp4"]
     }
 
 matchedFilePaths :: [FilePath]
