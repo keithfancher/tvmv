@@ -44,7 +44,7 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
   let parseResults = parseFilePaths filteredFiles
   showParseFailures seasonSelection parseResults
   seasonNums <- getSeasonNums seasonSelection parseResults
-  putStrLn' $ "Fetching episode data from API for season(s): " <> show seasonNums <> "..."
+  putStrLn' $ fetchMessage seasonNums
   episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
   matchedFiles <- case seasonSelection of
     SeasonNum _ -> liftEither $ match episodeData filteredFiles -- lexicographic sort, "dumb" matching
@@ -57,6 +57,16 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
     searchSeason k = case searchQuery of
       (Name n) -> searchSeasonByName withApi k n
       (Id i) -> searchSeasonById withApi k i
+
+-- Slightly neurotic? Nicer printing of the input seasons.
+fetchMessage :: [Int] -> String
+fetchMessage seasons = case seasons of
+  [s] -> base <> " " <> show s -- e.g. "season 12"
+  [f, s] -> base <> "s " <> show f <> " and " <> show s -- e.g. "seasons 12 and 13"
+  threeOrMore -> base <> "s " <> withCommas threeOrMore -- e.g. "seasons 12, 13, 14"
+  where
+    withCommas l = intercalate ", " $ map show l
+    base = "Fetching episode data from API for season"
 
 -- Fetch data for the given seasons via the given API function, concat all
 -- episodes of the resulting seasons into a single list.
