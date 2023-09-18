@@ -19,14 +19,14 @@ import Control.Monad.Writer (MonadWriter)
 import Data.List (intercalate)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
-import Domain.Rename (RenameOp, matchEpisodes, matchEpisodesAllowPartial, renameFiles, undoRenameOp)
-import Domain.Show (Season (..))
+import Domain.Rename (MatchedEpisodes, RenameOp, episodes, matchEpisodes, matchEpisodesAllowPartial, renameFiles, undoRenameOp)
+import Domain.Show (Episode, Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Filter (filterFiles)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
 import File (listFiles)
 import Log (readLatestLogFile, readLogFile)
-import Match (ParseResults (..), matchParsedEpisodes, parseFilePaths)
+import Match (MatchResults (..), ParseResults (..), ParsedFile, matchParsedEpisodes, parseFilePaths)
 import Print (prettyPrintListLn)
 import System.Directory (makeRelativeToCurrentDirectory)
 import Text.Printf (printf)
@@ -44,10 +44,10 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
   let parseResults = parseFilePaths filteredFiles
   showParseFailures seasonSelection parseResults
   putStrLn' "Fetching show data from API..."
-  episodeData <- episodes <$> (getSeasonNum seasonSelection parseResults >>= searchSeason apiKey)
-  matchedFiles <- liftEither $ case seasonSelection of
-    SeasonNum _ -> match episodeData filteredFiles -- lexicographic sort, "dumb" matching
-    Auto -> matchParsedEpisodes (successes parseResults) episodeData -- parsed filenames, "smart" matching
+  episodeData <- Domain.Show.episodes <$> (getSeasonNum seasonSelection parseResults >>= searchSeason apiKey)
+  matchedFiles <- case seasonSelection of
+    SeasonNum _ -> liftEither $ match episodeData filteredFiles -- lexicographic sort, "dumb" matching
+    Auto -> autoMatchFiles (successes parseResults) episodeData -- parsed filenames, "smart" matching
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) force
   where
@@ -57,16 +57,39 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
       (Name n) -> searchSeasonByName withApi k n
       (Id i) -> searchSeasonById withApi k i
 
+-- If there are any failed matches, we show them to the user but continue on.
+-- If we get ZERO successful matches, however, the whole operation is a failure.
+autoMatchFiles :: (MonadIO m, MonadError Error m) => [ParsedFile] -> [Episode] -> m MatchedEpisodes
+autoMatchFiles parsedFiles epList = do
+  let (MatchResults matchedEps f) = matchParsedEpisodes parsedFiles epList
+  showMatchFailures f
+  case Domain.Rename.episodes matchedEps of -- stupid ambiguous refs require this qualification :')
+    [] -> throwError $ ParseError zeroMatchError
+    _ -> return matchedEps
+  where
+    zeroMatchError =
+      "No parsed files matched the API episode data ... try using the `-s` flag to manually specify the correct season?"
+    matchError = "\nFailed to match the following files with corresponding API episode data:"
+    showMatchFailures [] = return ()
+    showMatchFailures failures = printRelativeFiles failures matchError
+
 showParseFailures :: (MonadIO m) => SeasonSelection -> ParseResults -> m ()
 showParseFailures (SeasonNum _) _ = return () -- No parsing
 showParseFailures Auto (ParseResults _ _ []) = return () -- No failures!
-showParseFailures Auto (ParseResults _ _ failures) = do
-  putStrLn' "Failed to parse season/episode numbers from the following files:"
+showParseFailures Auto (ParseResults _ _ failures) = printRelativeFiles failures errMsg
+  where
+    errMsg = "Failed to parse season/episode numbers from the following files:"
+
+-- A helper to get back a newline-delimted string of relative paths, given a
+-- list of FilePaths. With a message at the top!
+printRelativeFiles :: (MonadIO m) => [FilePath] -> String -> m ()
+printRelativeFiles files msg = do
+  putStrLn' msg
   f <- liftIO withNewLines
   putStrLn' $ f <> "\n"
   where
-    withNewLines = intercalate "\n" <$> relativeFailures
-    relativeFailures = mapM makeRelativeToCurrentDirectory failures
+    withNewLines = intercalate "\n" <$> relativeFiles
+    relativeFiles = mapM makeRelativeToCurrentDirectory files
 
 -- If the user has specified a season, simply return that. In the case of
 -- auto-detection, pull the season from the parsed input file list. For now, we
