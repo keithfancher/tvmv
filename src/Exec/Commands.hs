@@ -43,9 +43,9 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
   let parseResults = parseFilePaths filteredFiles
   showParseFailures seasonSelection parseResults
-  seasonNum <- getSeasonNum seasonSelection parseResults
-  putStrLn' $ "Fetching show data from API for season " <> show seasonNum <> "..."
-  episodeData <- Domain.Show.episodes <$> searchSeason apiKey seasonNum
+  seasonNums <- getSeasonNums seasonSelection parseResults
+  putStrLn' $ "Fetching episode data from API for season(s): " <> show seasonNums <> "..."
+  episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
   matchedFiles <- case seasonSelection of
     SeasonNum _ -> liftEither $ match episodeData filteredFiles -- lexicographic sort, "dumb" matching
     Auto -> autoMatchFiles (successes parseResults) episodeData -- parsed filenames, "smart" matching
@@ -57,6 +57,13 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
     searchSeason k = case searchQuery of
       (Name n) -> searchSeasonByName withApi k n
       (Id i) -> searchSeasonById withApi k i
+
+-- Fetch data for the given seasons via the given API function, concat all
+-- episodes of the resulting seasons into a single list.
+fetchEpisodeData :: Monad m => (Int -> m Season) -> [Int] -> m [Episode]
+fetchEpisodeData apiGetSeason seasonNumList = concatSeasonEps <$> mapM apiGetSeason seasonNumList
+  where
+    concatSeasonEps = concatMap Domain.Show.episodes
 
 -- If there are any failed matches, we show them to the user but continue on.
 -- If we get ZERO successful matches, however, the whole operation is a failure.
@@ -75,14 +82,14 @@ autoMatchFiles parsedFiles epList = do
     showMatchFailures failures = printRelativeFiles failures matchError
 
 showParseFailures :: (MonadIO m) => SeasonSelection -> ParseResults -> m ()
-showParseFailures (SeasonNum _) _ = return () -- No parsing
-showParseFailures Auto (ParseResults _ _ []) = return () -- No failures!
+showParseFailures (SeasonNum _) _ = return () -- No parsing means no failures
+showParseFailures Auto (ParseResults _ _ []) = return () -- No failures also means no failures!
 showParseFailures Auto (ParseResults _ _ failures) = printRelativeFiles failures errMsg
   where
     errMsg = "Failed to parse season/episode numbers from the following files:"
 
--- A helper to get back a newline-delimted string of relative paths, given a
--- list of FilePaths. With a message at the top!
+-- A helper to print a newline-delimited string of relative paths, given a list
+-- of FilePaths. With a message at the top!
 printRelativeFiles :: (MonadIO m) => [FilePath] -> String -> m ()
 printRelativeFiles files msg = do
   putStrLn' msg
@@ -93,15 +100,12 @@ printRelativeFiles files msg = do
     relativeFiles = mapM makeRelativeToCurrentDirectory files
 
 -- If the user has specified a season, simply return that. In the case of
--- auto-detection, pull the season from the parsed input file list. For now, we
--- only support a single season. If the input files span multiple seasons,
--- fail. For now!
-getSeasonNum :: (MonadError Error m) => SeasonSelection -> ParseResults -> m Int
-getSeasonNum (SeasonNum n) _ = return n
-getSeasonNum Auto parseResults = case seasonNumbers parseResults of
-  [s] -> return s -- exactly one season is a success, return that season
+-- auto-detection, pull the seasons from the parsed input file list.
+getSeasonNums :: (MonadError Error m) => SeasonSelection -> ParseResults -> m [Int]
+getSeasonNums (SeasonNum n) _ = return [n]
+getSeasonNums Auto parseResults = case seasonNumbers parseResults of
   [] -> throwError $ ParseError "Unable to parse season/episode data from any input files"
-  _ -> throwError $ ParseError "All input files must be from a single season"
+  nonEmpty -> return nonEmpty
 
 -- Undo a previously-run rename operation, given a log file. The `undo` command.
 undoRename ::
