@@ -99,6 +99,7 @@ getSeasonNum :: (MonadError Error m) => SeasonSelection -> ParseResults -> m Int
 getSeasonNum (SeasonNum n) _ = return n
 getSeasonNum Auto parseResults = case seasonNumbers parseResults of
   [s] -> return s -- exactly one season is a success, return that season
+  [] -> throwError $ ParseError "Unable to parse season/episode data from any input files"
   _ -> throwError $ ParseError "All input files must be from a single season"
 
 -- Undo a previously-run rename operation, given a log file. The `undo` command.
