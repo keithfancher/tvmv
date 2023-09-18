@@ -1,6 +1,8 @@
 module Domain.Rename
   ( RenameOp (..),
     MatchedEpisodes, -- note NOT exporting constructor(s) here
+    episodes, -- but we ARE exporting field extractors
+    files,
     matchEpisodes,
     matchEpisodes',
     matchEpisodesAllowPartial,
