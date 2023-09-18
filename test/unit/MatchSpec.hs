@@ -1,7 +1,6 @@
 module MatchSpec (spec) where
 
-import Domain.Error (Error)
-import Domain.Rename (MatchedEpisodes, matchEpisodes)
+import Domain.Rename (matchEpisodes')
 import Domain.Show (Episode (..))
 import Match
 import Parse (SeasonEpNum (..))
@@ -52,10 +51,14 @@ episodeData =
     Episode {episodeSeasonNumber = 3, episodeNumber = 19, episodeName = "Shut up, Hastings", episodeShowName = ""}
   ]
 
--- This looks a little strange because of the "private" constructor. We have to
+-- This looks a little strange because of the private constructor. We have to
 -- use our own match function to build this object for comparison.
-matchedEpisodes :: Either Error MatchedEpisodes
-matchedEpisodes = matchEpisodes episodeData matchedFilePaths
+matchedEpisodes :: MatchResults
+matchedEpisodes =
+  MatchResults
+    { matchSuccesses = matchEpisodes' $ zip episodeData matchedFilePaths,
+      matchFailures = []
+    }
 
 matchedFilePaths :: [FilePath]
 matchedFilePaths =

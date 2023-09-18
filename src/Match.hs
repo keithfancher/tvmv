@@ -1,5 +1,6 @@
 module Match
-  ( ParsedFile,
+  ( MatchResults (..),
+    ParsedFile,
     ParseResults (..),
     matchParsedEpisodes,
     parseFilePaths,
@@ -8,12 +9,13 @@ where
 
 import Data.Either (partitionEithers)
 import Data.List (find, nub, sort)
-import Domain.Error (Error (..))
-import Domain.Rename (MatchedEpisodes, matchEpisodes)
+import Domain.Rename (MatchedEpisodes, matchEpisodes')
 import Domain.Show (Episode (..))
 import Parse (SeasonEpNum (..), parseFilename)
 
 type ParseFailure = FilePath
+
+type MatchFailure = FilePath
 
 -- Parsed, which simply means we've extracted and attached its season/ep numbers
 type ParsedFile = (FilePath, SeasonEpNum)
@@ -25,6 +27,12 @@ data ParseResults = ParseResults
     seasonNumbers :: [Int],
     -- Any file paths that failed to parse are also returned, for error messages, etc.
     failures :: [ParseFailure]
+  }
+  deriving (Eq, Show)
+
+data MatchResults = MatchResults
+  { matchSuccesses :: MatchedEpisodes,
+    matchFailures :: [MatchFailure]
   }
   deriving (Eq, Show)
 
@@ -43,29 +51,26 @@ getSeasons parsedFiles = sort $ nub $ map seasonNum parsedFiles -- `nub` removes
     seasonNum (_, SeasonEpNum s _) = s -- extract season number from a single result
 
 -- Match the parsed filenames with corresponding API episode data.
-matchParsedEpisodes :: [ParsedFile] -> [Episode] -> Either Error MatchedEpisodes
-matchParsedEpisodes results epList = case matchedEps of
-  -- TODO: Collect specific filenames which are unmatchable
-  Nothing -> Left $ ParseError "Unable to find matching episode data for one or more inputs"
-  Just matchedTuples -> makeMatchedEps matchedTuples
+matchParsedEpisodes :: [ParsedFile] -> [Episode] -> MatchResults
+matchParsedEpisodes results epList =
+  MatchResults
+    { matchSuccesses = matchEpisodes' matchedTuples,
+      matchFailures = matchFailures
+    }
   where
-    matchedEps = mapM (matchEpisode epList) results
+    (matchFailures, matchedTuples) = partitionEithers $ map (matchEpisode epList) results
 
 -- Given a single parsed filepath and its season/episode numbers, find and
--- attach its Episode data. Nothing, if there's no matching data.
-matchEpisode :: [Episode] -> ParsedFile -> Maybe (FilePath, Episode)
-matchEpisode epList (path, seasonEpNum) = (path,) <$> findEp seasonEpNum -- creating a tuple is partially apply-able!
+-- attach its Episode data. A `Left` if there's no matching data.
+matchEpisode :: [Episode] -> ParsedFile -> Either MatchFailure (Episode, FilePath)
+matchEpisode epList (path, seasonEpNum) = (,path) <$> findEp seasonEpNum -- tuple creation is partially apply-able!
   where
-    findEp seasEpNum = find (epsEqual seasEpNum) epList
+    findEp seasEpNum = case find (epsEqual seasEpNum) epList of
+      Nothing -> Left path -- send back the path so we can collect failures easily
+      Just ep -> Right ep
     epsEqual seasEpNum ep =
       (episodeNum seasEpNum == episodeNumber ep)
         && (seasonNum seasEpNum == episodeSeasonNumber ep)
-
--- From a list of tuples, build the `MatchedEpisodes` object.
-makeMatchedEps :: [(FilePath, Episode)] -> Either Error MatchedEpisodes
-makeMatchedEps inTuples = matchEpisodes eps files
-  where
-    (files, eps) = unzip inTuples
 
 -- If we succeed, we pair the episode data with its `FilePath`. If we fail,
 -- return a `Left` of the failed `FilePath`. An easy way to collect failures!
