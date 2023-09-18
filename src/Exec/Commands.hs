@@ -43,8 +43,9 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
   let parseResults = parseFilePaths filteredFiles
   showParseFailures seasonSelection parseResults
-  putStrLn' "Fetching show data from API..."
-  episodeData <- Domain.Show.episodes <$> (getSeasonNum seasonSelection parseResults >>= searchSeason apiKey)
+  seasonNum <- getSeasonNum seasonSelection parseResults
+  putStrLn' $ "Fetching show data from API for season " <> show seasonNum <> "..."
+  episodeData <- Domain.Show.episodes <$> searchSeason apiKey seasonNum
   matchedFiles <- case seasonSelection of
     SeasonNum _ -> liftEither $ match episodeData filteredFiles -- lexicographic sort, "dumb" matching
     Auto -> autoMatchFiles (successes parseResults) episodeData -- parsed filenames, "smart" matching
