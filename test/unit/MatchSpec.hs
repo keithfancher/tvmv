@@ -43,12 +43,15 @@ parsedFiles =
       failures = ["Some un-parseable jibber-jabber"]
     }
 
--- Note that only the episode and seasons numbers matter here, really.
+-- Note that only the episode and seasons numbers matter here, really. Also
+-- note that we (intentionally) have more episodes returned than there are
+-- files. The extra "API data" here should just be ignored!
 episodeData :: [Episode]
 episodeData =
   [ Episode {episodeSeasonNumber = 1, episodeNumber = 23, episodeName = "He catches a cold", episodeShowName = ""},
     Episode {episodeSeasonNumber = 12, episodeNumber = 4, episodeName = "", episodeShowName = ""},
-    Episode {episodeSeasonNumber = 3, episodeNumber = 19, episodeName = "Shut up, Hastings", episodeShowName = ""}
+    Episode {episodeSeasonNumber = 3, episodeNumber = 19, episodeName = "Shut up, Hastings", episodeShowName = ""},
+    Episode {episodeSeasonNumber = 11, episodeNumber = 1, episodeName = "An extra episode", episodeShowName = ""}
   ]
 
 -- This looks a little strange because of the private constructor. We have to
