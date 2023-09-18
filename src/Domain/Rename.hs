@@ -2,6 +2,7 @@ module Domain.Rename
   ( RenameOp (..),
     MatchedEpisodes, -- note NOT exporting constructor(s) here
     matchEpisodes,
+    matchEpisodes',
     matchEpisodesAllowPartial,
     renameFile,
     renameFiles,
@@ -50,11 +51,18 @@ undoRenameOp (RenameOp old new) = RenameOp {oldPath = new, newPath = old}
 matchEpisodes :: [Episode] -> [FilePath] -> Either Error MatchedEpisodes
 matchEpisodes eps inFiles
   | numEps /= numFiles = Left $ RenameError errorMessage
-  | otherwise = Right UnsafeMatchedEpisodes {episodes = eps, files = inFiles}
+  | otherwise = Right $ matchEpisodes' $ zip eps inFiles
   where
     numEps = length eps
     numFiles = length inFiles
     errorMessage = printf "Mismatched number of episodes (%d) and files (%d)" numEps numFiles
+
+-- Same as above, but with a list of tuples as the input so invalid/unmatching
+-- inputs are impossible!
+matchEpisodes' :: [(Episode, FilePath)] -> MatchedEpisodes
+matchEpisodes' inTuples = UnsafeMatchedEpisodes {episodes = eps, files = inFiles}
+  where
+    (eps, inFiles) = unzip inTuples
 
 -- Allow partial matches. Creates a `MatchedEpisodes` object when given (a
 -- certain class of) mismatched files/eps. Specifically, this is for the case
