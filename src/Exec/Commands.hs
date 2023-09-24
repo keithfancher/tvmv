@@ -39,16 +39,21 @@ renameSeason ::
   MvOptions ->
   m ()
 renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQuery seasonSelection inFiles) = do
+  -- Before doing anything, ensure we have an API key available:
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
+  -- Get the list of input files, parse out relevant season/episode data:
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
   let parseResults = parseFilePaths filteredFiles
   showParseFailures seasonSelection parseResults
   seasonNums <- getSeasonNums seasonSelection parseResults
+  -- Fetch episode data from our configured API:
   putStrLn' $ fetchMessage seasonNums
   episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
+  -- Match API data with the list of input files, smartly or dumbly:
   matchedFiles <- case seasonSelection of
     SeasonNum _ -> liftEither $ match episodeData filteredFiles -- lexicographic sort, "dumb" matching
     Auto -> autoMatchFiles (successes parseResults) episodeData -- parsed filenames, "smart" matching
+  -- Finally, actually rename the input files based on the API data:
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) force
   where
