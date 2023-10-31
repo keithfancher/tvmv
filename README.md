@@ -87,14 +87,24 @@ the app-in-question in the sign-up form if it asks. (This is why I say
 
 You've got two options:
 
-1. Build from source. Not recommended unless you need a particular
-   cutting-edge feature that isn't included in the latest binary release. (But
-   don't worry: building isn't *complicated*. It's just *slow*.)
-2. Installing a binary
+1. Installing a binary
    [release](https://github.com/keithfancher/tvmv/releases). The
    quick-and-easy route.
+2. Building from source. Not recommended unless you need a particular
+   cutting-edge feature that isn't included in the latest binary release. (But
+   don't worry: building isn't *complicated*. It's just *slow*.)
 
 More details below.
+
+### Binary installation
+
+If you've downloaded [a binary
+release](https://github.com/keithfancher/tvmv/releases), you can simply
+extract the `tvmv` executable somewhere in your `PATH`. No installation
+process is required. (Other than configuring your API key, as covered in the
+following section.)
+
+To uninstall, simply remove the binary.
 
 ### Building from source
 
@@ -113,16 +123,6 @@ $ stack install
 By default, this installs the `tvmv` binary into `~/.local/bin`. You may need
 to add this directory to your `PATH`. (Or just put the binary wherever you
 like. There are no ancillary files to worry about.)
-
-### Binary installation
-
-If you've downloaded [a binary
-release](https://github.com/keithfancher/tvmv/releases), you can simply
-extract the `tvmv` executable somewhere in your `PATH`. No installation
-process is required. (Other than configuring your API key, as covered in the
-following section.)
-
-To uninstall, simply remove the binary.
 
 
 ## Using tvmv
