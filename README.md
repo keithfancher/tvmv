@@ -128,7 +128,7 @@ like. There are no ancillary files to worry about.)
 ## Using tvmv
 
 The "Quickstart" section above should get you pretty far. But there are a few
-other features to mention.
+other things to mention.
 
 ### API key location
 
@@ -152,18 +152,35 @@ about it. Whatever works for you!)
 
 ### tvmv commands
 
-`tvmv` has three commands: `mv`, `search`, and `undo`. Let's look at some
-examples:
+`tvmv` has three commands: `mv`, `search`, and `undo`. You must specify one of
+these commands to actually *do* anything.
+
+For help with a given command, you can use `tvmv [COMMAND] -h`. For example,
+to learn more about `mv`:
 
 ```
-### THE mv COMMAND:
+$ tvmv mv -h
+```
 
+Let's take a closer look at each command.
+
+#### mv
+
+This is the Main Thing, the "mv" in "tvmv". Renames (moves) your files. Users
+of any Unix-like OS will recognize the name.
+
+Here are some basic examples to get you started:
+
+```
 # Rename all files in current directory, using data for "Buffy", season 4:
 $ tvmv mv -n buffy -s 4
 
-# The exact same operation, but using Buffy's unique ID rather than a name
-# query. This ID can be easily fetched with the `tvmv search` command.
-$ tvmv mv -i 95 -s 4
+# Do the same thing, but auto-detect the season and episode number(s):
+$ tvmv mv -n buffy -a
+
+# The exact same operation again, but using Buffy's unique ID rather than a
+# name query. This ID can be easily fetched with the `tvmv search` command.
+$ tvmv mv -i 95 -a
 
 # This time, let's do season 1. And we're specifying a directory instead of
 # using the current working directory:
@@ -172,65 +189,101 @@ $ tvmv mv -n buffy -s 1 ~/tv/buffy/s1
 # This time, globbing for specific files -- subtitles! Note that tvmv doesn't
 # care whether it's renaming episodes, subtitles, or whatever else.
 $ tvmv mv -n buffy -s 1 ~/tv/buffy/s1/*srt
+```
 
+Note that the `mv` command has **two modes of operation**.
 
-### THE undo COMMAND:
+1. **tvmv autodetects the season/episode numbers** using the `-a` flag, or
+2. **User specifies a season number** using the `-s` flag.
 
-# This will undo the `mv` operations that you just ran, resetting your files.
-# It depends on a tvmv log file sitting in your current directory.
+Read on to understand more about the pros/cons of each mode.
+
+##### mv mode 1: Autodetect the season/episode numbers
+
+"Smart mode".
+
+This is generally the most flexible, least painful option. However, **it
+requires file names which already contain season and episode numbers** in a
+standard format (e.g. `s03e23` or `3x23`).
+
+If this is the case for your files, simply pass them to `tvmv` with the `-a`
+flag. Here's a quick example:
+
+```
+$ ls -1 poirot/
+12x4.mkv
+1x1.pilot.encoded.by.MEGA.KEWL.TEAM.LOLZ.mkv
+'poirot s04e03.mkv'
+
+$ tvmv mv -n poirot -a poirot/
+
+$ ls -1 poirot/
+"Agatha Christie's Poirot - s01e01 - The Adventure of the Clapham Cook.mkv"
+"Agatha Christie's Poirot - s04e03 - One, Two, Buckle My Shoe.mkv"
+"Agatha Christie's Poirot - s12e04 - The Clocks.mkv"
+```
+
+Note that `tvmv` will simply ignore files which it can't parse season/episode
+data from. Convenient!
+
+##### mv mode 2: Specify a season number
+
+"Dumb mode".
+
+The user specifies a season number (e.g. `-s 7`) and `tvmv`, without any
+processing of the filenames at all, sorts the files lexicographically, then
+applies the API data to each file **in that order**.
+
+This mode requires you to operate on only **a single season at a time**. It
+also requires you to operate on **a full, contiguous season**. If you attempt
+to operate on too few or too many files in this mode, `tvmv` will (by default)
+throw an error. (This behavior can be changed with the `-p` flag, which allows
+partial matches. Use at your own peril!)
+
+If your files do *not* contain standard-format season/episode numbers already,
+you must use this mode.
+
+Note that you can run into trouble if your files don't (lexicographically)
+sort correctly. For example, if you have files whose episode numbers aren't
+zero-padded, the sorting can go wrong, e.g.:
+
+```
+ep1.mp4
+ep10.mp4
+ep2.mp4
+```
+
+In this case, you'll have to zero-pad the episode numbers for `tvmv` to work
+correctly. (Or fix the filenames to be usable with the "auto-detect" mode.)
+
+##### Which mode should I use?
+
+**Do your file names contain season and episode numbers already**, in a
+standard format like `s03e23` or `3x23`? If so, just use the autodetect mode
+(`-a`). It's more flexible, and can operate on non-contiguous files from
+arbitrary seasons.
+
+Otherwise, you'll need to specify a season number with `-s`, and can only
+operate over contiguous episodes from a single season at a time.
+
+#### undo
+
+The `undo` command will undo the `mv` operations that you just ran, resetting
+your files. It depends on a `tvmv` log file sitting in your current directory.
+
+```
+# This will undo the most recent `mv` operation. It depends on a tvmv log file
+# sitting in your current directory.
 $ tvmv undo
 
 # Same idea here, but let's specify a specific tvmv log file rather than using
 # the most recent one:
 $ tvmv undo tvmv-log-123456.txt
-
-
-### THE search COMMAND
-
-# Searches TMDB for shows that match the query "buffy". Fetches name, unique
-# ID, and a little bit of metadata for each result:
-$ tvmv search buffy
-
 ```
 
-### A note on the `mv` command and show-matching
+What are these log files, you ask? Read on!
 
-As you can see in the examples above, you can match a show on *either* its
-name *or* its unique ID. If you match a show by name (using the `-n` flag of
-the `mv` command), `tvmv` will use the **first** match returned by the API for
-your query. (You will have a chance to confirm the rename before it happens,
-of course.)
-
-Luckily, TMDB's search is generally very sane. If you search for `buffy`, you
-get back the right "Buffy". Fragments are fine, too -- if you search
-`thrones`, you get back "Game of Thrones". If you search `simps`, you get back
-"The Simpsons", etc.
-
-If you don't trust this behavior, or if you prefer something guaranteed to be
-repeatable (or scriptable?), you can match a show by its unique ID using the
-`-i` flag. As mentioned above, you can get a show's id via `tvmv search`.
-
-#### Matching the number of episodes and files
-
-By default, `tvmv` will throw an error if the number of files passed in does
-not match the number of episodes in a given season. This is a safety feature,
-designed to keep you from shooting yourself in the foot, but might be
-undesirable in certain cases.
-
-For example, if you only have the first `n` episodes of a season, but still
-want to easily rename them. Or if the TMDB data includes "extra" stuff at the
-end of a season. In these cases, you can pass the `--allow-partial` flag to
-the `mv` command (aka `-p`) and the error-checking will become less strict.
-
-(Note that, even with this flag, `tvmv` will still throw an error if you have
-more *files* than episodes. In this case, you can simply glob for the files
-you want to rename or put them in a directory. It doesn't quite make sense to
-pass more files than there are episodes to `tvmv`.)
-
-See [the FAQ](#faq) for more information and caveats about `tvmv`'s
-episode-matching logic.
-
-### Log files
+##### Log files
 
 When you do an `mv` operation, `tvmv` will (by default) write a log of any
 renamed files. (This is written to the *current* directory -- not necessarily
@@ -248,19 +301,43 @@ If you don't want to write a log when using the `mv` command, simply pass the
 `--no-log` flag (aka `-x`). You will *not* be able to use the `undo` command
 without a log, however.
 
-### Other options / Getting help
+#### search
+
+The `search` command searches TMDB for shows that match the given text query.
+Fetches name, unique ID, and a little metadata about each result. For example:
+
+```
+# Searches TMDB for shows that match the query "buffy":
+$ tvmv search buffy
+```
+
+The TMDB URL for each result will also be displayed, which can be handy to
+quickly grab some more info about a result or verify it's the show you expect.
+
+### A note on the `mv` command and show-matching
+
+As you can see in the examples above, you can match a show on *either* its
+name *or* its unique ID. If you match a show by name (using the `-n` flag of
+the `mv` command), `tvmv` will use the **first** match returned by the API for
+your query. This is the same order that's returned by `tvmv search`, so you
+can preview the results if you like. (And you will have a chance to confirm
+the rename before it happens, of course.)
+
+Luckily, TMDB's search is generally very sane. If you search for `buffy`, you
+get back the right "Buffy" as the first result. Fragments are fine, too -- if
+you search `thrones`, you get back "Game of Thrones". If you search `simps`,
+you get back "The Simpsons", etc.
+
+If you don't trust this behavior, or if you prefer something guaranteed to be
+repeatable (or scriptable?), you can match a show by its unique ID using the
+`-i` flag. As mentioned above, you can get a show's id via `tvmv search`.
+
+### Other options
 
 By default, `tvmv` will ask for user confirmation before making any file
 changes. (This goes for both the `mv` and `undo` commands.) If you want to
 skip this confirmation step, simply use the `-f` (or `--force`) command-line
 option. (For example, `tvmv undo -f`.)
-
-For help with a given `tvmv` command, you can use `tvmv [COMMAND] -h`. For
-example, to learn more about `mv`:
-
-```
-$ tvmv mv -h
-```
 
 ### Configuration / Customization?
 
@@ -316,46 +393,11 @@ It fetches TV episode metadata from an API, then uses that metadata to
 automatically rename TV episode files into a media-server-friendly (and
 human-friendly) format.
 
-### How does tvmv decide that a given file corresponds to a given episode of a show?
-
-1. *Currently*, `tvmv`'s logic is Very Dumb and Very Limited. It sorts files
-   in lexicographic order and matches accordingly to the list of episodes from
-   the configured API. That's it. And it works for, like, 90% of the cases
-   I've come across. But it *can* cause problems! (See next question below.)
-2. *In the near future*, `tvmv` will first attempt to parse out season/episode
-   numbers from the filenames/paths directly. Only if that fails will it fall
-   back to the dumber "lexicographic sorting" approach. (There will probably
-   be some manual overrides as well.) This will allow for greater flexibility
-   and require less care on the user's part.
-
-### What are the problems with the current approach and how can I work around them?
-
-The current (lexicographic sorting) approach starts to fall short in a couple
-of cases:
-
-1. **If you only have a limited subset of the episodes.** Say for example you
-   only have episodes 1, 2, and 4. In this case, `tvmv` will (incorrectly)
-   assume that the 4th episode is actually episode 3. (Which is why I
-   *currently* recommend using `tvmv` only on full seasons of a show... though
-   technically you can still use it if you have a *contiguous starting*
-   portion of a season, via the `-p` flag. In other words, if you have the
-   first *n* episodes.)
-2. **If your episodes don't (lexicographically) sort correctly.** For example,
-   if you have files whose episode numbers aren't zero-padded, the sorting can
-   go wrong, e.g.:
-   ```
-   ep1.mp4
-   ep10.mp4
-   ep2.mp4
-   ```
-   In this case, you'll have to zero-pad the episode numbers for `tvmv` to
-   work correctly. (For now. Sorry.)
- 
 ### Is there a GUI?
 
 Nope, it's a command-line tool. It probably wouldn't be hard to build a GUI on
 top of it, but that's not a priority for me at the moment. (Calling `tvmv mv
--n buffy -s 7` is quick and easy! That's really all there is to it.)
+-n buffy -a` is quick and easy! That's really all there is to it.)
 
 ### How is this different from \[bulk-rename tool X\]?
 
