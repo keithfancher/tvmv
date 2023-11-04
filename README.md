@@ -210,7 +210,7 @@ Read on to understand more about the pros/cons of each mode.
 
 ##### mv mode 1: Autodetect the season/episode numbers
 
-"Smart mode".
+"Smart mode". (Added in version `0.3.0`.)
 
 This is generally the most flexible, least painful option. However, **it
 requires file names which already contain season and episode numbers** in a
