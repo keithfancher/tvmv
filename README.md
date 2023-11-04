@@ -282,8 +282,7 @@ The `undo` command will undo the `mv` operations that you just ran, resetting
 your files. It depends on a `tvmv` log file sitting in your current directory.
 
 ```
-# This will undo the most recent `mv` operation. It depends on a tvmv log file
-# sitting in your current directory.
+# This will undo the most recent `mv` operation:
 $ tvmv undo
 
 # Same idea here, but let's specify a specific tvmv log file rather than using
