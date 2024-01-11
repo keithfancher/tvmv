@@ -1,7 +1,6 @@
 module File
   ( listDir,
     listFiles,
-    normalizeFileList,
     sortCaseInsensitive,
   )
 where
@@ -11,45 +10,44 @@ import Data.Text qualified as T
 import System.Directory (doesDirectoryExist, listDirectory, makeAbsolute)
 import System.FilePath ((</>))
 
--- Given a directory OR a list of files OR nothing, get back a SORTED list of
--- ABSOLUTE file paths. If given an empty list, get files in current directory.
+-- Given:
+--   a single directory
+--   OR a list of one or more files
+--   OR an empty list...
+-- get back a SORTED list of ABSOLUTE file paths. (If given an empty list,
+-- returns files in current directory.
 listFiles :: [FilePath] -> IO [FilePath]
 listFiles [] = listDir "." -- no files/paths given, default to current directory
 listFiles [singlePath] = do
-  pathIsDir <- doesDirectoryExist singlePath
-  if pathIsDir -- a single path could be a directory OR a single file
+  pathIsDirectory <- doesDirectoryExist singlePath
+  if pathIsDirectory -- a single path could be a directory OR a single file
     then listDir singlePath
-    else mapM makeAbsolute [singlePath]
-listFiles multiplePaths = mapM makeAbsolute $ normalizeFileList Nothing multiplePaths
+    else mapM normalizePath [singlePath] -- jump through some hoops to get a list back
+listFiles multiplePaths = normalizePaths multiplePaths
 
--- Get a list of files in the given directory. Note that this returns a
--- SORTED list of ABSOLUTE paths.
---
--- TODO: There's redundancy here, some weird organization, needs refactoring.
+-- Get a list of files in the given directory. Note that this returns a SORTED
+-- list of ABSOLUTE paths.
 listDir :: FilePath -> IO [FilePath]
 listDir dirPath = do
   files <- listDirectory dirPath
-  let normalizedPaths = normalizeFileList (Just dirPath) files
-  mapM makeAbsolute normalizedPaths
-
--- Pure helper func for the above. "Normalizing" here is:
---   1) `listDirectory` returns files in a (seemingly?) random order, so we sort.
---
---   2) `listDirectory` also only returns the files themselves, not any portion
---    of the path. For example, if you `listDirectory some/path/`, you'll get
---    results like `["file.a", "file.b"]`, without the `some/path/` portion. So
---    we need to stick that back on for the (relative) paths to be correct.
---
--- Note that the `basePath` is not required. This allows us to also use this
--- function even when given already "correct" relative paths, e.g., when a file
--- list is passed in directly rather than coming from `listDirectory`.
-normalizeFileList :: Maybe FilePath -> [FilePath] -> [FilePath]
-normalizeFileList basePath paths = map prependDirPath sorted
+  let fixedFiles = map prependDir files
+  normalizePaths fixedFiles
   where
-    sorted = sortCaseInsensitive paths
-    prependDirPath p = case basePath of
-      Just base -> base </> p -- `basePath` could be relative or absolute, we don't know/care
-      Nothing -> p
+    -- `listDirectory` only returns the files themselves, not any portion of
+    -- the path. For example, if you `listDirectory some/path/`, you'll get
+    -- results like `["file.a", "file.b"]`, without the `some/path/` portion.
+    -- So we need to stick that back on for the (relative) paths to be correct.
+    prependDir p = dirPath </> p
+
+-- For a single file, "normalization" is simply making its path absolute.
+normalizePath :: FilePath -> IO FilePath
+normalizePath = makeAbsolute
+
+-- For a list of files, we make each one absolute AND do a case-insensitive
+-- sort of the list. `listDirectory` returns files in a (seemingly?)
+-- non-deterministic order, so this is required.
+normalizePaths :: [FilePath] -> IO [FilePath]
+normalizePaths paths = mapM normalizePath (sortCaseInsensitive paths)
 
 -- The default `sort` is case sensitive. For example:
 --     sort ["test", "something", "Tesz", "Somethinz"]
