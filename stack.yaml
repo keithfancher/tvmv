@@ -18,7 +18,7 @@
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
 resolver:
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/26.yaml # GHC 9.2.8
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/21/25.yaml # GHC 9.4.8
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -50,6 +50,12 @@ extra-deps:
 - hspec-discover-2.11.4
 - hspec-expectations-0.8.4
 
+# As of now, the `themoviedb` library has some older dependencies that don't
+# jibe with our newer stack. This (slightly questionable) approach lets us keep
+# on keepin' on until it's updated.
+allow-newer: true
+allow-newer-deps:
+- themoviedb
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

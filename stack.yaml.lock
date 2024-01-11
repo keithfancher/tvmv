@@ -41,8 +41,8 @@ packages:
     hackage: hspec-expectations-0.8.4
 snapshots:
 - completed:
-    sha256: 5a59b2a405b3aba3c00188453be172b85893cab8ebc352b1ef58b0eae5d248a2
-    size: 650475
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/26.yaml
+    sha256: a81fb3877c4f9031e1325eb3935122e608d80715dc16b586eb11ddbff8671ecd
+    size: 640086
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/21/25.yaml
   original:
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/26.yaml
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/21/25.yaml
