@@ -3,7 +3,7 @@ import Command (Command (..), MvOptions (..), SearchKey (..), SeasonSelection (.
 import Data.Text.IO qualified as TIO
 import Domain.Error (Error)
 import Execute (Env (..), execCommandWithAPI, selectRunner)
-import File (InFiles (..), sortCaseInsensitive)
+import File (sortCaseInsensitive)
 import Log (getLatestLog)
 import System.Directory (createDirectoryIfMissing, listDirectory, removePathForcibly)
 import System.FilePath ((</>))
@@ -34,7 +34,7 @@ spec = do
 
 mvSpec :: Spec
 mvSpec = before_ testSetup $ do
-  -- note running `mvSetup` BEFORE this test
+  -- note running `testSetup` BEFORE this test
   describe "mv command" $ do
     it "renames a directory of files according to (mock) API data" $ do
       runTestCommand mvCommand `shouldReturn` Right ()
@@ -76,7 +76,7 @@ mvOptions =
       allowPartial = False, -- don't allow partial matches
       searchKey = Id 790, -- Poirot! by ID
       seasonNum = SeasonNum 12,
-      seasonFiles = Dir testTempDir
+      seasonFiles = [testTempDir]
     }
 
 undoCommand :: Command

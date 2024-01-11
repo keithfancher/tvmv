@@ -11,7 +11,6 @@ where
 import Data.Text qualified as T
 import Domain.API (APIKey)
 import Domain.Show (ItemId)
-import File (InFiles)
 
 -- The three commands
 data Command
@@ -35,7 +34,7 @@ data MvOptions = MvOptions
     allowPartial :: Bool, -- allow partial matches of episodes/files
     searchKey :: SearchKey,
     seasonNum :: SeasonSelection,
-    seasonFiles :: InFiles
+    seasonFiles :: [FilePath]
   }
 
 data SearchOptions = SearchOptions

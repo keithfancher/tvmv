@@ -1,8 +1,6 @@
 module File
-  ( InFiles (..),
-    listDir,
+  ( listDir,
     listFiles,
-    mkInFiles,
     normalizeFileList,
     sortCaseInsensitive,
   )
@@ -10,30 +8,24 @@ where
 
 import Data.List (sortBy)
 import Data.Text qualified as T
-import System.Directory (listDirectory, makeAbsolute)
+import System.Directory (doesDirectoryExist, listDirectory, makeAbsolute)
 import System.FilePath ((</>))
 
--- Our input file selection. Can either be a directory OR a list of files.
-data InFiles = Dir FilePath | Files [FilePath]
-
--- Given the list of FilePaths -- which is how our input comes in from the CLI
--- arg parsing -- create the appropriate `InFiles` type.
--- TODO: This does NOT handle the case of passing in a single file. If there's
--- only one value, we're assuming it's a directory.
-mkInFiles :: [FilePath] -> InFiles
-mkInFiles [] = Dir "." -- empty, default to current directory
-mkInFiles [d] = Dir d -- one element passed in, assume it's a directory
-mkInFiles twoOrMore = Files twoOrMore -- otherwise, a list of files
-
--- Given a dir or files, get back a SORTED list of ABSOLUTE file paths.
-listFiles :: InFiles -> IO [FilePath]
-listFiles (Dir dirPath) = listDir dirPath
-listFiles (Files fileList) = mapM makeAbsolute (normalize fileList)
-  where
-    normalize = normalizeFileList Nothing -- no base path here
+-- Given a directory OR a list of files OR nothing, get back a SORTED list of
+-- ABSOLUTE file paths. If given an empty list, get files in current directory.
+listFiles :: [FilePath] -> IO [FilePath]
+listFiles [] = listDir "." -- no files/paths given, default to current directory
+listFiles [singlePath] = do
+  pathIsDir <- doesDirectoryExist singlePath
+  if pathIsDir -- a single path could be a directory OR a single file
+    then listDir singlePath
+    else mapM makeAbsolute [singlePath]
+listFiles multiplePaths = mapM makeAbsolute $ normalizeFileList Nothing multiplePaths
 
 -- Get a list of files in the given directory. Note that this returns a
 -- SORTED list of ABSOLUTE paths.
+--
+-- TODO: There's redundancy here, some weird organization, needs refactoring.
 listDir :: FilePath -> IO [FilePath]
 listDir dirPath = do
   files <- listDirectory dirPath

@@ -3,7 +3,6 @@ module Args (cliOptParser) where
 import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), SeasonSelection (..), UndoOptions (..))
 import Data.Text qualified as T
 import Domain.API (APIKey)
-import File (InFiles, mkInFiles)
 import Options.Applicative
 import Version (currentVersion)
 
@@ -57,7 +56,7 @@ mvOptionsParser =
     <*> allowPartialParser
     <*> searchKeyParser
     <*> seasonNumParser
-    <*> inFilesParser
+    <*> filePathsParser
 
 seasonNumParser :: Parser SeasonSelection
 seasonNumParser = integerSeasonParser <|> autoSeasonFlag
@@ -122,11 +121,7 @@ maybeApiKeyReader = eitherReader $ \case
   "" -> Right Nothing
   anythingNonEmpty -> Right $ Just $ T.pack anythingNonEmpty
 
-inFilesParser :: Parser InFiles
-inFilesParser = mkInFiles <$> filePathsParser
-
--- We get these in from the CLI as a list of paths, but need to transform it
--- into `InFiles`, the actually-useful type.
+-- One directory OR zero or more file paths. If zero, operate on all files in current dir.
 filePathsParser :: Parser [FilePath]
 filePathsParser =
   many -- `many` == "zero or more"

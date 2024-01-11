@@ -18,13 +18,20 @@ and this project adheres to the
   versions of `tvmv`. (The need to operate on an entire season at once, for
   example.) See the `README` for more details!
 
+### Fixed
+
+- A single file parameter is no longer *assumed* to be a directory -- we now
+  actually *check* whether it's a directory. In other words, you can now pass
+  a single (non-directory) file into `tvmv` without it complaining. (This is
+  most useful when using the new `--auto-detect` flag.)
+
 
 ## 0.2.0 - 2023-09-08
 
 ### Added
 
-- Show a URL for each returned TV show in the `search` results list. Handy to
-  find more info about a show, verify you've got the right ID, etc.
+- Show a TMDB URL for each returned TV show in the `search` results list.
+  Handy to find more info about a show, verify you've got the right ID, etc.
 
 ### Changed
 
