@@ -41,6 +41,7 @@ That's all there is to it!
   + [How is this different from [bulk-rename tool X]?](#how-is-this-different-from-bulk-rename-tool-x)
   + [What about FileBot?](#what-about-filebot)
   + [Sonarr/Radarr?](#sonarrradarr)
+  + [I use Windows and I'm getting "invalid character" errors](#i-use-windows-and-im-getting-invalid-character-errors)
 
 
 ## Quickstart / Demo
@@ -432,3 +433,16 @@ These tools are fantastic, and I highly recommend them if you need/want the
 functionality they provide. But they are *way* overkill for my needs. To
 install software like this simply to pull API data and rename files is... too
 much! (For me, at least.)
+
+### I use Windows and I'm getting "invalid character" errors
+
+Windows support for Unicode in the command-line is dicey. See the ["Important
+note for Windows users!"](https://github.com/keithfancher/kept#important-note-for-windows-users)
+section in the readme for `kept`, another tool of mine, for a workaround.
+See also [this StackOverflow
+post](https://stackoverflow.com/questions/49476326/displaying-unicode-in-powershell/49481797#49481797)
+for more details.
+
+In the future, I also intend to add an option to limit filenames to the [Portable Filename Character
+Set](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_282),
+which will be handy for this and other reasons.
