@@ -1,11 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
 name:           tvmv
-version:        0.2.0
+version:        0.3.0
 description:    Please see the README on GitHub at <https://github.com/keithfancher/tvmv#readme>
 homepage:       https://github.com/keithfancher/tvmv#readme
 bug-reports:    https://github.com/keithfancher/tvmv/issues
