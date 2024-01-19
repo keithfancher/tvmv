@@ -36,7 +36,7 @@ fullFilename = do
   _ <- many anyChar
   return nums
   where
-    seasonEpNum = seasonEpNumXFormat <|> seasonEpNumSEFormat
+    seasonEpNum = seasonEpNumXFormat <|> seasonEpNumSEFormat <|> seasonEpNumEpOnlyFormat
     -- Consume characters until we succeed in parsing ep/season num. We need a
     -- version of our parser that doesn't *consume* our ep/season number here,
     -- since `manyTill` throws that bit away.
@@ -61,6 +61,15 @@ seasonEpNumSEFormat = do
   _ <- char 'e' <|> char 'E'
   e <- parseInt
   return SeasonEpNum {seasonNum = s, episodeNum = e}
+
+-- Consumes, e.g., "EP24". Often used for shows with only a single season.
+-- Implies season 1.
+seasonEpNumEpOnlyFormat :: Parser SeasonEpNum
+seasonEpNumEpOnlyFormat = do
+  _ <- char 'e' <|> char 'E'
+  _ <- char 'p' <|> char 'P'
+  e <- parseInt
+  return SeasonEpNum {seasonNum = 1, episodeNum = e}
 
 parseInt :: Parser Int
 parseInt = do

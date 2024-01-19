@@ -31,7 +31,9 @@ inputOutputBaseCases =
     ("s01e21", SeasonEpNum {seasonNum = 1, episodeNum = 21}),
     ("s001e021", SeasonEpNum {seasonNum = 1, episodeNum = 21}), -- more zeros
     ("S01E21", SeasonEpNum {seasonNum = 1, episodeNum = 21}), -- uppercase
-    ("S01e21", SeasonEpNum {seasonNum = 1, episodeNum = 21}) -- mixed case
+    ("S01e21", SeasonEpNum {seasonNum = 1, episodeNum = 21}), -- mixed case
+    ("ep12", SeasonEpNum {seasonNum = 1, episodeNum = 12}), -- ep-number only
+    ("eP12", SeasonEpNum {seasonNum = 1, episodeNum = 12}) -- ep-number only, mixed case
   ]
 
 inputOutputTrailing :: [(String, SeasonEpNum)]

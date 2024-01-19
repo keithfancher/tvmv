@@ -7,6 +7,15 @@ and this project adheres to the
 [Haskell Package Versioning Policy](https://pvp.haskell.org/).
 
 
+## Unreleased
+
+### Added
+
+- When using auto-detect mode, can now parse file names in the `EPxx` format.
+  One often sees this format with shows that only have a single season. (e.g.
+  `Cowboy Bebop - EP09 - Jamming with Edward.mkv`)
+
+
 ## 0.3.0 - 2024-01-11
 
 ### Added
