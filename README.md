@@ -42,6 +42,7 @@ That's all there is to it!
   + [What about FileBot?](#what-about-filebot)
   + [Sonarr/Radarr?](#sonarrradarr)
   + [I use Windows and I'm getting "invalid character" errors](#i-use-windows-and-im-getting-invalid-character-errors)
+  + [How can I rename files for all of a show's seasons at once?](#how-can-i-rename-files-for-all-of-a-shows-seasons-at-once)
 
 
 ## Quickstart / Demo
@@ -446,3 +447,44 @@ for more details.
 In the future, I also intend to add an option to limit filenames to the [Portable Filename Character
 Set](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_282),
 which will be handy for this and other reasons.
+
+### How can I rename files for all of a show's seasons at once?
+
+If you have several seasons of a show, with all the video files in the same
+directory (*not* in subdirectories), you can simply use `tvmv`'s new
+`--auto-detect` flag (aka `-a`). In auto-detect mode, it will happily rename
+episodes from different seasons all at once.
+
+However, `tvmv` does not currently traverse subdirectories automatically. If
+each season of your show is in its own subdirectory, your best bet is to use
+tools like `find` and `xargs`. Note that the following is for Linux and MacOS
+users only -- I don't know if there is a Windows equivalent:
+
+```
+# This is my directory structure: two directories, `s4` and `s12`, each with
+# corresponding episodes inside.
+$ find .
+./s12
+./s12/Poirot S12E1.mp4
+./s12/Poirot S12E2.mp4
+./s12/Poirot S12E3.mp4
+./s12/Poirot S12E4.mp4
+./s4
+./s4/s4e1.mp4
+
+# Now, with the help of `find` and `xargs`, we find all `mp4` files in these
+# dirs and pass those files to `tvmv mv`:
+$ find -name '*.mp4' -type f -print0 | xargs -0 tvmv mv -f -n poirot -a
+
+[ tvmv does its thing ]
+
+# Et voila!
+$ find .
+./s12
+./s12/Agatha Christie's Poirot - s12e01 - Three Act Tragedy.mp4
+./s12/Agatha Christie's Poirot - s12e02 - Hallowe'en Party.mp4
+./s12/Agatha Christie's Poirot - s12e03 - Murder on the Orient Express.mp4
+./s12/Agatha Christie's Poirot - s12e04 - The Clocks.mp4
+./s4
+./s4/Agatha Christie's Poirot - s04e01 - The ABC Murders.mp4
+```
