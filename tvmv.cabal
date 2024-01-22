@@ -38,6 +38,7 @@ library
       Exec.Rename
       Execute
       File
+      Filenames
       Log
       Match
       Monad.Tvmv
@@ -116,6 +117,7 @@ test-suite unit
       API.TMDBSpec
       Domain.RenameSpec
       Exec.EnvSpec
+      FilenamesSpec
       FileSpec
       LogSpec
       MatchSpec
