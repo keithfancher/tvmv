@@ -4,11 +4,11 @@ module Filenames
   )
 where
 
-import Data.Char (isAscii, isPrint)
+import Data.Char (isAlphaNum, isAscii, isPrint)
 import System.FilePath (makeValid)
 import System.FilePath.Windows qualified as Win
 
--- Make portable, AKA "make Windows-friendly":
+-- Make filenames portable, AKA "make Windows-friendly":
 --
 -- 1. Ensure that only printable ASCII characters are used.
 -- 2. Another pass to remove Windows reserved characters and filenames.
@@ -31,19 +31,24 @@ import System.FilePath.Windows qualified as Win
 --   - https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
 --   - https://en.wikipedia.org/wiki/Comparison_of_file_systems
 makePortable :: FilePath -> FilePath
-makePortable = makeValid . Win.makeValid . printableAsciiString -- Note these are called in reverse order
+makePortable = makeValid . Win.makeValid . map makePrintableAscii -- Note these are called in reverse order
   where
-    printableAsciiString = map makePrintableAscii
+    makePrintableAscii c =
+      if isAscii c && isPrint c -- No control characters, no Unicode, etc.
+        then c
+        else '-'
 
--- TL;DR, these characters only: A–Z a–z 0–9 . _ -
--- See: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_282
--- TODO!
+-- Make filenames VERY portable, using these characters only:
+--   [A–Z] [a–z] [0–9] ._-
+-- As defined here:
+--   https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_282
+-- Probably more restrictive than anyone wants or needs. But here it is!
+--
+-- Note that we also call the various `makeValid` functions here to catch
+-- Windows reserved filenames, etc.
 makeVeryPortable :: FilePath -> FilePath
-makeVeryPortable = undefined
-
--- Printable ASCII only. No control characters, no Unicode, etc.
-makePrintableAscii :: Char -> Char
-makePrintableAscii c =
-  if isAscii c && isPrint c
-    then c
-    else '-'
+makeVeryPortable = makeValid . Win.makeValid . map makeCharVeryPortable
+  where
+    makeCharVeryPortable c = if isVeryPortable c then c else '-'
+    isVeryPortable c = isAscii c && (isAlphaNum c || isPortableSymbol c)
+    isPortableSymbol c = c `elem` ['.', '-', '_']
