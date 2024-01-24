@@ -51,6 +51,7 @@ library:
   - parsec
   - time
   - word-wrap
+  - containers
 
 executables:
   tvmv:

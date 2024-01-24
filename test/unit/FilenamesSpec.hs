@@ -22,11 +22,16 @@ testResultSet testFunc (input, expected) = testFunc input `shouldBe` expected
 portableTestCases :: [(FilePath, FilePath)]
 portableTestCases =
   [ ("buffy.mkv", "buffy.mkv"), -- already valid, a no-op
-    ("buffy: the pilot.mkv", "buffy_ the pilot.mkv"),
-    ("Let's go to a café?!", "Let's go to a caf-_!"),
+    ("buffy: the pilot.mkv", "buffy- the pilot.mkv"),
     ("Do you know 日本語?.mp4", "Do you know ---_.mp4"),
     ("nul.mov", "nul_.mov"), -- fun fact: `nul` is reserved in Windows!
-    (":::?)_--_.?", "____)_--_._")
+    (":::?)_--_.?", "---_)_--_._"),
+    ("Let's go to a café?!", "Let's go to a cafe_!"),
+    ("Büffÿ: Thë Vämp Slãýêr!!!", "Buffy- The Vamp Slayer!!!"),
+    ("François the NIÑO", "Francois the NINO"),
+    ("I say \"hello hello\"", "I say 'hello hello'"),
+    ("If You Can’t Win, Don’t “Play”", "If You Can't Win, Don't \'Play\'"), -- "smart" quotes
+    ("Dover–Calais crossing — and stuff", "Dover-Calais crossing - and stuff") -- em and en dashes
   ]
 
 -- Tuples of (input, expectedOutput)
@@ -34,8 +39,9 @@ veryPortableTestCases :: [(FilePath, FilePath)]
 veryPortableTestCases =
   [ ("buffy.mkv", "buffy.mkv"), -- still valid, a no-op
     ("buffy: the pilot.mkv", "buffy--the-pilot.mkv"),
-    ("Let's go to a café?!", "Let-s-go-to-a-caf---"),
+    ("Let's go to a café?!", "Let-s-go-to-a-cafe--"),
     ("Do you know 日本語?.mp4", "Do-you-know-----.mp4"),
     ("nul.mov", "nul_.mov"), -- still no good!
-    (":::?)_--_.?", "-----_--_.-")
+    (":::?)_--_.?", "-----_--_.-"),
+    ("Büffÿ: Thë Vämp Slãýêr!!!", "Buffy--The-Vamp-Slayer---")
   ]
