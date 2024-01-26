@@ -31,6 +31,7 @@ default-extensions:
 - DuplicateRecordFields
 - LambdaCase
 - OverloadedStrings
+- StrictData # prefer strict data to prevent space leaks
 
 ghc-options:
 - -Wall
