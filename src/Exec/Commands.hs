@@ -17,14 +17,16 @@ import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
 import Data.List (intercalate)
+import Data.Text qualified as T
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Domain.Rename (MatchedEpisodes, RenameOp, episodes, matchEpisodes, matchEpisodesAllowPartial, renameFiles, undoRenameOp)
-import Domain.Show (Episode, Season (..))
+import Domain.Show (Episode (..), Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Filter (filterFiles)
 import Exec.Rename (RenameResult, executeRename, makeOpRelative)
 import File (listFiles)
+import Filenames (makePortable)
 import Log (readLatestLogFile, readLogFile)
 import Match (MatchResults (..), ParseResults (..), ParsedFile, matchParsedEpisodes, parseFilePaths)
 import Print (prettyPrintListLn)
@@ -50,10 +52,13 @@ renameSeason env withApi mvOptions = do
   -- Fetch episode data from our configured API:
   putStrLn' $ fetchMessage seasonNums
   episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
+  -- If the option is set, make episode names "portable", aka Windows-friendly:
+  let makePortableFiles = False -- TODO: CLI option!
+  let niceEpData = if makePortableFiles then makePortableEpNames episodeData else episodeData
   -- Match API data with the list of input files, smartly or dumbly:
   matchedFiles <- case seasonSelection of
-    SeasonNum _ -> liftEither $ match episodeData filteredFiles -- lexicographic sort, "dumb" matching
-    Auto -> autoMatchFiles (successes parseResults) episodeData -- parsed filenames, "smart" matching
+    SeasonNum _ -> liftEither $ match niceEpData filteredFiles -- lexicographic sort, "dumb" matching
+    Auto -> autoMatchFiles (successes parseResults) niceEpData -- parsed filenames, "smart" matching
   -- Finally, actually rename the input files based on the API data:
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) force
@@ -122,6 +127,14 @@ getSeasonNums (SeasonNum n) _ = return [n]
 getSeasonNums Auto parseResults = case seasonNumbers parseResults of
   [] -> throwError $ ParseError "Unable to parse season/episode data from any input files"
   nonEmpty -> return nonEmpty
+
+-- Make episode names "portable", aka Windows-friendly. Remove/replace fancy
+-- characters, watch for reserved filenames, etc.
+makePortableEpNames :: [Episode] -> [Episode]
+makePortableEpNames = map makePortableName
+  where
+    makePortableName e = e {episodeName = makeTextPortable (episodeName e)}
+    makeTextPortable = T.pack . makePortable . T.unpack
 
 -- Undo a previously-run rename operation, given a log file. The `undo` command.
 undoRename ::
