@@ -31,7 +31,7 @@ executeRenameSingle renameOp = do
   renameResults <- tryRename (oldPath renameOp) (newPath renameOp)
   tell [mkResult renameOp renameResults]
 
-tryRename :: MonadIO m => FilePath -> FilePath -> m (Either IOError ())
+tryRename :: (MonadIO m) => FilePath -> FilePath -> m (Either IOError ())
 tryRename old new = liftIO $ try (Dir.renameFile old new)
 
 mkResult :: RenameOp -> Either IOError () -> RenameResult
@@ -39,13 +39,13 @@ mkResult o (Left err) = Failure o err
 mkResult o (Right _) = Success o
 
 -- Replace the paths in a RenameOp with paths relative to the current directory.
-makeOpRelative :: MonadIO m => RenameOp -> m RenameOp
+makeOpRelative :: (MonadIO m) => RenameOp -> m RenameOp
 makeOpRelative (RenameOp old new) = do
   relativeOld <- liftIO $ makeRelativeToCurrentDirectory old
   relativeNew <- liftIO $ makeRelativeToCurrentDirectory new
   return RenameOp {oldPath = relativeOld, newPath = relativeNew}
 
-makeResultRelative :: MonadIO m => RenameResult -> m RenameResult
+makeResultRelative :: (MonadIO m) => RenameResult -> m RenameResult
 makeResultRelative result = do
   relativeOp <- makeOpRelative (getOp result)
   return $ setOp result relativeOp

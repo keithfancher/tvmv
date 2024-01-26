@@ -9,11 +9,11 @@ import Exec.Rename (RenameResult (..), getOp)
 
 class Pretty a where
   prettyText :: a -> T.Text -- only one required function
-  prettyPrint :: MonadIO m => a -> m ()
-  prettyPrintLn :: MonadIO m => a -> m ()
+  prettyPrint :: (MonadIO m) => a -> m ()
+  prettyPrintLn :: (MonadIO m) => a -> m ()
   prettyList :: [a] -> T.Text
-  prettyPrintList :: MonadIO m => [a] -> m ()
-  prettyPrintListLn :: MonadIO m => [a] -> m ()
+  prettyPrintList :: (MonadIO m) => [a] -> m ()
+  prettyPrintListLn :: (MonadIO m) => [a] -> m ()
 
   -- Default implementations:
   prettyPrint = liftIO . TIO.putStr . prettyText
