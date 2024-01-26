@@ -76,7 +76,7 @@ fetchMessage seasons = case seasons of
 
 -- Fetch data for the given seasons via the given API function, concat all
 -- episodes of the resulting seasons into a single list.
-fetchEpisodeData :: Monad m => (Int -> m Season) -> [Int] -> m [Episode]
+fetchEpisodeData :: (Monad m) => (Int -> m Season) -> [Int] -> m [Episode]
 fetchEpisodeData apiGetSeason seasonNumList = concatSeasonEps <$> mapM apiGetSeason seasonNumList
   where
     concatSeasonEps = concatMap Domain.Show.episodes
@@ -181,5 +181,5 @@ awaitConfirmation False = do
     confirm _ = Left UserAbort -- default is to bail
 
 -- Wrapper for less lifting :')
-putStrLn' :: MonadIO m => String -> m ()
+putStrLn' :: (MonadIO m) => String -> m ()
 putStrLn' = liftIO . putStrLn
