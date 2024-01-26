@@ -93,7 +93,7 @@ autoMatchFiles parsedFiles epList = do
   showMatchFailures f
   case Domain.Rename.episodes matchedEps of -- stupid ambiguous refs require this qualification :')
     [] -> throwError $ ParseError zeroMatchError
-    _ -> return matchedEps
+    _nonEmpty -> return matchedEps
   where
     zeroMatchError =
       "No parsed files matched the API episode data ... try using the `-s` flag to manually specify the correct season?"
