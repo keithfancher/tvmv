@@ -35,6 +35,7 @@ library
       Exec.Commands
       Exec.Env
       Exec.Filter
+      Exec.Mv
       Exec.Rename
       Execute
       File

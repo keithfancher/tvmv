@@ -13,8 +13,9 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Writer.Class (MonadWriter)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
-import Exec.Commands (renameSeason, searchByName, undoRename)
+import Exec.Commands (searchByName, undoRename)
 import Exec.Env (Env (..))
+import Exec.Mv (mv)
 import Exec.Rename (RenameResult)
 import Log (printAndWriteLog, printLog)
 import Monad.Tvmv (Tvmv, runTvmv)
@@ -32,7 +33,7 @@ execCommandWithAPI ::
   APIWrapper m ->
   Command ->
   m ()
-execCommandWithAPI env withApi (Mv mvOpts) = renameSeason env withApi mvOpts
+execCommandWithAPI env withApi (Mv mvOpts) = mv env withApi mvOpts
 execCommandWithAPI env withApi (Search searchOpts) = searchByName env withApi searchOpts
 execCommandWithAPI _ _ (Undo undoOpts) = undoRename undoOpts
 
