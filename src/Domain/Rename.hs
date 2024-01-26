@@ -104,23 +104,20 @@ renameFile :: Episode -> FilePath -> RenameOp
 renameFile ep inFile = RenameOp {oldPath = inFile, newPath = newFullPath}
   where
     newBaseName = generateBaseFileName ep
-    newFullPath = replaceBaseName inFile newBaseName
+    newFullPath = makeValid $ replaceBaseName inFile newBaseName -- Note final call to `makeValid`
 
--- Generate the filename -- note, NOT the full path, nor the extension.
+-- Generate the filename -- note, NOT the full path, nor the extension. Note
+-- the removal of delimiters to ensure no part of it is mistaken for a
+-- directory.
 generateBaseFileName :: Episode -> FilePath
 generateBaseFileName ep =
-  makeValidFileName $
+  removeDelimiters $
     printf
       episodeNameTemplate
       (T.unpack $ episodeShowName ep)
       (episodeSeasonNumber ep)
       (episodeNumber ep)
       (T.unpack $ episodeName ep)
-
--- Could also consider being more strict, just using the "POSIX portable file
--- name character set"?
-makeValidFileName :: FilePath -> FilePath
-makeValidFileName = makeValid . removeDelimiters
 
 -- Technically a filename is "valid" even if it contains path delimiters (at
 -- least according to `System.FilePath`, since it just assumes it's a full
