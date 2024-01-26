@@ -54,6 +54,7 @@ mvOptionsParser =
     <*> forceFlagParser
     <*> noLogFlagParser
     <*> allowPartialParser
+    <*> portableNamesParser
     <*> searchKeyParser
     <*> seasonNumParser
     <*> filePathsParser
@@ -114,6 +115,14 @@ allowPartialParser =
     ( long "allow-partial"
         <> short 'p'
         <> help "Allow mismatched number of episodes/files. (i.e. you have an incomplete set of files.) See README for more details."
+    )
+
+portableNamesParser :: Parser Bool
+portableNamesParser =
+  switch
+    ( long "portable-filenames"
+        <> short 'w'
+        <> help "Rename using portable (aka Windows-friendly) filenames. ASCII, without special symbols, etc."
     )
 
 maybeApiKeyReader :: ReadM (Maybe APIKey)

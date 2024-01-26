@@ -41,7 +41,7 @@ renameSeason ::
   MvOptions ->
   m ()
 renameSeason env withApi mvOptions = do
-  let (MvOptions maybeApiKey force _ _ _ seasonSelection inFiles) = mvOptions
+  let (MvOptions maybeApiKey force _noLog _partial portable _searchKey seasonSelection inFiles) = mvOptions
   -- Before doing anything, ensure we have an API key available:
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
   -- Get the list of input files, parse out relevant season/episode data:
@@ -53,8 +53,7 @@ renameSeason env withApi mvOptions = do
   putStrLn' $ fetchMessage seasonNums
   episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
   -- If the option is set, make episode names "portable", aka Windows-friendly:
-  let makePortableFiles = False -- TODO: CLI option!
-  let niceEpData = if makePortableFiles then makePortableEpNames episodeData else episodeData
+  let niceEpData = if portable then makePortableEpNames episodeData else episodeData
   -- Match API data with the list of input files, smartly or dumbly:
   matchedFiles <- case seasonSelection of
     SeasonNum _ -> liftEither $ match niceEpData filteredFiles -- lexicographic sort, "dumb" matching
