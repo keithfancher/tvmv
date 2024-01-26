@@ -38,7 +38,8 @@ renameSeason ::
   APIWrapper m ->
   MvOptions ->
   m ()
-renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQuery seasonSelection inFiles) = do
+renameSeason env withApi mvOptions = do
+  let (MvOptions maybeApiKey force _ _ _ seasonSelection inFiles) = mvOptions
   -- Before doing anything, ensure we have an API key available:
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
   -- Get the list of input files, parse out relevant season/episode data:
@@ -57,9 +58,9 @@ renameSeason env withApi (MvOptions maybeApiKey force _ partialMatches searchQue
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) force
   where
-    match = if partialMatches then matchEpisodesAllowPartial else matchEpisodes
+    match = if allowPartial mvOptions then matchEpisodesAllowPartial else matchEpisodes
     renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
-    searchSeason k = case searchQuery of
+    searchSeason k = case searchKey mvOptions of
       (Name n) -> searchSeasonByName withApi k n
       (Id i) -> searchSeasonById withApi k i
 
