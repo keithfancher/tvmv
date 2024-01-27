@@ -1,6 +1,6 @@
 module Exec.Commands.Mv (mv) where
 
-import API (searchSeasonById, searchSeasonByName)
+import API qualified
 import Command (MvOptions (..), SearchKey (..), SeasonSelection (..))
 import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -28,36 +28,42 @@ mv ::
   MvOptions ->
   m ()
 mv env withApi mvOptions = do
-  let (MvOptions maybeApiKey force _noLog _partial portable _searchKey seasonSelection inFiles) = mvOptions
+  let (MvOptions maybeApiKey force _noLog _partial mkPortable _searchKey seasonSelection inFiles) = mvOptions
+
   -- Before doing anything, ensure we have an API key available:
   apiKey <- liftEither $ populateAPIKey maybeApiKey env
+
   -- Get the list of input files, parse out relevant season/episode data:
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
   let parseResults = parseFilePaths filteredFiles
   showParseFailures seasonSelection parseResults
   seasonNums <- getSeasonNums seasonSelection parseResults
+
   -- Fetch episode data from our configured API:
-  putStrLn' $ fetchMessage seasonNums
+  putStrLn' $ showFetchMessage seasonNums
   episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
+
   -- If the option is set, make episode names "portable", aka Windows-friendly:
-  let niceEpData = if portable then makePortableEpNames episodeData else episodeData
+  let niceEpData = if mkPortable then makePortableEpNames episodeData else episodeData
+
   -- Match API data with the list of input files, smartly or dumbly:
   matchedFiles <- case seasonSelection of
     SeasonNum _ -> liftEither $ match niceEpData filteredFiles -- lexicographic sort, "dumb" matching
     Auto -> autoMatchFiles (successes parseResults) niceEpData -- parsed filenames, "smart" matching
-    -- Finally, actually rename the input files based on the API data:
+
+  -- Finally, actually rename the input files based on the API data:
   let renameOps = renameFiles matchedFiles
   runRenameOps renameOps (renameMsg renameOps) force
   where
     match = if allowPartial mvOptions then matchEpisodesAllowPartial else matchEpisodes
     renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
     searchSeason k = case searchKey mvOptions of
-      (Name n) -> searchSeasonByName withApi k n
-      (Id i) -> searchSeasonById withApi k i
+      (Name n) -> API.searchSeasonByName withApi k n
+      (Id i) -> API.searchSeasonById withApi k i
 
 -- Slightly neurotic? Nicer printing of the input seasons.
-fetchMessage :: [Int] -> String
-fetchMessage seasons = case seasons of
+showFetchMessage :: [Int] -> String
+showFetchMessage seasons = case seasons of
   [s] -> base <> " " <> show s -- e.g. "season 12"
   [f, s] -> base <> "s " <> show f <> " and " <> show s -- e.g. "seasons 12 and 13"
   threeOrMore -> base <> "s " <> withCommas threeOrMore -- e.g. "seasons 12, 13, 14"
