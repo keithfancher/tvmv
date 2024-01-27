@@ -5,7 +5,6 @@ import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Domain.Rename (RenameOp (..))
 import Domain.Show (TvShow, showInfoBrief)
-import Exec.Rename (RenameResult (..), getOp)
 
 class Pretty a where
   prettyText :: a -> T.Text -- only one required function
@@ -33,9 +32,3 @@ instance Pretty RenameOp where
     where
       old = T.pack $ oldPath renameOp
       new = T.pack $ newPath renameOp
-
-instance Pretty RenameResult where
-  prettyText r = prettyText (getOp r) <> "\n" <> resultText r
-    where
-      resultText (Success _) = "Sucess!"
-      resultText (Failure _ err) = "ERROR :(\n  " <> T.pack (show err)

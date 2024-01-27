@@ -4,19 +4,63 @@ module Exec.Rename
     getOp,
     makeOpRelative,
     makeResultRelative,
+    runRenameOps,
   )
 where
 
 import Control.Exception (try)
+import Control.Monad.Except (MonadError, liftEither)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
+import Data.Text qualified as T
+import Domain.Error (Error (..))
 import Domain.Rename (RenameOp (..))
+import Print (Pretty (..))
 import System.Directory (makeRelativeToCurrentDirectory)
 import System.Directory qualified as Dir
 
 -- Not quite an Either, since we want the op to exist even in failure cases.
 data RenameResult = Success RenameOp | Failure RenameOp IOError
   deriving (Eq, Show)
+
+-- This lives here rather than with the other `Pretty` instances to avoid an
+-- annoying circular dependency.
+instance Pretty RenameResult where
+  prettyText r = prettyText (getOp r) <> "\n" <> resultText r
+    where
+      resultText (Success _) = "Sucess!"
+      resultText (Failure _ err) = "ERROR :(\n  " <> T.pack (show err)
+
+-- Helper shared by `rename` and `undo` operations.
+runRenameOps ::
+  (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
+  [RenameOp] ->
+  String ->
+  Bool ->
+  m ()
+runRenameOps ops message forceRename = do
+  putStrLn' message
+  relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
+  prettyPrintListLn relativeOps >> putStrLn' ""
+  awaitConfirmation forceRename
+  executeRename ops
+
+-- Given a `force` flag, either waits for the user to confirm an action, or
+-- does nothing at all!
+awaitConfirmation :: (MonadIO m, MonadError Error m) => Bool -> m ()
+awaitConfirmation True = putStrLn' "`force` flag is set, proceeding...\n"
+awaitConfirmation False = do
+  putStrLn' "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
+  input <- liftIO getChar
+  liftEither $ confirm input
+  where
+    confirm 'y' = Right ()
+    confirm 'Y' = Right ()
+    confirm _ = Left UserAbort -- default is to bail
+
+-- Wrapper for less lifting :')
+putStrLn' :: (MonadIO m) => String -> m ()
+putStrLn' = liftIO . putStrLn
 
 -- Actually rename the files on the file system. Accumulate a "log" of rename
 -- results.

@@ -54,33 +54,6 @@ searchByName env withApi (SearchOptions maybeApiKey searchQuery) = do
   where
     resultsMsg r = printf "Found %d results" (length r)
 
--- Helper shared by `rename` and `undo` operations.
-runRenameOps ::
-  (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
-  [RenameOp] ->
-  String ->
-  Bool ->
-  m ()
-runRenameOps ops message forceRename = do
-  putStrLn' message
-  relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
-  prettyPrintListLn relativeOps >> putStrLn' ""
-  awaitConfirmation forceRename
-  executeRename ops
-
--- Given a `force` flag, either waits for the user to confirm an action, or
--- does nothing at all!
-awaitConfirmation :: (MonadIO m, MonadError Error m) => Bool -> m ()
-awaitConfirmation True = putStrLn' "`force` flag is set, proceeding...\n"
-awaitConfirmation False = do
-  putStrLn' "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
-  input <- liftIO getChar
-  liftEither $ confirm input
-  where
-    confirm 'y' = Right ()
-    confirm 'Y' = Right ()
-    confirm _ = Left UserAbort -- default is to bail
-
 -- Wrapper for less lifting :')
 putStrLn' :: (MonadIO m) => String -> m ()
 putStrLn' = liftIO . putStrLn

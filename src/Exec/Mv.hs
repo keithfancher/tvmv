@@ -9,15 +9,14 @@ import Data.List (intercalate)
 import Data.Text qualified as T
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
-import Domain.Rename (MatchedEpisodes, RenameOp, episodes, matchEpisodes, matchEpisodesAllowPartial, renameFiles)
+import Domain.Rename (MatchedEpisodes, episodes, matchEpisodes, matchEpisodesAllowPartial, renameFiles)
 import Domain.Show (Episode (..), Season (..))
 import Exec.Env (Env, populateAPIKey)
 import Exec.Filter (filterFiles)
-import Exec.Rename (RenameResult, executeRename, makeOpRelative)
+import Exec.Rename (RenameResult, runRenameOps)
 import File (listFiles)
 import Filenames (makePortable)
 import Match (MatchResults (..), ParseResults (..), ParsedFile, matchParsedEpisodes, parseFilePaths)
-import Print (prettyPrintListLn)
 import System.Directory (makeRelativeToCurrentDirectory)
 import Text.Printf (printf)
 
@@ -122,35 +121,6 @@ makePortableEpNames = map makePortableName
   where
     makePortableName e = e {episodeName = makeTextPortable (episodeName e)}
     makeTextPortable = T.pack . makePortable . T.unpack
-
--- TODO: move to Rename.hs or Shared or something
---
--- Helper shared by `rename` and `undo` operations.
-runRenameOps ::
-  (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
-  [RenameOp] ->
-  String ->
-  Bool ->
-  m ()
-runRenameOps ops message forceRename = do
-  putStrLn' message
-  relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
-  prettyPrintListLn relativeOps >> putStrLn' ""
-  awaitConfirmation forceRename
-  executeRename ops
-
--- Given a `force` flag, either waits for the user to confirm an action, or
--- does nothing at all!
-awaitConfirmation :: (MonadIO m, MonadError Error m) => Bool -> m ()
-awaitConfirmation True = putStrLn' "`force` flag is set, proceeding...\n"
-awaitConfirmation False = do
-  putStrLn' "Continue? (y/N) " -- Note: need `putStrLn` here, not `putStr` (because buffering)
-  input <- liftIO getChar
-  liftEither $ confirm input
-  where
-    confirm 'y' = Right ()
-    confirm 'Y' = Right ()
-    confirm _ = Left UserAbort -- default is to bail
 
 -- Wrapper for less lifting :')
 putStrLn' :: (MonadIO m) => String -> m ()
