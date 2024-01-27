@@ -407,8 +407,8 @@ human-friendly) format.
 ### Is there a GUI?
 
 Nope, it's a command-line tool. It probably wouldn't be hard to build a GUI on
-top of it, but that's not a priority for me at the moment. (Calling `tvmv mv
--n buffy -a` is quick and easy! That's really all there is to it.)
+top of it, but that's not a priority for me. (Calling `tvmv mv -n buffy -a` is
+quick and easy! That's really all there is to it.)
 
 ### How is this different from \[bulk-rename tool X\]?
 
