@@ -37,6 +37,7 @@ library
       Exec.Filter
       Exec.Mv
       Exec.Rename
+      Exec.Undo
       Execute
       File
       Filenames
