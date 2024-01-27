@@ -11,6 +11,10 @@ and this project adheres to the
 
 ### Added
 
+- CLI option to rename files more portably (`-w` or `--portable-filenames`).
+  This results in output filenames which, in particular, are more
+  Windows-friendly thanks to a reduced set of characters. (**NOTE:** This will
+  likely become the default in a future version of `tvmv`.)
 - When using auto-detect mode, can now parse file names in the `EPxx` format.
   One often sees this format with shows that only have a single season. (e.g.
   `Cowboy Bebop - EP09 - Jamming with Edward.mkv`)

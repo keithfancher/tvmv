@@ -33,6 +33,8 @@ That's all there is to it!
      * [search](#search)
   + [A note on the mv command and show-matching](#a-note-on-the-mv-command-and-show-matching)
   + [Other options](#other-options)
+     * [-f, --force](#-f---force)
+     * [-w, --portable-filenames](#-w---portable-filenames)
   + [Configuration / Customization?](#configuration--customization)
 * [Running tests](#running-tests)
 * [FAQ](#faq)
@@ -345,10 +347,33 @@ repeatable (or scriptable?), you can match a show by its unique ID using the
 
 ### Other options
 
+Other CLI options you should be aware of.
+
+#### -f, --force
+
 By default, `tvmv` will ask for user confirmation before making any file
 changes. (This goes for both the `mv` and `undo` commands.) If you want to
 skip this confirmation step, simply use the `-f` (or `--force`) command-line
 option. (For example, `tvmv undo -f`.)
+
+#### -w, --portable-filenames
+
+By default, `tvmv` will rename files based on API data, whatever that data may
+look like. This can occasionally result in some annoying filenames, especially
+when the show data contains special characters (dashes, "smart" quotes, etc).
+The Windows command-line in particular tends to behave poorly in these cases,
+and can even [error out
+entirely](#i-use-windows-and-im-getting-invalid-character-errors).
+
+The `-w` (or `--portable-filenames`) option, added in version `0.4.0`, ensures
+that written files use a more limited set of characters and those filenames
+will be valid (and less annoying to work with) on all three supported
+operating systems: Windows, MacOS, and Linux.
+
+Note that, regardless of whether this option is set, `tvmv` will *always*
+ensure it's writing valid filenames for the operating system it's built for.
+In other words, the Windows build of `tvmv` will always create valid Windows
+filenames, the Linux build will create valid Linux filenames, etc.
 
 ### Configuration / Customization?
 
@@ -444,9 +469,9 @@ See also [this StackOverflow
 post](https://stackoverflow.com/questions/49476326/displaying-unicode-in-powershell/49481797#49481797)
 for more details.
 
-In the future, I also intend to add an option to limit filenames to the [Portable Filename Character
-Set](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_282),
-which will be handy for this and other reasons.
+As of `tvmv` version `0.4.0`, there is also a
+[--portable-filenames](#-w---portable-filenames) option which should avoid
+this issue altogether, regardless of your OS.
 
 ### How can I rename files for all of a show's seasons at once?
 
