@@ -32,12 +32,13 @@ library
       Domain.Error
       Domain.Rename
       Domain.Show
+      Exec.Commands
+      Exec.Commands.Mv
+      Exec.Commands.Search
+      Exec.Commands.Undo
       Exec.Env
       Exec.Filter
-      Exec.Mv
       Exec.Rename
-      Exec.Search
-      Exec.Undo
       Execute
       File
       Filenames

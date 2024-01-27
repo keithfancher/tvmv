@@ -13,11 +13,9 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Writer.Class (MonadWriter)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
+import Exec.Commands qualified as Commands
 import Exec.Env (Env (..))
-import Exec.Mv (mv)
 import Exec.Rename (RenameResult)
-import Exec.Search (search)
-import Exec.Undo (undoRename)
 import Log (printAndWriteLog, printLog)
 import Monad.Tvmv (Tvmv, runTvmv)
 
@@ -34,9 +32,9 @@ execCommandWithAPI ::
   APIWrapper m ->
   Command ->
   m ()
-execCommandWithAPI env withApi (Mv mvOpts) = mv env withApi mvOpts
-execCommandWithAPI env withApi (Search searchOpts) = search env withApi searchOpts
-execCommandWithAPI _ _ (Undo undoOpts) = undoRename undoOpts
+execCommandWithAPI env withApi (Mv mvOpts) = Commands.mv env withApi mvOpts
+execCommandWithAPI env withApi (Search searchOpts) = Commands.search env withApi searchOpts
+execCommandWithAPI _ _ (Undo undoOpts) = Commands.undo undoOpts
 
 -- Different commands have different logging behavior, and therefore different
 -- runners.

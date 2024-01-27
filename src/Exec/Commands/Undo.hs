@@ -1,4 +1,4 @@
-module Exec.Undo (undoRename) where
+module Exec.Commands.Undo (undo) where
 
 import Command (UndoOptions (..))
 import Control.Monad.Except (MonadError)
@@ -11,11 +11,11 @@ import Log (readLatestLogFile, readLogFile)
 import Text.Printf (printf)
 
 -- Undo a previously-run rename operation, given a log file. The `undo` command.
-undoRename ::
+undo ::
   (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
   UndoOptions ->
   m ()
-undoRename (UndoOptions forceRename maybeLogFileName) = do
+undo (UndoOptions forceRename maybeLogFileName) = do
   renameOps <- readLog maybeLogFileName
   let reversedOps = map undoRenameOp renameOps
   runRenameOps reversedOps (undoMsg reversedOps) forceRename

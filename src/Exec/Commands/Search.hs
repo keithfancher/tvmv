@@ -1,4 +1,4 @@
-module Exec.Search (search) where
+module Exec.Commands.Search (search) where
 
 import API (searchShowByName)
 import Command (SearchOptions (..))

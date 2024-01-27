@@ -1,4 +1,4 @@
-module Exec.Mv (mv) where
+module Exec.Commands.Mv (mv) where
 
 import API (searchSeasonById, searchSeasonByName)
 import Command (MvOptions (..), SearchKey (..), SeasonSelection (..))
