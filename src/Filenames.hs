@@ -11,11 +11,12 @@ import System.FilePath.Windows qualified as Win
 
 -- Make filenames portable, AKA "make Windows-friendly":
 --
--- 1. First pass to do some "nice" replacements, swapping out characters that
---    have easy ASCII equivalents ('é' for 'e', e.g.).
--- 2. Next, catch any remaining non-printable, non-ASCII characters.
--- 3. Another pass to remove Windows reserved characters and filenames.
--- 4. Another, final call to `makeValid` for whatever the current system is.
+-- 1. Remove annoying characters entirely. (Question marks!)
+-- 2. A pass to do some "nice" replacements, swapping out characters that have
+--    easy ASCII equivalents ('é' for 'e', e.g.).
+-- 3. Catch any remaining non-printable, non-ASCII characters.
+-- 4. Remove Windows reserved characters and filenames.
+-- 5. Another, final call to `makeValid` for whatever the current system is.
 --    This ensures that, if by some wild chance, valid Windows is *not* a subset
 --    of valid filenames for the current system, the final result will still be
 --    valid. But in our current universe, this is almost certainly a no-op.
@@ -34,7 +35,8 @@ import System.FilePath.Windows qualified as Win
 --   - https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
 --   - https://en.wikipedia.org/wiki/Comparison_of_file_systems
 makePortable :: FilePath -> FilePath
-makePortable = makeValid . Win.makeValid . map makePrintableAscii . replaceFancyChars -- Note, called in reverse order
+-- Note, function composition means these are actually called from right to left:
+makePortable = makeValid . Win.makeValid . map makePrintableAscii . replaceFancyChars . removals
   where
     makePrintableAscii c =
       if isAscii c && isPrint c -- No control characters, no Unicode, etc.
@@ -50,11 +52,21 @@ makePortable = makeValid . Win.makeValid . map makePrintableAscii . replaceFancy
 -- Note that we also call the various `makeValid` functions here to catch
 -- Windows reserved filenames, etc.
 makeVeryPortable :: FilePath -> FilePath
-makeVeryPortable = makeValid . Win.makeValid . map makeCharVeryPortable . replaceFancyChars
+makeVeryPortable = makeValid . Win.makeValid . map makeCharVeryPortable . replaceFancyChars . removals
   where
     makeCharVeryPortable c = if isVeryPortable c then c else '-'
     isVeryPortable c = isAscii c && (isAlphaNum c || isPortableSymbol c)
     isPortableSymbol c = c `elem` ['.', '-', '_']
+
+-- Remove annoying characters. For now, this is just question marks. This may
+-- be personal preference, but I'd rather have this:
+--   `Is this an episode name?.mp4`
+-- become this:
+--   `Is this an episode name.mp4`
+-- instead of something like this:
+--   `Is this an episode name_.mp4`
+removals :: FilePath -> FilePath
+removals = filter (/= '?')
 
 -- Replace "fancy" characters in a path with less-fancy ASCII equivalents.
 replaceFancyChars :: FilePath -> FilePath

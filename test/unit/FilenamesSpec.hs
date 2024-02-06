@@ -23,10 +23,10 @@ portableTestCases :: [(FilePath, FilePath)]
 portableTestCases =
   [ ("buffy.mkv", "buffy.mkv"), -- already valid, a no-op
     ("buffy: the pilot.mkv", "buffy- the pilot.mkv"),
-    ("Do you know 日本語?.mp4", "Do you know ---_.mp4"),
+    ("Do you know 日本語?.mp4", "Do you know ---.mp4"),
     ("nul.mov", "nul_.mov"), -- fun fact: `nul` is reserved in Windows!
-    (":::?)_--_.?", "---_)_--_._"),
-    ("Let's go to a café?!", "Let's go to a cafe_!"),
+    (":::?)_--_.?", "---)_--_."),
+    ("Let's go to a café?!", "Let's go to a cafe!"),
     ("Büffÿ: Thë Vämp Slãýêr!!!", "Buffy- The Vamp Slayer!!!"),
     ("BÜffÿ: ThË Vämp SlãÝêr!!!", "BUffy- ThE Vamp SlaYer!!!"), -- mixing case
     ("François the NIÑO", "Francois the NINO"),
@@ -40,9 +40,9 @@ veryPortableTestCases :: [(FilePath, FilePath)]
 veryPortableTestCases =
   [ ("buffy.mkv", "buffy.mkv"), -- still valid, a no-op
     ("buffy: the pilot.mkv", "buffy--the-pilot.mkv"),
-    ("Let's go to a café?!", "Let-s-go-to-a-cafe--"),
-    ("Do you know 日本語?.mp4", "Do-you-know-----.mp4"),
+    ("Let's go to a café?!", "Let-s-go-to-a-cafe-"),
+    ("Do you know 日本語?.mp4", "Do-you-know----.mp4"),
     ("nul.mov", "nul_.mov"), -- still no good!
-    (":::?)_--_.?", "-----_--_.-"),
+    (":::?)_--_.?", "----_--_."),
     ("Büffÿ: Thë Vämp Slãýêr!!!", "Buffy--The-Vamp-Slayer---")
   ]
