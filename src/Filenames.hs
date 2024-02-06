@@ -70,7 +70,7 @@ removals = filter (/= '?')
 
 -- Replace "fancy" characters in a path with less-fancy ASCII equivalents.
 replaceFancyChars :: FilePath -> FilePath
-replaceFancyChars = map replaceChar
+replaceFancyChars = map replaceChar . replaceDoubles
   where
     -- If the char is in our map, replace. Otherwise, leave as-is.
     replaceChar c = Map.findWithDefault c c replacementMap
@@ -85,8 +85,6 @@ replaceFancyChars = map replaceChar
 --
 -- Note that this is FAR from a complete mapping. Just some common low-hanging
 -- fruit.
---
--- TODO, doubles: Æ æ Œ œ
 replacementMap :: Map.Map Char Char
 replacementMap = Map.fromList allReplacementTuples
   where
@@ -124,3 +122,14 @@ replacementMap = Map.fromList allReplacementTuples
 
 genReplacementTuples :: [a] -> a -> [(a, a)]
 genReplacementTuples mapFromList mapToItem = map (,mapToItem) mapFromList
+
+-- Common "double" characters, e.g. "Æ æ Œ œ". Require an extra step because
+-- they map from one char to two.
+replaceDoubles :: FilePath -> FilePath
+replaceDoubles = concatMap replace
+  where
+    replace 'Æ' = "AE"
+    replace 'æ' = "ae"
+    replace 'Œ' = "OE"
+    replace 'œ' = "oe"
+    replace otherChar = [otherChar]
