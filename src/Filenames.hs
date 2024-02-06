@@ -75,24 +75,23 @@ replaceFancyChars = map replaceChar
 -- fruit.
 --
 -- TODO, doubles: Æ æ Œ œ
--- TODO: match case of input (currently maps all to lower-case)
 replacementMap :: Map.Map Char Char
 replacementMap = Map.fromList allReplacementTuples
   where
     allReplacementTuples =
-      genReplacementTuples aLike 'a'
-        ++ genReplacementTuples eLike 'e'
-        ++ genReplacementTuples iLike 'i'
-        ++ genReplacementTuples oLike 'o'
-        ++ genReplacementTuples uLike 'u'
-        ++ genReplacementTuples yLike 'y'
+      genReplacementTuples "ÀÁÂÃÄÅ" 'A'
+        ++ genReplacementTuples "àáâãäå" 'a'
+        ++ genReplacementTuples "ÈÉÊË" 'E'
+        ++ genReplacementTuples "èéêë" 'e'
+        ++ genReplacementTuples "ÌÍÎÏ" 'I'
+        ++ genReplacementTuples "ìíîï" 'i'
+        ++ genReplacementTuples "ÒÓÔÕÖØ" 'O'
+        ++ genReplacementTuples "òóôõöø" 'o'
+        ++ genReplacementTuples "ÙÚÛÜ" 'U'
+        ++ genReplacementTuples "ùúûü" 'u'
+        ++ genReplacementTuples "ÝŸ" 'Y'
+        ++ genReplacementTuples "ýÿ" 'y'
         ++ otherReplacements
-    aLike = "ÀÁÂÃÄÅàáâãäå"
-    eLike = "ÈÉÊËèéêë"
-    iLike = "ÌÍÎÏìíîï"
-    oLike = "ÒÓÔÕÖØòóôõöø"
-    uLike = "ÙÚÛÜùúûü"
-    yLike = "ÝŸýÿ"
     otherReplacements =
       [ ('Ñ', 'N'),
         ('ñ', 'n'),

@@ -28,6 +28,7 @@ portableTestCases =
     (":::?)_--_.?", "---_)_--_._"),
     ("Let's go to a café?!", "Let's go to a cafe_!"),
     ("Büffÿ: Thë Vämp Slãýêr!!!", "Buffy- The Vamp Slayer!!!"),
+    ("BÜffÿ: ThË Vämp SlãÝêr!!!", "BUffy- ThE Vamp SlaYer!!!"), -- mixing case
     ("François the NIÑO", "Francois the NINO"),
     ("I say \"hello hello\"", "I say 'hello hello'"),
     ("If You Can’t Win, Don’t “Play”", "If You Can't Win, Don't \'Play\'"), -- "smart" quotes
