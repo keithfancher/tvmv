@@ -423,8 +423,9 @@ Continue? (y/N)
 ```
 
 **NOTE:** Both the `en` and `de` subtitle files will be renamed to the same
-resulting filename. **DO NOT PROCEED.** One of these files will be
-overwritten.
+resulting filename. As of `tvmv` version `0.5.0`, this operation will simply
+fail. For versions `0.4.0` and below, however, **DO NOT PROCEED.** One of
+these files will be overwritten.
 
 My workaround here is to simply target my preferred language when renaming,
 i.e. `tvmv mv -n "ab fab" -a *en.srt`. The other languages are still around if

@@ -9,7 +9,7 @@ module Exec.Rename
 where
 
 import Control.Exception (try)
-import Control.Monad.Except (MonadError, liftEither)
+import Control.Monad.Except (MonadError, liftEither, when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
 import Data.Text qualified as T
@@ -75,8 +75,15 @@ executeRenameSingle renameOp = do
   renameResults <- tryRename (oldPath renameOp) (newPath renameOp)
   tell [mkResult renameOp renameResults]
 
+-- Attempt a single rename operation. Catches IO exceptions to return as an
+-- `Either`. Will fail if destination path exists.
 tryRename :: (MonadIO m) => FilePath -> FilePath -> m (Either IOError ())
-tryRename old new = liftIO $ try (Dir.renameFile old new)
+tryRename old new = liftIO $ try $ do
+  destFileExists <- Dir.doesPathExist new
+  when destFileExists $ ioError fileExistsError
+  Dir.renameFile old new
+  where
+    fileExistsError = userError $ "Destination file already exists: " <> new
 
 mkResult :: RenameOp -> Either IOError () -> RenameResult
 mkResult o (Left err) = Failure o err
