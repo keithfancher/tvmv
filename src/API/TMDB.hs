@@ -4,6 +4,7 @@ module API.TMDB
   )
 where
 
+import API.Error (toAPIError)
 import Data.Text qualified as T
 import Domain.API (APIKey, APIWrapper (..))
 import Domain.Error (Error (..))
@@ -64,7 +65,7 @@ toTvmv key x = mkTvmv mappedResult
 -- Map Eithers to our internal Error type.
 mapError :: Either TMDB.Error a -> Either Error a
 mapError (Right r) = Right r
-mapError (Left e) = Left $ APIError $ show e
+mapError (Left e) = Left $ toAPIError e
 
 -- Map from TMDB format to our internal domain. (Almost identical really, but
 -- ours is a subset. Plus, mapping is always a sanity-saver.)

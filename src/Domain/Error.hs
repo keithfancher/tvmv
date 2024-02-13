@@ -16,4 +16,5 @@ data Error
 errorMessage :: Error -> String
 -- Specal case for user abort, so it's a bit "nicer":
 errorMessage UserAbort = "Operation aborted! No files have been renamed."
+errorMessage (APIError msg) = "TMDB API error: " <> msg
 errorMessage otherError = "Failed with: " <> show otherError
