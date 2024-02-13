@@ -36,7 +36,7 @@ writeLogFile :: Logger
 writeLogFile [] = return () -- no ops, don't log
 writeLogFile results = do
   logFile <- logFileName
-  putStrLn $ "Writing log to `" <> logFile <> "`. Use `tvmv undo` to undo this operation."
+  putStrLn $ "Writing log to `" <> logFile <> "`.\nUse `tvmv undo` to undo any changes made by this operation."
   TIO.writeFile logFile (getLogText results)
 
 -- Print only, don't write a log file.
@@ -45,6 +45,12 @@ printLog [] = return () -- don't print if empty
 printLog results = do
   relativeResults <- mapM makeResultRelative results -- print relative paths for readability
   prettyPrintListLn relativeResults
+  putStrLn $ "\n" <> finalCountMsg
+  where
+    totalOps = length results
+    numSuccesses = length $ successfulOps results
+    numFailures = totalOps - numSuccesses
+    finalCountMsg = show numSuccesses <> "/" <> show totalOps <> " operations succeeded. " <> show numFailures <> " failures.\n"
 
 -- Print AND log. As you might expect.
 printAndWriteLog :: Logger
