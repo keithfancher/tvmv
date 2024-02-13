@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- More user-friendly messaging, in both success and error cases.
+
 ### Fixed
 
 - Do not allow rename operations to overwrite existing files.
