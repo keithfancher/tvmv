@@ -28,7 +28,6 @@ populateAPIKey :: Maybe APIKey -> Env -> Either Error APIKey
 populateAPIKey (Just cliArgsKey) _ = Right cliArgsKey -- CLI args take precedence
 populateAPIKey Nothing env = case envOrFile of
   Just k -> Right k
-  Nothing -> Left missingKeyError
+  Nothing -> Left MissingAPIKey
   where
     envOrFile = apiKeyEnvVar env <|> apiKeyFile env -- otherwise try these, in this order
-    missingKeyError = InvalidInput "Missing API key! Please provide via command line args, env var, or file"
