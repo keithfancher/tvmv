@@ -12,7 +12,6 @@ import Control.Exception (try)
 import Control.Monad.Except (MonadError, liftEither, when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
-import Data.Text qualified as T
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp (..))
 import Print (Pretty (..))
@@ -29,7 +28,7 @@ instance Pretty RenameResult where
   prettyText r = prettyText (getOp r) <> "\n" <> resultText r
     where
       resultText (Success _) = "Sucess!"
-      resultText (Failure _ err) = "ERROR :(\n  " <> T.pack (show err)
+      resultText (Failure _ err) = "ERROR :(\n  " <> prettyText err
 
 -- Helper shared by `rename` and `undo` operations.
 runRenameOps ::
