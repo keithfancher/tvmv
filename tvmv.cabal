@@ -44,6 +44,7 @@ library
       File
       Filenames
       Filenames.Extensions
+      Language.Codes
       Log
       Match
       Monad.Tvmv
