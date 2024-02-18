@@ -32,12 +32,12 @@ That's all there is to it!
         + [Log files](#log-files)
      * [search](#search)
   + [A note on the mv command and show-matching](#a-note-on-the-mv-command-and-show-matching)
+  + [Multi-language subtitle files](#multi-language-subtitle-files)
   + [Other options](#other-options)
      * [-f, --force](#-f---force)
      * [-w, --portable-filenames](#-w---portable-filenames)
   + [Configuration / Customization?](#configuration--customization)
 * [Known limitations](#known-limitations)
-  + [Multi-language subtitle files](#multi-language-subtitle-files)
   + [Multi-episode files](#multi-episode-files)
   + [Multiple episode orderings](#multiple-episode-orderings)
 * [Running tests](#running-tests)
@@ -349,6 +349,74 @@ If you don't trust this behavior, or if you prefer something guaranteed to be
 repeatable (or scriptable?), you can match a show by its unique ID using the
 `-i` flag. As mentioned above, you can get a show's id via `tvmv search`.
 
+### Multi-language subtitle files
+
+As of version `0.5.0`, `tvmv` supports multi-language subtitle files. Assuming
+the language metadata in your filenames follows [the convention defined by
+Plex](https://support.plex.tv/articles/200471133-adding-local-subtitles-to-your-media/#toc-3),
+`tvmv` will maintain that metadata when it renames your files.
+
+When using the `--auto-detect`/`-a` mode, this all just works as expected and
+doesn't require any extra effort on your part:
+
+```
+$ ls -1
+'abfab - s02e03.de.srt'
+'abfab - s02e03.en.sdh.forced.srt'
+'abfab - s02e03.mp4'
+
+$ tvmv mv -n "ab fab" -a
+Fetching episode data from API for season 2
+[etc, tvmv does its thing]
+
+$ ls -1
+'Absolutely Fabulous - s02e03 - Morocco.de.srt'
+'Absolutely Fabulous - s02e03 - Morocco.en.sdh.forced.srt'
+'Absolutely Fabulous - s02e03 - Morocco.mp4'
+```
+
+This also works when you're *not* able to use `--auto-detect`/`-a`. However,
+for the number of episodes to line up properly, you'll need to rename *only
+one* set of subs at a time when not using `-a`. For example, consider the
+following (poorly-named) files:
+
+```
+$ ls -1
+'abfab 1.de.srt'
+'abfab 1.en.srt'
+'abfab 1.mp4'
+'abfab 2.de.srt'
+'abfab 2.en.srt'
+'abfab 2.mp4'
+```
+
+We can't use `-a` here because the season/episode numbers can't be
+auto-detected. Therefore we must take three passes: one for each language
+(`en` and `de`) and one for the episode files themselves (the `mp4` files).
+Here's what the first pass might look like, targeting only the English
+subtitles:
+
+```
+$ tvmv mv -p -n "ab fab" -s 1 *en.srt
+Fetching episode data from API for season 1
+[etc, tvmv does its thing]
+
+$ ls -1
+'abfab 1.de.srt'
+'abfab 1.mp4'
+'abfab 2.de.srt'
+'abfab 2.mp4'
+'Absolutely Fabulous - s01e01 - Fashion.en.srt'
+'Absolutely Fabulous - s01e02 - Fat.en.srt'
+
+# Now again for German subs:
+$ tvmv mv -p -n "ab fab" -s 1 *de.srt
+[etc]
+```
+
+See the section on ["Dumb mode"](#mv-mode-2-specify-a-season-number) for more
+details on its foibles and limitations.
+
 ### Other options
 
 Other CLI options you should be aware of.
@@ -394,44 +462,6 @@ mostly with my own needs in mind.
 Stuff `tvmv` doesn't handle *yet*, but which is on my radar for future
 releases.
 
-### Multi-language subtitle files
-
-`tvmv` does not currently detect the language code as part of a file's
-extension. This results in some funky behavior if you have multiple subtitle
-files for a single episode. For example:
-
-```
-$ ls -1
-'Absolutely Fabulous - s02e03.de.srt'
-'Absolutely Fabulous - s02e03.en.srt'
-'Absolutely Fabulous - s02e03.mp4'
-
-$ tvmv mv -n "ab fab" -a
-Fetching episode data from API for season 2
-Preparing to execute the following 3 rename operations...
-
-Absolutely Fabulous - s02e03.de.srt ->
-Absolutely Fabulous - s02e03 - Morocco.srt
-
-Absolutely Fabulous - s02e03.en.srt ->
-Absolutely Fabulous - s02e03 - Morocco.srt
-
-Absolutely Fabulous - s02e03.mp4 ->
-Absolutely Fabulous - s02e03 - Morocco.mp4
-
-Continue? (y/N)
-```
-
-**NOTE:** Both the `en` and `de` subtitle files will be renamed to the same
-resulting filename. As of `tvmv` version `0.5.0`, this operation will simply
-fail. For versions `0.4.0` and below, however, **DO NOT PROCEED.** One of
-these files will be overwritten.
-
-My workaround here is to simply target my preferred language when renaming,
-i.e. `tvmv mv -n "ab fab" -a *en.srt`. The other languages are still around if
-I need them. I realize this approach won't work for everyone, however. Fixing
-this is a priority for me!
-
 ### Multi-episode files
 
 When using the `-a` flag to auto-detect season/episode numbers, double/triple
@@ -455,9 +485,10 @@ Adventure Time - s07e14 - The More You Moe, The Moe You Know (1).mkv
 [etc.]
 ```
 
-**NOTE:** `S07E14-E15` is parsed as `s07e14`. Again, **DO NOT PROCEED**. No
-data will be lost in this case, but it's certainly annoying. For now, the best
-bet is to rename double episodes manually.
+**NOTE:** `S07E14-E15` is parsed as `s07e14`.
+
+No data will be lost in this case, but it's certainly annoying. For now, the
+best bet is to rename double episodes manually.
 
 ### Multiple episode orderings
 

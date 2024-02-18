@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Support multi-language subtitle files! Following the convention [defined by
+  Plex](https://support.plex.tv/articles/200471133-adding-local-subtitles-to-your-media/#toc-3),
+  `tvmv` will properly detect language-code metadata in filenames and ensure
+  it's preserved when renaming a file. See the `README` for more details.
 - More user-friendly messaging, in both success and error cases.
 
 ### Fixed
