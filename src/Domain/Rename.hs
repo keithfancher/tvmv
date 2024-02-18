@@ -15,7 +15,8 @@ where
 import Data.Text qualified as T
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..))
-import System.FilePath (makeValid, replaceBaseName)
+import Filenames.Extensions (replaceBaseName')
+import System.FilePath (makeValid)
 import Text.Printf (printf)
 
 -- Contains a rename "op" for a single file. Either to be performed or which
@@ -104,7 +105,9 @@ renameFile :: Episode -> FilePath -> RenameOp
 renameFile ep inFile = RenameOp {oldPath = inFile, newPath = newFullPath}
   where
     newBaseName = generateBaseFileName ep
-    newFullPath = makeValid $ replaceBaseName inFile newBaseName -- Note final call to `makeValid`
+    -- Note final call to `makeValid`. Also note use of custom
+    -- `replaceBaseName'`, which accounts for language metadata in filename.
+    newFullPath = makeValid $ replaceBaseName' inFile newBaseName
 
 -- Generate the filename -- note, NOT the full path, nor the extension. Note
 -- the removal of delimiters to ensure no part of it is mistaken for a

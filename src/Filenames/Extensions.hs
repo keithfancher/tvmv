@@ -1,5 +1,7 @@
 module Filenames.Extensions (replaceBaseName') where
 
+import Data.Set qualified as Set
+import Language.Codes (iso639_1, iso639_2)
 import System.FilePath (normalise, splitExtension, splitFileName, (<.>), (</>))
 
 -- A custom version of `replaceBaseName` that accounts for subtitle language
@@ -38,16 +40,17 @@ takeAllSubMetadata fp =
   where
     (base, ext) = splitExtension fp
 
--- Note: Does NOT check for real, valid language codes! It simply validates
--- that it's the correct length.
+-- Is the given extension a valid ISO-639-1 or ISO-639-2 language code?
 validSubMetadata :: FilePath -> Bool
 validSubMetadata ext =
-  strippedExt `elem` predefined
-    || extLen == 2
-    || extLen == 3
+  strippedExt `elem` predefinedValid
+    || valid2Char
+    || valid3Char
   where
-    predefined = ["forced", "sdh", "cc"]
+    predefinedValid = ["forced", "sdh", "cc"]
     strippedExt = strip ext
+    valid2Char = extLen == 2 && Set.member strippedExt iso639_1
+    valid3Char = extLen == 3 && Set.member strippedExt iso639_2
     extLen = length strippedExt
     -- Remove the leading '.', if it exists:
     strip ('.' : rest) = rest

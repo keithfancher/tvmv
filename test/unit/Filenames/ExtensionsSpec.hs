@@ -23,5 +23,7 @@ testCases =
     ("foo.forced.in.butt.de.sdh.srt", "bar", "bar.de.sdh.srt"),
     -- Note that our func will keep grabbing more as long as it can, regardless
     -- of whether it makes sense. (Multiple languages, repeats, etc.)
-    ("foo.de.en.cc.sdh.cc.forced.en", "bar", "bar.de.en.cc.sdh.cc.forced.en")
+    ("foo.de.en.cc.sdh.cc.forced.en", "bar", "bar.de.en.cc.sdh.cc.forced.en"),
+    -- No false positives, checks for valid language codes:
+    ("foo.cc.forced.poo.xx.srt", "bar", "bar.srt")
   ]
