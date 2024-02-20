@@ -1,4 +1,10 @@
-module Print (Pretty (..)) where
+module Print
+  ( Pretty (..),
+    printError,
+    printSuccess,
+    printWarning,
+  )
+where
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Text qualified as T
@@ -6,6 +12,7 @@ import Data.Text.IO qualified as TIO
 import Domain.Rename (RenameOp (..))
 import Domain.Show (TvShow, showInfoBrief)
 import GHC.IO.Exception (IOException (..))
+import System.Console.ANSI (Color (..), ColorIntensity (..), ConsoleLayer (..), SGR (..), setSGR)
 
 class Pretty a where
   prettyText :: a -> T.Text -- only one required function
@@ -50,3 +57,22 @@ instance Pretty IOException where
     where
       fileInfo (Just fp) = ": " <> fp
       fileInfo Nothing = ""
+
+printError :: (MonadIO m) => String -> m ()
+printError msg = withSGR (fgColor Red) $ putStrLn msg
+
+printSuccess :: (MonadIO m) => String -> m ()
+printSuccess msg = withSGR (fgColor Green) $ putStrLn msg
+
+printWarning :: (MonadIO m) => String -> m ()
+printWarning msg = withSGR (fgColor Yellow) $ putStrLn msg
+
+fgColor :: Color -> [SGR]
+fgColor c = [SetColor Foreground Dull c]
+
+-- Do an IO action with the given SGR, then reset.
+withSGR :: (MonadIO m) => [SGR] -> IO () -> m ()
+withSGR sgr act = liftIO $ do
+  setSGR sgr
+  act
+  setSGR [Reset]

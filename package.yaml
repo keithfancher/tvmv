@@ -53,6 +53,7 @@ library:
   - time
   - word-wrap
   - containers
+  - ansi-terminal
 
 executables:
   tvmv:
