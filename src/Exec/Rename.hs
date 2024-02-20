@@ -12,8 +12,10 @@ import Control.Exception (try)
 import Control.Monad.Except (MonadError, liftEither, when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
+import Data.Text (Text)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp (..))
+import Print.Color (ColorText (..), Colorized (..))
 import Print.Pretty (Pretty (..))
 import System.Directory (makeRelativeToCurrentDirectory)
 import System.Directory qualified as Dir
@@ -26,9 +28,18 @@ data RenameResult = Success RenameOp | Failure RenameOp IOError
 -- annoying circular dependency.
 instance Pretty RenameResult where
   prettyText r = prettyText (getOp r) <> "\n" <> resultText r
+
+instance Colorized RenameResult where
+  colorize r = N opText <> resultColorText
     where
-      resultText (Success _) = "Sucess!"
-      resultText (Failure _ err) = "ERROR :(\n  " <> prettyText err
+      opText = prettyText (getOp r) <> "\n"
+      resultColorText = case r of
+        (Success _) -> G $ resultText r
+        (Failure _ _) -> R $ resultText r
+
+resultText :: RenameResult -> Text
+resultText (Success _) = "Sucess!"
+resultText (Failure _ err) = "ERROR :(\n  " <> prettyText err
 
 -- Helper shared by `rename` and `undo` operations.
 runRenameOps ::
