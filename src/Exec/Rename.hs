@@ -37,7 +37,7 @@ instance Colorized RenameResult where
         (Failure _ _) -> R $ resultText r
 
 resultText :: RenameResult -> Text
-resultText (Success _) = "Sucess!"
+resultText (Success _) = "Rename successful!"
 resultText (Failure _ err) = "ERROR :(\n  " <> prettyText err
 
 -- Helper shared by `rename` and `undo` operations.
@@ -52,6 +52,7 @@ runRenameOps ops message forceRename = do
   relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
   prettyPrintListLn relativeOps >> putStrLn' ""
   awaitConfirmation forceRename
+  putStrLn' "\nConfirmed! Renaming files...\n"
   executeRename ops
 
 -- Given a `force` flag, either waits for the user to confirm an action, or
