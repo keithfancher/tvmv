@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `tvmv` will properly detect language-code metadata in filenames and ensure
   it's preserved when renaming a file. See the `README` for more details.
 - More user-friendly messaging, in both success and error cases.
+- Add a bit of color to the output, in the name of readability.
 
 ### Fixed
 
