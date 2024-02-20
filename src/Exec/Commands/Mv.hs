@@ -17,6 +17,7 @@ import Exec.Rename (RenameResult, runRenameOps)
 import File (listFiles)
 import Filenames (makePortable)
 import Match (MatchResults (..), ParseResults (..), ParsedFile, matchParsedEpisodes, parseFilePaths)
+import Print.Color (asWarning)
 import System.Directory (makeRelativeToCurrentDirectory)
 import Text.Printf (printf)
 
@@ -92,12 +93,12 @@ autoMatchFiles parsedFiles epList = do
       "No parsed files matched the API episode data ... try using the `-s` flag to manually specify the correct season?"
     matchError = "\nFailed to match the following files with corresponding API episode data:"
     showMatchFailures [] = return ()
-    showMatchFailures failures = printRelativeFiles failures matchError
+    showMatchFailures failures = asWarning $ printRelativeFiles failures matchError
 
 showParseFailures :: (MonadIO m) => SeasonSelection -> ParseResults -> m ()
 showParseFailures (SeasonNum _) _ = return () -- No parsing means no failures
 showParseFailures Auto (ParseResults _ _ []) = return () -- No failures also means no failures!
-showParseFailures Auto (ParseResults _ _ failures) = printRelativeFiles failures errMsg
+showParseFailures Auto (ParseResults _ _ failures) = asWarning $ printRelativeFiles failures errMsg
   where
     errMsg = "Failed to parse season/episode numbers from the following files:"
 

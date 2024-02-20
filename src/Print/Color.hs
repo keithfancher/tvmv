@@ -1,6 +1,9 @@
 module Print.Color
   ( Colorized (..),
     ColorText (..),
+    asError,
+    asSuccess,
+    asWarning,
     printError,
     printSuccess,
     printWarning,
@@ -64,6 +67,15 @@ printSuccess msg = printColorLn $ G msg
 
 printWarning :: (MonadIO m) => Text -> m ()
 printWarning msg = printColorLn $ Y msg
+
+asError :: (MonadIO m) => IO () -> m ()
+asError = withSGR (fgColor Red)
+
+asSuccess :: (MonadIO m) => IO () -> m ()
+asSuccess = withSGR (fgColor Green)
+
+asWarning :: (MonadIO m) => IO () -> m ()
+asWarning = withSGR (fgColor Yellow)
 
 fgColor :: Color -> [SGR]
 fgColor c = [SetColor Foreground Dull c]
