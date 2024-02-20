@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Args (cliOptParser)
-import Domain.Error (errorMessage)
+import Domain.Error (printErrorMessage)
 import Env (populateEnv)
 import Execute (execCommand)
 import Options.Applicative (execParser)
@@ -12,5 +12,5 @@ main = do
   env <- populateEnv
   result <- execCommand env command
   case result of
-    Left e -> putStrLn $ errorMessage e
+    Left e -> printErrorMessage e
     Right _ -> return ()
