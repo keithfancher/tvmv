@@ -24,6 +24,21 @@ instance Semigroup ColorText where
 instance Monoid ColorText where
   mempty = Arr []
 
+class Colorized a where
+  colorize :: a -> ColorText -- one required function
+  printColorized :: (MonadIO m) => a -> m ()
+  printColorizedLn :: (MonadIO m) => a -> m ()
+  printColorizedList :: (MonadIO m) => [a] -> m ()
+
+  -- Default implementations:
+  printColorized = printColor . colorize
+  printColorizedLn = printColorLn . colorize
+  printColorizedList = mapM_ withseps
+    where
+      withseps x = do
+        printColorized x
+        liftIO $ putStr "\n\n"
+
 printColor :: (MonadIO m) => ColorText -> m ()
 printColor (R s) = withSGR (fgColor Red) $ putStr s
 printColor (Y s) = withSGR (fgColor Yellow) $ putStr s
