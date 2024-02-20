@@ -25,9 +25,6 @@ instance Semigroup ColorText where
   (<>) c (Arr a) = Arr (c : a)
   (<>) c1 c2 = Arr (c1 : [c2])
 
-instance Monoid ColorText where
-  mempty = Arr []
-
 class Colorized a where
   colorize :: a -> ColorText -- one required function
   printColorized :: (MonadIO m) => a -> m ()
