@@ -51,7 +51,7 @@ printLog results = do
     totalOps = length results
     numSuccesses = length $ successfulOps results
     numFailures = totalOps - numSuccesses
-    finalCountMsg = show numSuccesses <> "/" <> show totalOps <> " operations succeeded. " <> show numFailures <> " failures.\n"
+    finalCountMsg = T.pack $ show numSuccesses <> "/" <> show totalOps <> " operations succeeded. " <> show numFailures <> " failures.\n"
     colorPrint = case (numSuccesses, totalOps) of
       (suc, tot) | suc == tot -> printSuccess
       (0, _) -> printError

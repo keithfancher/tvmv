@@ -1,18 +1,22 @@
 module Print.Color
-  ( printError,
+  ( Colorized (..),
+    ColorText (..),
+    printError,
     printSuccess,
     printWarning,
   )
 where
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
+import Data.Text (Text)
+import Data.Text.IO qualified as TIO
 import System.Console.ANSI (Color (..), ColorIntensity (..), ConsoleLayer (..), SGR (..), setSGR)
 
 data ColorText
-  = R String -- red
-  | G String -- green
-  | Y String -- yellow
-  | N String -- no color, default
+  = R Text -- red
+  | G Text -- green
+  | Y Text -- yellow
+  | N Text -- no color, default
   | Arr [ColorText]
 
 instance Semigroup ColorText where
@@ -40,22 +44,22 @@ class Colorized a where
         liftIO $ putStr "\n\n"
 
 printColor :: (MonadIO m) => ColorText -> m ()
-printColor (R s) = withSGR (fgColor Red) $ putStr s
-printColor (Y s) = withSGR (fgColor Yellow) $ putStr s
-printColor (G s) = withSGR (fgColor Green) $ putStr s
-printColor (N s) = liftIO $ putStr s
+printColor (R t) = withSGR (fgColor Red) $ TIO.putStr t
+printColor (Y t) = withSGR (fgColor Yellow) $ TIO.putStr t
+printColor (G t) = withSGR (fgColor Green) $ TIO.putStr t
+printColor (N t) = liftIO $ TIO.putStr t
 printColor (Arr arr) = mapM_ printColor arr
 
 printColorLn :: (MonadIO m) => ColorText -> m ()
 printColorLn c = liftIO $ printColor c >> putStrLn ""
 
-printError :: (MonadIO m) => String -> m ()
+printError :: (MonadIO m) => Text -> m ()
 printError msg = printColorLn $ R msg
 
-printSuccess :: (MonadIO m) => String -> m ()
+printSuccess :: (MonadIO m) => Text -> m ()
 printSuccess msg = printColorLn $ G msg
 
-printWarning :: (MonadIO m) => String -> m ()
+printWarning :: (MonadIO m) => Text -> m ()
 printWarning msg = printColorLn $ Y msg
 
 fgColor :: Color -> [SGR]
