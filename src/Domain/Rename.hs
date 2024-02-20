@@ -15,7 +15,7 @@ where
 import Data.Text qualified as T
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..))
-import Filenames.Extensions (replaceBaseName')
+import File.Path (replaceBaseName')
 import System.FilePath (makeValid)
 import Text.Printf (printf)
 

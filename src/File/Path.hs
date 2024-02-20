@@ -1,4 +1,4 @@
-module Filenames.Extensions (replaceBaseName') where
+module File.Path (replaceBaseName') where
 
 import Data.Set qualified as Set
 import Language.Codes (iso639_1, iso639_2)

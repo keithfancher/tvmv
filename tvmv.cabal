@@ -41,9 +41,9 @@ library
       Exec.Filter
       Exec.Rename
       Execute
-      File
-      Filenames
-      Filenames.Extensions
+      File.Dir
+      File.Names
+      File.Path
       Language.Codes
       Log
       Match
@@ -129,9 +129,9 @@ test-suite unit
       API.TMDBSpec
       Domain.RenameSpec
       Exec.EnvSpec
-      Filenames.ExtensionsSpec
-      FilenamesSpec
-      FileSpec
+      File.DirSpec
+      File.NamesSpec
+      File.PathSpec
       LogSpec
       MatchSpec
       ParseSpec

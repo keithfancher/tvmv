@@ -1,6 +1,6 @@
-module FileSpec (spec) where
+module File.DirSpec (spec) where
 
-import File
+import File.Dir
 import Test.Hspec
 
 spec :: Spec

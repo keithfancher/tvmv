@@ -1,6 +1,6 @@
-module FilenamesSpec (spec) where
+module File.NamesSpec (spec) where
 
-import Filenames
+import File.Names
 import Test.Hspec
 
 spec :: Spec

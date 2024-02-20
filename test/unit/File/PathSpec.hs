@@ -1,6 +1,6 @@
-module Filenames.ExtensionsSpec (spec) where
+module File.PathSpec (spec) where
 
-import Filenames.Extensions
+import File.Path
 import System.FilePath ((</>))
 import Test.Hspec
 

@@ -1,4 +1,4 @@
-module File
+module File.Dir
   ( listDir,
     listFiles,
     sortCaseInsensitive,

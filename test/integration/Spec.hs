@@ -3,7 +3,7 @@ import Command (Command (..), MvOptions (..), SearchKey (..), SeasonSelection (.
 import Data.Text.IO qualified as TIO
 import Domain.Error (Error)
 import Execute (Env (..), execCommandWithAPI, selectRunner)
-import File (sortCaseInsensitive)
+import File.Dir (sortCaseInsensitive)
 import Log (getLatestLog)
 import System.Directory (createDirectoryIfMissing, listDirectory, removePathForcibly)
 import System.FilePath ((</>))

@@ -1,4 +1,4 @@
-module Filenames
+module File.Names
   ( makePortable,
     makeVeryPortable,
   )
