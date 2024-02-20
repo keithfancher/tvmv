@@ -22,7 +22,7 @@ import Domain.Error (Error (..))
 import Domain.Rename (RenameOp)
 import Exec.Rename (RenameResult (..), getOp, makeResultRelative)
 import Monad.Tvmv (Logger)
-import Print (prettyPrintListLn)
+import Print (prettyPrintListLn, printError, printSuccess, printWarning)
 import System.Directory (listDirectory)
 import System.FilePath (takeFileName)
 import Text.Printf (printf)
@@ -45,12 +45,16 @@ printLog [] = return () -- don't print if empty
 printLog results = do
   relativeResults <- mapM makeResultRelative results -- print relative paths for readability
   prettyPrintListLn relativeResults
-  putStrLn $ "\n" <> finalCountMsg
+  colorPrint $ "\n" <> finalCountMsg
   where
     totalOps = length results
     numSuccesses = length $ successfulOps results
     numFailures = totalOps - numSuccesses
     finalCountMsg = show numSuccesses <> "/" <> show totalOps <> " operations succeeded. " <> show numFailures <> " failures.\n"
+    colorPrint = case (numSuccesses, totalOps) of
+      (suc, tot) | suc == tot -> printSuccess
+      (0, _) -> printError
+      _ -> printWarning
 
 -- Print AND log. As you might expect.
 printAndWriteLog :: Logger
