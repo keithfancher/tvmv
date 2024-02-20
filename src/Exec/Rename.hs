@@ -17,7 +17,6 @@ import Domain.Error (Error (..))
 import Domain.Rename (RenameOp (..))
 import Print.Color (ColorText (..), Colorized (..))
 import Print.Pretty (Pretty (..))
-import System.Directory (makeRelativeToCurrentDirectory)
 import System.Directory qualified as Dir
 
 -- Not quite an Either, since we want the op to exist even in failure cases.
@@ -102,8 +101,8 @@ mkResult o (Right _) = Success o
 -- Replace the paths in a RenameOp with paths relative to the current directory.
 makeOpRelative :: (MonadIO m) => RenameOp -> m RenameOp
 makeOpRelative (RenameOp old new) = do
-  relativeOld <- liftIO $ makeRelativeToCurrentDirectory old
-  relativeNew <- liftIO $ makeRelativeToCurrentDirectory new
+  relativeOld <- liftIO $ Dir.makeRelativeToCurrentDirectory old
+  relativeNew <- liftIO $ Dir.makeRelativeToCurrentDirectory new
   return RenameOp {oldPath = relativeOld, newPath = relativeNew}
 
 makeResultRelative :: (MonadIO m) => RenameResult -> m RenameResult

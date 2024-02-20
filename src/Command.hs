@@ -8,7 +8,7 @@ module Command
   )
 where
 
-import Data.Text qualified as T
+import Data.Text (Text)
 import Domain.API (APIKey)
 import Domain.Show (ItemId)
 
@@ -19,7 +19,7 @@ data Command
   | Undo UndoOptions
 
 -- Search by name or by ID
-data SearchKey = Name T.Text | Id ItemId
+data SearchKey = Name Text | Id ItemId
 
 -- Specify the season number or indicate that it should be auto-detected from
 -- the input files.
@@ -40,7 +40,7 @@ data MvOptions = MvOptions
 
 data SearchOptions = SearchOptions
   { apiKey :: Maybe APIKey,
-    query :: T.Text
+    query :: Text
   }
 
 data UndoOptions = UndoOptions

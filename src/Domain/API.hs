@@ -4,13 +4,13 @@ module Domain.API
   )
 where
 
-import Data.Text qualified as T
+import Data.Text (Text)
 import Domain.Show (ItemId, Season, TvShow)
 
-type APIKey = T.Text
+type APIKey = Text
 
 data APIWrapper m = APIWrapper
   { getShow :: APIKey -> ItemId -> m TvShow,
     getSeason :: APIKey -> TvShow -> Int -> m Season,
-    queryShows :: APIKey -> T.Text -> m [TvShow]
+    queryShows :: APIKey -> Text -> m [TvShow]
   }
