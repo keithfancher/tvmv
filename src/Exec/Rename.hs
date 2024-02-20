@@ -14,7 +14,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp (..))
-import Print (Pretty (..))
+import Print.Pretty (Pretty (..))
 import System.Directory (makeRelativeToCurrentDirectory)
 import System.Directory qualified as Dir
 

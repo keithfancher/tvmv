@@ -49,7 +49,8 @@ library
       Match
       Monad.Tvmv
       Parse
-      Print
+      Print.Color
+      Print.Pretty
   other-modules:
       Paths_tvmv
   hs-source-dirs:

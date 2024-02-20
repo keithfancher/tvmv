@@ -7,7 +7,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Exec.Env (Env, populateAPIKey)
-import Print (prettyPrintListLn)
+import Print.Pretty (prettyPrintListLn)
 import Text.Printf (printf)
 
 -- Query the configured API for a show with the given name. The `search` command!
