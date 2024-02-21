@@ -12,7 +12,8 @@ where
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.List (intersperse)
-import Data.Text (Text)
+import Data.String (IsString (..))
+import Data.Text (Text, pack)
 import Data.Text.IO qualified as TIO
 import System.Console.ANSI (Color (..), ColorIntensity (..), ConsoleLayer (..), SGR (..), setSGR)
 
@@ -28,6 +29,12 @@ instance Semigroup ColorText where
   (<>) (Arr a) c = Arr (a ++ [c])
   (<>) c (Arr a) = Arr (c : a)
   (<>) c1 c2 = Arr (c1 : [c2])
+
+-- Makes `OverloadedStrings` work, magically converts string literals.
+-- Allows stuff like:
+--     R "red text" <> "regular non-colored text"
+instance IsString ColorText where
+  fromString s = N $ pack s
 
 class Colorized a where
   colorize :: a -> ColorText -- one required function
