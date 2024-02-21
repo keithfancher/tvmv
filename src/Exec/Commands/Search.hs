@@ -24,7 +24,7 @@ search env withApi (SearchOptions maybeApiKey searchQuery) = do
   putStrLn' $ resultsMsg tvShowResults
   prettyPrintListLn tvShowResults
   where
-    resultsMsg r = printf "Found %d results" (length r)
+    resultsMsg r = printf "Found %d results\n" (length r)
 
 -- Wrapper for less lifting :')
 putStrLn' :: (MonadIO m) => String -> m ()
