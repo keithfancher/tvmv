@@ -77,8 +77,11 @@ asSuccess = withSGR (fgColor Green)
 asWarning :: (MonadIO m) => IO () -> m ()
 asWarning = withSGR (fgColor Yellow)
 
+-- There are two brightness options: `Vivid` and `Dull`. Both are fine in Linux
+-- and Mac, but sometimes in Windows (Win10 in particular?), the dull variants
+-- are SO dull as to be borderline-unreadable. So vivid it is :')
 fgColor :: Color -> [SGR]
-fgColor c = [SetColor Foreground Dull c]
+fgColor c = [SetColor Foreground Vivid c]
 
 -- Do an IO action with the given SGR, then reset.
 withSGR :: (MonadIO m) => [SGR] -> IO () -> m ()
