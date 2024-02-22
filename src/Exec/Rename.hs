@@ -15,7 +15,7 @@ import Control.Monad.Writer.Class (MonadWriter, tell)
 import Data.Text (Text)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp (..))
-import Print.Color (ColorText (..), Colorized (..))
+import Print.Color (Colorized (..), green, mono, red)
 import Print.Pretty (Pretty (..))
 import System.Directory qualified as Dir
 
@@ -29,12 +29,12 @@ instance Pretty RenameResult where
   prettyText r = prettyText (getOp r) <> "\n" <> resultText r
 
 instance Colorized RenameResult where
-  colorize r = N opText <> resultColorText
+  colorize r = mono opText <> resultColorText
     where
       opText = prettyText (getOp r) <> "\n"
       resultColorText = case r of
-        (Success _) -> G $ resultText r
-        (Failure _ _) -> R $ resultText r
+        (Success _) -> green $ resultText r
+        (Failure _ _) -> red $ resultText r
 
 resultText :: RenameResult -> Text
 resultText (Success _) = "Rename successful!"

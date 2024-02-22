@@ -1,12 +1,18 @@
 module Print.Color
   ( Colorized (..),
-    ColorText (..),
+    ColorText,
+    red,
+    yellow,
+    green,
+    mono,
     asError,
     asSuccess,
     asWarning,
     printError,
     printSuccess,
     printWarning,
+    printColor,
+    printColorLn,
   )
 where
 
@@ -15,26 +21,42 @@ import Data.List (intersperse)
 import Data.String (IsString (..))
 import Data.Text (Text, pack)
 import Data.Text.IO qualified as TIO
-import System.Console.ANSI (Color (..), ColorIntensity (..), ConsoleLayer (..), SGR (..), setSGR)
+import System.Console.ANSI qualified as ANSI
 
-data ColorText
-  = R Text -- red
-  | G Text -- green
-  | Y Text -- yellow
-  | N Text -- no color, default
-  | Arr [ColorText]
+-- Red, green, yellow, "no color"/"neutral"
+data Color = R | G | Y | N
+
+data ColorString = ColorString Color Text
+
+newtype ColorText = ColorText [ColorString]
 
 instance Semigroup ColorText where
-  (<>) (Arr a) (Arr b) = Arr (a ++ b)
-  (<>) (Arr a) c = Arr (a ++ [c])
-  (<>) c (Arr a) = Arr (c : a)
-  (<>) c1 c2 = Arr (c1 : [c2])
+  (<>) (ColorText a) (ColorText b) = ColorText $ a <> b
+
+instance Monoid ColorText where
+  mempty = ColorText []
 
 -- Makes `OverloadedStrings` work, magically converts string literals.
 -- Allows stuff like:
---     R "red text" <> "regular non-colored text"
+--     red "red text " <> "regular non-colored text"
 instance IsString ColorText where
-  fromString s = N $ pack s
+  fromString s = mono $ pack s
+
+red :: Text -> ColorText
+red = colorText R
+
+yellow :: Text -> ColorText
+yellow = colorText Y
+
+green :: Text -> ColorText
+green = colorText G
+
+-- Monochrome, aka no color added.
+mono :: Text -> ColorText
+mono = colorText N
+
+colorText :: Color -> Text -> ColorText
+colorText c t = ColorText [ColorString c t]
 
 class Colorized a where
   colorize :: a -> ColorText -- one required function
@@ -56,46 +78,55 @@ class Colorized a where
 
   printColorizedListLn = withNewline . printColorizedList
 
+printColorString :: (MonadIO m) => ColorString -> m ()
+printColorString (ColorString c t) = liftIO $ setColor c $ TIO.putStr t
+  where
+    setColor R = withColor ANSI.Red
+    setColor Y = withColor ANSI.Yellow
+    setColor G = withColor ANSI.Green
+    setColor N = id
+
 printColor :: (MonadIO m) => ColorText -> m ()
-printColor (R t) = withSGR (fgColor Red) $ TIO.putStr t
-printColor (Y t) = withSGR (fgColor Yellow) $ TIO.putStr t
-printColor (G t) = withSGR (fgColor Green) $ TIO.putStr t
-printColor (N t) = liftIO $ TIO.putStr t
-printColor (Arr arr) = mapM_ printColor arr
+printColor (ColorText []) = liftIO $ return ()
+printColor (ColorText [cs]) = printColorString cs
+printColor (ColorText multiString) = mapM_ printColorString multiString
 
 printColorLn :: (MonadIO m) => ColorText -> m ()
 printColorLn = withNewline . printColor
 
 printError :: (MonadIO m) => Text -> m ()
-printError msg = printColorLn $ R msg
+printError msg = asError $ TIO.putStrLn msg
 
 printSuccess :: (MonadIO m) => Text -> m ()
-printSuccess msg = printColorLn $ G msg
+printSuccess msg = asSuccess $ TIO.putStrLn msg
 
 printWarning :: (MonadIO m) => Text -> m ()
-printWarning msg = printColorLn $ Y msg
+printWarning msg = asWarning $ TIO.putStrLn msg
 
 asError :: (MonadIO m) => IO () -> m ()
-asError = withSGR (fgColor Red)
+asError = withColor ANSI.Red
 
 asSuccess :: (MonadIO m) => IO () -> m ()
-asSuccess = withSGR (fgColor Green)
+asSuccess = withColor ANSI.Green
 
 asWarning :: (MonadIO m) => IO () -> m ()
-asWarning = withSGR (fgColor Yellow)
+asWarning = withColor ANSI.Yellow
 
 -- There are two brightness options: `Vivid` and `Dull`. Both are fine in Linux
 -- and Mac, but sometimes in Windows (Win10 in particular?), the dull variants
 -- are SO dull as to be borderline-unreadable. So vivid it is :')
-fgColor :: Color -> [SGR]
-fgColor c = [SetColor Foreground Vivid c]
+fgColor :: ANSI.Color -> [ANSI.SGR]
+fgColor c = [ANSI.SetColor ANSI.Foreground ANSI.Vivid c]
+
+withColor :: (MonadIO m) => ANSI.Color -> IO () -> m ()
+withColor c = withSGR (fgColor c)
 
 -- Do an IO action with the given SGR, then reset.
-withSGR :: (MonadIO m) => [SGR] -> IO () -> m ()
+withSGR :: (MonadIO m) => [ANSI.SGR] -> IO () -> m ()
 withSGR sgr act = liftIO $ do
-  setSGR sgr
+  ANSI.setSGR sgr
   act
-  setSGR [Reset]
+  ANSI.setSGR [ANSI.Reset]
 
 -- Do an IO action, then print a "\n" afterward.
 withNewline :: (MonadIO m) => m () -> m ()
