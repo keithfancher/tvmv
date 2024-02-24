@@ -16,6 +16,7 @@ import Data.Text qualified as T
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..))
 import File.Path (replaceBaseName')
+import Print.Color (Colorized (..), cyan, mono, uncolor)
 import Print.Pretty (Pretty (..))
 import System.FilePath (makeValid)
 import Text.Printf (printf)
@@ -28,11 +29,15 @@ data RenameOp = RenameOp
   }
   deriving (Eq, Show, Read)
 
-instance Pretty RenameOp where
-  prettyText renameOp = old <> " ->\n" <> new
+instance Colorized RenameOp where
+  colorize op = mono old <> cyan " ->\n" <> mono new
     where
-      old = T.pack $ oldPath renameOp
-      new = T.pack $ newPath renameOp
+      old = T.pack $ oldPath op
+      new = T.pack $ newPath op
+
+-- "Pretty" is just the uncolorized version of the colored text.
+instance Pretty RenameOp where
+  prettyText = uncolor . colorize
 
 -- A set of files and their associated Episode data. These two fields MUST be
 -- the same length. Use the `matchEpisodes` function to construct this type.

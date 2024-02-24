@@ -15,7 +15,7 @@ import Control.Monad.Writer.Class (MonadWriter, tell)
 import Data.Text (Text)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp (..))
-import Print.Color (Colorized (..), green, mono, red)
+import Print.Color (Colorized (..), green, red, uncolor)
 import Print.Pretty (Pretty (..))
 import System.Directory qualified as Dir
 
@@ -23,15 +23,13 @@ import System.Directory qualified as Dir
 data RenameResult = Success RenameOp | Failure RenameOp IOError
   deriving (Eq, Show)
 
--- This lives here rather than with the other `Pretty` instances to avoid an
--- annoying circular dependency.
 instance Pretty RenameResult where
-  prettyText r = prettyText (getOp r) <> "\n" <> resultText r
+  prettyText = uncolor . colorize
 
 instance Colorized RenameResult where
-  colorize r = mono opText <> resultColorText
+  colorize r = opText <> resultColorText
     where
-      opText = prettyText (getOp r) <> "\n"
+      opText = colorize (getOp r) <> "\n"
       resultColorText = case r of
         (Success _) -> green $ resultText r
         (Failure _ _) -> red $ resultText r
@@ -50,7 +48,7 @@ runRenameOps ::
 runRenameOps ops message forceRename = do
   putStrLn' message
   relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
-  prettyPrintListLn relativeOps >> putStrLn' ""
+  printColorizedListLn relativeOps >> putStrLn' ""
   awaitConfirmation forceRename
   putStrLn' "\nConfirmed! Renaming files...\n"
   executeRename ops
