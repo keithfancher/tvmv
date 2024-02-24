@@ -88,10 +88,12 @@ executeRenameSingle renameOp = do
 tryRename :: (MonadIO m) => FilePath -> FilePath -> m (Either IOError ())
 tryRename old new = liftIO $ try $ do
   destFileExists <- Dir.doesPathExist new
-  when destFileExists $ ioError fileExistsError
+  when destFileExists $ do
+    relativePath <- Dir.makeRelativeToCurrentDirectory new
+    ioError $ fileExistsError relativePath
   Dir.renameFile old new
   where
-    fileExistsError = userError $ "Destination file already exists: " <> new
+    fileExistsError fp = userError $ "Destination file already exists: " <> fp
 
 mkResult :: RenameOp -> Either IOError () -> RenameResult
 mkResult o (Left err) = Failure o err
