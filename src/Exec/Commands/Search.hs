@@ -7,7 +7,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Exec.Env (Env, populateAPIKey)
-import Print.Pretty (prettyPrintListLn)
+import Print.Color (Colorized (..))
 import Text.Printf (printf)
 
 -- Query the configured API for a show with the given name. The `search` command!
@@ -22,7 +22,7 @@ search env withApi (SearchOptions maybeApiKey searchQuery) = do
   putStrLn' "Querying API..."
   tvShowResults <- searchShowByName withApi key searchQuery
   putStrLn' $ resultsMsg tvShowResults
-  prettyPrintListLn tvShowResults
+  printColorizedListLn tvShowResults
   where
     resultsMsg r = printf "Found %d results\n" (length r)
 

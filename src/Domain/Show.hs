@@ -8,6 +8,7 @@ module Domain.Show
 where
 
 import Data.Text qualified as T
+import Print.Color (Colorized (..), green, mono, uncolor, yellow)
 import Text.Wrap (defaultWrapSettings, wrapTextToLines)
 
 -- A unique ID used for a given API resource.
@@ -48,19 +49,25 @@ data Episode = Episode
   }
   deriving (Eq, Show)
 
+instance Colorized TvShow where
+  colorize s =
+    "ID:\t"
+      <> green (toText (showId s))
+      <> "\nName:\t"
+      <> yellow (showName s)
+      <> "\nBlurb:\t"
+      <> mono (wrapAndTrim (description s))
+      <> url (showUrl s)
+    where
+      url Nothing = ""
+      url (Just u) = mono $ "\nLink:\t" <> u
+
 -- Brief text summary of a show.
+--
+-- For now, to avoid duplication, we're defining the colored text as the "base"
+-- above, and UNcoloring it for the plain text version.
 showInfoBrief :: TvShow -> T.Text
-showInfoBrief s =
-  "ID:\t"
-    <> toText (showId s)
-    <> "\nName:\t"
-    <> showName s
-    <> "\nBlurb:\t"
-    <> wrapAndTrim (description s)
-    <> url (showUrl s)
-  where
-    url Nothing = ""
-    url (Just u) = "\nLink:\t" <> u
+showInfoBrief = uncolor . colorize
 
 -- Format the show blurb for text console output. Wrap the text at 78 chars and
 -- only grab the first 3 lines for longer results.
@@ -74,5 +81,5 @@ wrapAndTrim t = trimmedLines <> suffix
     -- Show that we've cut something off, if that's the case:
     suffix = if length wrappedLines > numLinesToTake then "..." else ""
 
-toText :: Show a => a -> T.Text
+toText :: (Show a) => a -> T.Text
 toText = T.pack . show
