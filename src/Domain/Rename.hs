@@ -16,6 +16,7 @@ import Data.Text qualified as T
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..))
 import File.Path (replaceBaseName')
+import Print.Pretty (Pretty (..))
 import System.FilePath (makeValid)
 import Text.Printf (printf)
 
@@ -26,6 +27,12 @@ data RenameOp = RenameOp
     newPath :: FilePath
   }
   deriving (Eq, Show, Read)
+
+instance Pretty RenameOp where
+  prettyText renameOp = old <> " ->\n" <> new
+    where
+      old = T.pack $ oldPath renameOp
+      new = T.pack $ newPath renameOp
 
 -- A set of files and their associated Episode data. These two fields MUST be
 -- the same length. Use the `matchEpisodes` function to construct this type.

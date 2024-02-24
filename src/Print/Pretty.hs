@@ -3,8 +3,6 @@ module Print.Pretty (Pretty (..)) where
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
-import Domain.Rename (RenameOp (..))
-import Domain.Show (TvShow, showInfoBrief)
 import GHC.IO.Exception (IOException (..))
 
 class Pretty a where
@@ -24,15 +22,6 @@ class Pretty a where
   prettyPrintList = liftIO . TIO.putStr . prettyList
   prettyPrintListLn [] = return () -- don't want to print nothing and a newline
   prettyPrintListLn xs = liftIO . TIO.putStrLn . prettyList $ xs
-
-instance Pretty TvShow where
-  prettyText = showInfoBrief
-
-instance Pretty RenameOp where
-  prettyText renameOp = old <> " ->\n" <> new
-    where
-      old = T.pack $ oldPath renameOp
-      new = T.pack $ newPath renameOp
 
 -- Without unwrapping these exceptions ourselves, we get some very
 -- user-unfriendly errors. Like:

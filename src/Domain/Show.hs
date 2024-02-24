@@ -9,6 +9,7 @@ where
 
 import Data.Text qualified as T
 import Print.Color (Colorized (..), cyan, green, mono, uncolor, yellow)
+import Print.Pretty (Pretty (..))
 import Text.Wrap (defaultWrapSettings, wrapTextToLines)
 
 -- A unique ID used for a given API resource.
@@ -61,6 +62,9 @@ instance Colorized TvShow where
     where
       url Nothing = ""
       url (Just u) = "\nLink:\t" <> cyan u
+
+instance Pretty TvShow where
+  prettyText = showInfoBrief
 
 -- Brief text summary of a show.
 --
