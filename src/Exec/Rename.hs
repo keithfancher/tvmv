@@ -15,7 +15,7 @@ import Control.Monad.Writer.Class (MonadWriter, tell)
 import Data.Text (Text)
 import Domain.Error (Error (..))
 import Domain.Rename (RenameOp (..))
-import Print.Color (Colorized (..), green, red, uncolor)
+import Print.Color (ColorText, Colorized (..), green, printColorLn, red, uncolor)
 import Print.Pretty (Pretty (..))
 import System.Directory qualified as Dir
 
@@ -42,11 +42,11 @@ resultText (Failure _ err) = "ERROR :(\n  " <> prettyText err
 runRenameOps ::
   (MonadIO m, MonadError Error m, MonadWriter [RenameResult] m) =>
   [RenameOp] ->
-  String ->
+  ColorText ->
   Bool ->
   m ()
 runRenameOps ops message forceRename = do
-  putStrLn' message
+  printColorLn message
   relativeOps <- mapM makeOpRelative ops -- we'll *print* relative paths, for readability
   printColorizedListLn relativeOps >> putStrLn' ""
   awaitConfirmation forceRename

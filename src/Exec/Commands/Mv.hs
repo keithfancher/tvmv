@@ -5,7 +5,7 @@ import Command (MvOptions (..), SearchKey (..), SeasonSelection (..))
 import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
-import Data.List (intercalate)
+import Data.List (intercalate, intersperse)
 import Data.Text qualified as T
 import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
@@ -17,9 +17,8 @@ import Exec.Rename (RenameResult, runRenameOps)
 import File.Dir (listFiles)
 import File.Names (makePortable)
 import Match (MatchResults (..), ParseResults (..), ParsedFile, matchParsedEpisodes, parseFilePaths)
-import Print.Color (asWarning)
+import Print.Color (ColorText, asWarning, cyan, printColorLn)
 import System.Directory (makeRelativeToCurrentDirectory)
-import Text.Printf (printf)
 
 -- Rename the files of a TV season. This puts the `mv` in tvmv!
 mv ::
@@ -41,7 +40,7 @@ mv env withApi mvOptions = do
   seasonNums <- getSeasonNums seasonSelection parseResults
 
   -- Fetch episode data from our configured API:
-  putStrLn' $ showFetchMessage seasonNums
+  printColorLn $ showFetchMessage seasonNums
   episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
 
   -- If the option is set, make episode names "portable", aka Windows-friendly:
@@ -57,20 +56,24 @@ mv env withApi mvOptions = do
   runRenameOps renameOps (renameMsg renameOps) force
   where
     match = if allowPartial mvOptions then matchEpisodesAllowPartial else matchEpisodes
-    renameMsg f = printf "Preparing to execute the following %d rename operations...\n" (length f)
+    renameMsg ops =
+      "Preparing to execute the following " <> colorNum (length ops) <> " rename operations...\n"
     searchSeason k = case searchKey mvOptions of
       (Name n) -> API.searchSeasonByName withApi k n
       (Id i) -> API.searchSeasonById withApi k i
 
 -- Slightly neurotic? Nicer printing of the input seasons.
-showFetchMessage :: [Int] -> String
+showFetchMessage :: [Int] -> ColorText
 showFetchMessage seasons = case seasons of
-  [s] -> base <> " " <> show s -- e.g. "season 12"
-  [f, s] -> base <> "s " <> show f <> " and " <> show s -- e.g. "seasons 12 and 13"
+  [s] -> base <> " " <> colorNum s -- e.g. "season 12"
+  [f, s] -> base <> "s " <> colorNum f <> " and " <> colorNum s -- e.g. "seasons 12 and 13"
   threeOrMore -> base <> "s " <> withCommas threeOrMore -- e.g. "seasons 12, 13, 14"
   where
-    withCommas l = intercalate ", " $ map show l
     base = "Fetching episode data from API for season"
+    withCommas l = mconcat $ intersperse ", " $ map colorNum l
+
+colorNum :: Int -> ColorText
+colorNum = cyan . T.pack . show
 
 -- Fetch data for the given seasons via the given API function, concat all
 -- episodes of the resulting seasons into a single list.
