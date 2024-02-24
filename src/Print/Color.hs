@@ -4,6 +4,7 @@ module Print.Color
     red,
     yellow,
     green,
+    cyan,
     mono,
     asError,
     asSuccess,
@@ -24,8 +25,8 @@ import Data.Text (Text, pack)
 import Data.Text.IO qualified as TIO
 import System.Console.ANSI qualified as ANSI
 
--- Red, green, yellow, "no color"/"neutral"
-data Color = R | G | Y | N
+-- Red, green, yellow, cyan, "no color"/"neutral"
+data Color = R | G | Y | C | N
 
 data ColorString = ColorString Color Text
 
@@ -51,6 +52,9 @@ yellow = colorText Y
 
 green :: Text -> ColorText
 green = colorText G
+
+cyan :: Text -> ColorText
+cyan = colorText C
 
 -- Monochrome, aka no color added.
 mono :: Text -> ColorText
@@ -90,6 +94,7 @@ printColorString (ColorString c t) = liftIO $ setColor c $ TIO.putStr t
     setColor R = withColor ANSI.Red
     setColor Y = withColor ANSI.Yellow
     setColor G = withColor ANSI.Green
+    setColor C = withColor ANSI.Cyan
     setColor N = id
 
 printColor :: (MonadIO m) => ColorText -> m ()
