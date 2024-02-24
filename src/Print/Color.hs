@@ -13,6 +13,7 @@ module Print.Color
     printWarning,
     printColor,
     printColorLn,
+    uncolor,
   )
 where
 
@@ -57,6 +58,11 @@ mono = colorText N
 
 colorText :: Color -> Text -> ColorText
 colorText c t = ColorText [ColorString c t]
+
+uncolor :: ColorText -> Text
+uncolor (ColorText colorStrings) = mconcat $ map uncolorString colorStrings
+  where
+    uncolorString (ColorString _ t) = t
 
 class Colorized a where
   colorize :: a -> ColorText -- one required function
