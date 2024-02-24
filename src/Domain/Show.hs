@@ -8,7 +8,7 @@ module Domain.Show
 where
 
 import Data.Text qualified as T
-import Print.Color (Colorized (..), green, mono, uncolor, yellow)
+import Print.Color (Colorized (..), cyan, green, mono, uncolor, yellow)
 import Text.Wrap (defaultWrapSettings, wrapTextToLines)
 
 -- A unique ID used for a given API resource.
@@ -60,7 +60,7 @@ instance Colorized TvShow where
       <> url (showUrl s)
     where
       url Nothing = ""
-      url (Just u) = mono $ "\nLink:\t" <> u
+      url (Just u) = "\nLink:\t" <> cyan u
 
 -- Brief text summary of a show.
 --
