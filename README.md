@@ -12,6 +12,8 @@ $ tvmv mv -n buffy -s 7
 
 That's all there is to it!
 
+![](tvmv-demo.gif)
+
 
 ## Table of Contents
 
