@@ -1,5 +1,6 @@
 module ParseSpec (spec) where
 
+import Data.Either (isLeft)
 import Parse
 import Test.Hspec
 
@@ -18,10 +19,16 @@ spec = do
     it "parses all well-formed full paths" $ do
       mapM_ testResultSet inputOutputFullPath
 
+    it "fails when given episode ranges, which are not yet supported" $ do
+      mapM_ testFailures inputOutputEpRanges
+
 -- Given a tuple of (input, expected output), asserts that the expected result
 -- is returned when the input is parsed.
 testResultSet :: (String, SeasonEpNum) -> Expectation
 testResultSet (input, expected) = parseFilename input `shouldBe` Right expected
+
+testFailures :: String -> Expectation
+testFailures input = parseFilename input `shouldSatisfy` isLeft
 
 inputOutputBaseCases :: [(String, SeasonEpNum)]
 inputOutputBaseCases =
@@ -54,4 +61,13 @@ inputOutputFullPath :: [(String, SeasonEpNum)]
 inputOutputFullPath =
   [ ("/home/jimbo/tv/A show - 1x21 - An episode.mkv", SeasonEpNum {seasonNum = 1, episodeNum = 21}),
     ("/media/0x12dumbdirectory/Poirot - s035e123 - s12e04 baaad.mp4", SeasonEpNum {seasonNum = 35, episodeNum = 123})
+  ]
+
+-- These all use episode ranges, which are not (yet) supported:
+inputOutputEpRanges :: [String]
+inputOutputEpRanges =
+  [ "Adventure Time - S06E01-E02.mp4",
+    "BSG s04e19-21.mkv", -- missing the second "e", but we still match it
+    "BSG s04e19-21 s03e4.mkv", -- a mish-mash
+    "/home/jimbo/tv/A show - s01e21-E200 - An episode.mkv"
   ]

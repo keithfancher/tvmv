@@ -4,8 +4,10 @@ module Parse
   )
 where
 
+import Data.Either (isRight)
+import Domain.Error (Error (..))
 import System.FilePath (takeFileName)
-import Text.Parsec (ParseError, anyChar, char, lookAhead, many, many1, manyTill, parse, try, (<|>))
+import Text.Parsec (anyChar, char, lookAhead, many, many1, manyTill, parse, try, (<|>))
 import Text.Parsec.Char (digit)
 import Text.Parsec.String (Parser)
 
@@ -24,14 +26,21 @@ data MultiEpNums = MultiEpNums
 
 -- Given the filename (or full path) for an episode, attempt to parse out the
 -- season and episode number.
---
--- TODO: Actually, map this `ParseError` to an error in our domain. The calling
--- code shouldn't have to depend on Parsec!
-parseFilename :: FilePath -> Either ParseError SeasonEpNum
-parseFilename fullFilePath = parse fullFilename err fileName
+parseFilename :: FilePath -> Either Error SeasonEpNum
+parseFilename fullFilePath =
+  if isMultiEpFile fileName
+    then Left $ ParseError "Multi-episode files are not yet supported :'("
+    else mapParseResult $ parse fullFilename err fileName
   where
     fileName = takeFileName fullFilePath -- Strip the leading path, if it exists
     err = "" -- used only in errors, we don't need it
+    mapParseResult (Left e) = Left $ ParseError $ show e
+    mapParseResult (Right r) = Right r
+
+isMultiEpFile :: String -> Bool
+isMultiEpFile fileName = isRight parseMultiEp
+  where
+    parseMultiEp = parse (withLeadingAndTrailingChars multiEpFormat) "" fileName
 
 -- Parses out the season number and episode number, ignoring all leading and
 -- trailing characters.
