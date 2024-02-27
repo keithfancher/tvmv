@@ -30,20 +30,28 @@ parseFilename fullFilePath = parse fullFilename err fileName
 -- Parses out the season number and episode number, ignoring all leading and
 -- trailing characters.
 fullFilename :: Parser SeasonEpNum
-fullFilename = do
-  _ <- leadingChars
-  nums <- seasonEpNum
-  _ <- many anyChar
-  return nums
+fullFilename = withLeadingAndTrailingChars seasonEpNum
   where
+    -- NOTE: The only reason none of these (currently) needs a `try` is that
+    -- there is no overlap in the first character they parse, so they'll never
+    -- consume each others' input. If this changes, don't forget the `try`!
     seasonEpNum = seasonEpNumXFormat <|> seasonEpNumSEFormat <|> seasonEpNumEpOnlyFormat
-    -- Consume characters until we succeed in parsing ep/season num. We need a
-    -- version of our parser that doesn't *consume* our ep/season number here,
+
+-- Use the given parser, but allow any number of leading and trailing characters.
+withLeadingAndTrailingChars :: Parser a -> Parser a
+withLeadingAndTrailingChars parser = do
+  _ <- leadingChars
+  value <- parser
+  _ <- many anyChar
+  return value
+  where
+    -- Consume characters until we succeed in parsing a value. We need a
+    -- version of our parser that doesn't *consume* our actual value here,
     -- since `manyTill` throws that bit away.
-    leadingChars = manyTill anyChar epNumLookAhead
+    leadingChars = manyTill anyChar parserLookAhead
     -- The combination of `try` and `lookAhead` allows checking for a
     -- successful parse without consuming any input:
-    epNumLookAhead = try $ lookAhead seasonEpNum
+    parserLookAhead = try $ lookAhead parser
 
 -- Consumes, e.g., "2x12"
 seasonEpNumXFormat :: Parser SeasonEpNum
