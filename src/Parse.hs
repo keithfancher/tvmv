@@ -16,6 +16,12 @@ data SeasonEpNum = SeasonEpNum
   }
   deriving (Eq, Show)
 
+data MultiEpNums = MultiEpNums
+  { seasonNum :: Int,
+    episodeNums :: [Int]
+  }
+  deriving (Eq, Show)
+
 -- Given the filename (or full path) for an episode, attempt to parse out the
 -- season and episode number.
 --
@@ -78,6 +84,36 @@ seasonEpNumEpOnlyFormat = do
   _ <- char 'p' <|> char 'P'
   e <- parseInt
   return SeasonEpNum {seasonNum = 1, episodeNum = e}
+
+multiEpFormat :: Parser MultiEpNums
+multiEpFormat = do
+  _ <- char 's' <|> char 'S'
+  s <- parseInt
+  eps <- epRange
+  return MultiEpNums {seasonNum = s, episodeNums = eps}
+
+epRange :: Parser [Int]
+epRange = try epRangeValid <|> try epRangeInvalid
+
+-- e.g. "e23-e25".
+epRangeValid :: Parser [Int]
+epRangeValid = do
+  _ <- char 'e' <|> char 'E'
+  start <- parseInt
+  _ <- char '-'
+  _ <- char 'e' <|> char 'E'
+  end <- parseInt
+  return [start .. end]
+
+-- e.g. "e23-25". (Note: missing the second 'e'.) Technically this is NOT
+-- valid, but it's common enough in the wild that we'd better handle it.
+epRangeInvalid :: Parser [Int]
+epRangeInvalid = do
+  _ <- char 'e' <|> char 'E'
+  start <- parseInt
+  _ <- char '-'
+  end <- parseInt
+  return [start .. end]
 
 parseInt :: Parser Int
 parseInt = do
