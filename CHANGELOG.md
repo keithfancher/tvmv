@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Do not allow rename operations to overwrite existing files.
+- Explicitly fail to parse multi-episode files (e.g. `Adventure Time -
+  S06E01-E02.mp4`) rather than incorrectly parsing out only the *beginning* of
+  the episode range.
 
 
 ## 0.4.0 - 2024-02-06

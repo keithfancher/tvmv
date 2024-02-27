@@ -466,31 +466,37 @@ releases.
 
 ### Multi-episode files
 
-When using the `-a` flag to auto-detect season/episode numbers, double/triple
-episodes will not parse correctly. Which is to say, if you have a *single*
-file which contains *multiple* episodes, `tvmv` will currently only parse out
-the first episode. For example:
+`tvmv` can not yet handle multi-episode files. Which is to say, if you have a
+*single* file which contains *multiple* episodes, `tvmv` will simply fail to
+parse that file. (Of course this only applies when using `-a`/`--auto-detect`
+mode. "Dumb mode" doesn't parse the filenames at all.)
+
+The remaining files will still parse as expected. For example, with the
+following three files, *one* of which is a double episode:
 
 ```
 $ ls -1
-'Adventure Time - S07E14-E15.mkv'
-'Adventure Time - S07E16.mp4'
-'Adventure Time - S07E17.mp4'
+'at - S07E14-E15.mkv'
+'at - S07E16.mp4'
+'at - S07E17.mp4'
 
-$ tvmv mv -n "adventure time" -a
+Failed to parse season/episode numbers from the following files:
+at - S07E14-E15.mkv
+
 Fetching episode data from API for season 7
-Preparing to execute the following 3 rename operations...
+Preparing to execute the following 2 rename operations...
 
-Adventure Time - S07E14-E15.mkv ->
-Adventure Time - s07e14 - The More You Moe, The Moe You Know (1).mkv
+at - S07E16.mp4 ->
+Adventure Time - s07e16 - Summer Showers.mp4
 
-[etc.]
+at - S07E17.mp4 ->
+Adventure Time - s07e17 - Angel Face.mp4
+
+Continue? (y/N)
 ```
 
-**NOTE:** `S07E14-E15` is parsed as `s07e14`.
-
-No data will be lost in this case, but it's certainly annoying. For now, the
-best bet is to rename double episodes manually.
+Note that the `s07e14-e15` file did not parse, and therefore will *not* be
+renamed. For now, the best bet is to rename double episodes manually.
 
 ### Multiple episode orderings
 
