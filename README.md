@@ -2,12 +2,12 @@
 
 A command-line tool to bulk-rename TV episode files with minimal fuss.
 
-Integrates with [TMDB](https://www.themoviedb.org/). Uses API metadata to
-automatically rename your files to something media-server-friendly. (For Plex,
-Kodi, &c.)
+Integrates with [TMDB](https://www.themoviedb.org/). Uses API data to
+automatically rename your files to something human- and media-server-friendly.
+(For Plex, Jellyfin, Kodi, &c.)
 
 ```
-$ tvmv mv -n buffy -s 7
+$ tvmv mv -n buffy -a
 ```
 
 That's all there is to it!
@@ -18,7 +18,7 @@ That's all there is to it!
 ## Table of Contents
 
 * [Quickstart / Demo](#quickstart--demo)
-* [Overview](#overview)
+* [Overview](#overview--features)
 * [Prerequisite: an API key](#prerequisite-an-api-key)
 * [Installation](#installation)
   + [Binary installation](#binary-installation)
@@ -42,9 +42,11 @@ That's all there is to it!
 * [Known limitations](#known-limitations)
   + [Multi-episode files](#multi-episode-files)
   + [Multiple episode orderings](#multiple-episode-orderings)
+  + [Recursively traversing directories](#recursively-traversing-directories)
 * [Running tests](#running-tests)
 * [FAQ](#faq)
   + [What exactly does tvmv do?](#what-exactly-does-tvmv-do)
+  + [What's with the name?](#whats-with-the-name)
   + [Is there a GUI?](#is-there-a-gui)
   + [How is this different from [bulk-rename tool X]?](#how-is-this-different-from-bulk-rename-tool-x)
   + [What about FileBot?](#what-about-filebot)
@@ -86,12 +88,25 @@ $ ls -1
 ```
 
 
-## Overview
+## Overview / Features
 
-tvmv is a minimal, (almost-)zero-config command-line tool to bulk-rename your
-ripped or (legally!) downloaded TV episode files. It has sane defaults, talks
-to a sane API, and produces useful filenames that are compatible with Plex,
-Kodi, and most other media servers.
+`tvmv` is a minimal, (almost-)zero-config command-line tool to bulk-rename
+your ripped or (legally!) downloaded TV episode files. It has sane defaults,
+talks to a sane API, and produces useful filenames that are human- and
+media-server-friendly.
+
+- [x] Easily rename episode files, subtitles, or any other type of file using
+  data from [TMDB](https://www.themoviedb.org/).
+- [x] Produce useful, human-readable filenames which are also compatible with
+  Plex, Jellyfin, Kodi, and most other media servers.
+- [x] Search for shows right from the command-line.
+- [x] Write portable filenames: Windows-friendly, Mac-friendly, and (of
+  course!) Linux-friendly.
+- [x] Autodetect season/episode numbers in filenames.
+- [x] Autodetect language metadata in subtitle filenames.
+- [x] Easy to install: a single binary file with no external dependencies.
+- [x] Support for Linux, Mac OS, and Windows.
+- [x] Free and open source!
 
 
 ## Prerequisite: an API key
@@ -504,6 +519,13 @@ renamed. For now, the best bet is to rename double episodes manually.
 For example, "DVD order" or "TV broadcast order". It will simply use TMDB's
 default ordering.
 
+### Recursively traversing directories
+
+`tvmv` does not currently have an option to recursively traverse directories.
+This is easy to work around in Linux and Mac OS (see [the related FAQ
+item](#how-can-i-rename-files-for-all-of-a-shows-seasons-at-once)), but I
+don't know of an easy workaround for Windows users.
+
 
 ## Running tests
 
@@ -548,6 +570,11 @@ API key for this.
 It fetches TV episode metadata from an API, then uses that metadata to
 automatically rename TV episode files into a media-server-friendly (and
 human-friendly) format.
+
+### What's with the name?
+
+`mv` (short for "move") is the command in Unix-like operating systems to
+rename a file. And TV is TV :)
 
 ### Is there a GUI?
 
@@ -596,7 +623,7 @@ this issue altogether, regardless of your OS.
 ### How can I rename files for all of a show's seasons at once?
 
 If you have several seasons of a show, with all the video files in the same
-directory (*not* in subdirectories), you can simply use `tvmv`'s new
+directory (*not* in subdirectories), you can simply use `tvmv`'s
 `--auto-detect` flag (aka `-a`). In auto-detect mode, it will happily rename
 episodes from different seasons all at once.
 
