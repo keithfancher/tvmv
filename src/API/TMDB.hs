@@ -23,17 +23,24 @@ tmdbApiWrapper =
 -- Get data for a single show. Note that this only fetches certain top-level
 -- data for the show, it does NOT get all the season/episode data.
 getShow' :: APIKey -> ItemId -> Tvmv TvShow
-getShow' apiKey itemId = toTvmv apiKey $ getShowTMDB itemId
+getShow' apiKey itemId = toTvmv apiKey opDescription $ getShowTMDB itemId
+  where
+    opDescription = "fetch show data for ID: " <> toText itemId
 
 -- Given the show data, we can pull down the data for a given season, and all
 -- its episodes.
 getSeason' :: APIKey -> TvShow -> Int -> Tvmv Season
-getSeason' apiKey showData seasonNum = toTvmv apiKey $ getSeasonTMDB showData seasonNum
+getSeason' apiKey showData seasonNum = toTvmv apiKey opDescription $ getSeasonTMDB showData seasonNum
+  where
+    opDescription = "fetch season " <> toText seasonNum <> " of " <> showInfo
+    showInfo = "\"" <> showName showData <> "\" (ID: " <> toText (showId showData) <> ")"
 
 -- Get list of shows from TMDB that match the given query. Again, this only
 -- contains the top-level data for each returned show.
 queryShows' :: APIKey -> T.Text -> Tvmv [TvShow]
-queryShows' apiKey nameQuery = toTvmv apiKey $ queryShowsTMDB nameQuery
+queryShows' apiKey nameQuery = toTvmv apiKey opDescription $ queryShowsTMDB nameQuery
+  where
+    opDescription = "search shows with query text \"" <> nameQuery <> "\""
 
 getShowTMDB :: ItemId -> TMDB.TheMovieDB TvShow
 getShowTMDB itemId = do
@@ -56,16 +63,22 @@ runTMDB :: APIKey -> TMDB.TheMovieDB a -> IO (Either TMDB.Error a)
 runTMDB key = TMDB.runTheMovieDB (TMDB.defaultSettings key)
 
 -- Map to our internal monad stack, converting errors along the way.
-toTvmv :: APIKey -> TMDB.TheMovieDB a -> Tvmv a
-toTvmv key x = mkTvmv mappedResult
+-- The `opDescription` parameter is used only in the case of errors, so we can
+-- tell the user exactly what we *attempted* to do when we failed.
+toTvmv :: APIKey -> T.Text -> TMDB.TheMovieDB a -> Tvmv a
+toTvmv key opDescription x = mkTvmv mappedResult
   where
-    mappedResult = mapError <$> tmdbIO
+    mappedResult = mapError opDescription <$> tmdbIO
     tmdbIO = runTMDB key x
 
 -- Map Eithers to our internal Error type.
-mapError :: Either TMDB.Error a -> Either Error a
-mapError (Right r) = Right r
-mapError (Left e) = Left $ toAPIError e
+mapError :: T.Text -> Either TMDB.Error a -> Either Error a
+mapError _ (Right r) = Right r
+mapError opDescription (Left e) = Left $ appendOp $ toAPIError e
+  where
+    appendOp (APIError err) =
+      APIError $ err <> "\nWhile attempting to " <> T.unpack opDescription
+    appendOp otherError = otherError -- we don't care about non-API errors
 
 -- Map from TMDB format to our internal domain. (Almost identical really, but
 -- ours is a subset. Plus, mapping is always a sanity-saver.)
@@ -83,7 +96,9 @@ mapTvShow s =
   where
     mapSeason = mapTvSeason (TMDB.tvName s) -- map with the given name
     buildUrl showId = "https://www.themoviedb.org/tv/" <> toText showId
-    toText = T.pack . show
+
+toText :: (Show a) => a -> T.Text
+toText = T.pack . show
 
 mapTvSeason :: T.Text -> TMDB.Season -> Season
 mapTvSeason n s =
