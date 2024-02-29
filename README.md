@@ -18,7 +18,7 @@ That's all there is to it!
 ## Table of Contents
 
 * [Quickstart / Demo](#quickstart--demo)
-* [Overview](#overview--features)
+* [Overview / Features](#overview--features)
 * [Prerequisite: an API key](#prerequisite-an-api-key)
 * [Installation](#installation)
   + [Binary installation](#binary-installation)
