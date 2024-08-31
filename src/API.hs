@@ -28,7 +28,7 @@ searchSeasonByName withApi apiKey query seasonNum = do
 -- Get season episode data using the show's unique ID directly. Doesn't
 -- actually save on API calls, which is kind of funny, but ensures you're
 -- getting exactly the match you want.
-searchSeasonById :: Monad m => APIWrapper m -> APIKey -> ItemId -> Int -> m Season
+searchSeasonById :: (Monad m) => APIWrapper m -> APIKey -> ItemId -> Int -> m Season
 searchSeasonById withApi apiKey itemId seasonNum = do
   showData <- getShow withApi apiKey itemId
   getSeason withApi apiKey showData seasonNum
