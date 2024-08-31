@@ -1,6 +1,6 @@
-cabal-version: 1.12
+cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -53,6 +53,8 @@ library
       Print.Pretty
   other-modules:
       Paths_tvmv
+  autogen-modules:
+      Paths_tvmv
   hs-source-dirs:
       src
   default-extensions:
@@ -82,6 +84,8 @@ executable tvmv
       Env
       Version
       Paths_tvmv
+  autogen-modules:
+      Paths_tvmv
   hs-source-dirs:
       app
   default-extensions:
@@ -104,6 +108,8 @@ test-suite integration
   main-is: Spec.hs
   other-modules:
       API.Stub
+      Paths_tvmv
+  autogen-modules:
       Paths_tvmv
   hs-source-dirs:
       test/integration
@@ -135,6 +141,8 @@ test-suite unit
       LogSpec
       MatchSpec
       ParseSpec
+      Paths_tvmv
+  autogen-modules:
       Paths_tvmv
   hs-source-dirs:
       test/unit
