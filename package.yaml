@@ -1,7 +1,7 @@
 name:                tvmv
 version:             0.5.0
 github:              "keithfancher/tvmv"
-license:             BSD3
+license:             GPL-3.0-or-later
 author:              "Keith Fancher"
 maintainer:          "nospam@example.com"
 copyright:           "2022 Keith Fancher"
