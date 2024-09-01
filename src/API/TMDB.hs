@@ -1,6 +1,7 @@
 module API.TMDB
   ( mapTvShow,
     tmdbApiWrapper,
+    tmdbDefaultAPIKey,
   )
 where
 
@@ -11,6 +12,16 @@ import Domain.Error (Error (..))
 import Domain.Show (Episode (..), ItemId, Season (..), TvShow (..))
 import Monad.Tvmv (Tvmv, mkTvmv)
 import Network.API.TheMovieDB qualified as TMDB
+
+-- An experiment in goodwill! Attempting to make tvmv easier to use, truly
+-- zero-config, ready out-of-the-box.
+--
+-- I've registered a "default" TMDB API key and am committing it here. We'll
+-- see if it gets abused! Worst case, I can always revoke it. And of course
+-- users can still provide their own key if they start hitting rate limits or
+-- whatever.
+tmdbDefaultAPIKey :: APIKey
+tmdbDefaultAPIKey = "4c871702a327405b7fabd61a3b63f583"
 
 tmdbApiWrapper :: APIWrapper Tvmv
 tmdbApiWrapper =

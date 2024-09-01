@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- A default TMDB API key. Users are no longer *required* to register their own
+  API keys to use `tvmv`! This makes for a much smoother out-of-the-box
+  experience. (Users can still opt to use their own API keys, same as before:
+  with a file, CLI arg, or environment variable.)
+
 ### Changed
 
 - License update: `BSD-3-Clause` to `GPL-3.0-or-later`. Maybe this should go

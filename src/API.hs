@@ -1,21 +1,27 @@
 module API
   ( defaultAPI,
+    resolveAPIKey,
     searchSeasonById,
     searchSeasonByName,
     searchShowByName,
   )
 where
 
-import API.TMDB (tmdbApiWrapper)
+import API.TMDB (tmdbApiWrapper, tmdbDefaultAPIKey)
 import Control.Monad.Except (MonadError, liftEither)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Text qualified as T
 import Domain.API (APIKey, APIWrapper (..))
 import Domain.Error (Error (..))
 import Domain.Show (ItemId, Season (..), TvShow (..))
+import Exec.Env (Env, populateAPIKey)
 import Monad.Tvmv (Tvmv)
 
 defaultAPI :: APIWrapper Tvmv
 defaultAPI = tmdbApiWrapper
+
+defaultAPIKey :: APIKey
+defaultAPIKey = tmdbDefaultAPIKey
 
 -- Search for a show with the given name and, using the FIRST match for that
 -- name, return the episode data for the given season.
@@ -40,3 +46,15 @@ searchShowByName = queryShows
 firstMatch :: [a] -> Either Error a
 firstMatch [] = Left $ APIError "No match found for search query"
 firstMatch (first : _) = Right first
+
+-- Attempt to populate the user's API key override, if it exists (from cli arg,
+-- environment var, or file). If user has not provided an API key, fall back to
+-- tvmv's "default" key for this API.
+resolveAPIKey :: (MonadIO m) => Maybe APIKey -> Env -> m APIKey
+resolveAPIKey cliArgsKey env = case populateAPIKey cliArgsKey env of
+  (Left _) -> do
+    liftIO $ putStrLn "User API key override not detected, using tvmv's default API key"
+    return defaultAPIKey
+  (Right k) -> do
+    liftIO $ putStrLn "Found user-provided API key override..."
+    return k

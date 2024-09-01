@@ -1,26 +1,19 @@
 module Exec.Commands.Search (search) where
 
-import API (searchShowByName)
+import API qualified
 import Command (SearchOptions (..))
-import Control.Monad.Except (MonadError, liftEither)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Domain.API (APIWrapper)
-import Domain.Error (Error (..))
-import Exec.Env (Env, populateAPIKey)
+import Exec.Env (Env)
 import Print.Color (Colorized (..))
 import Text.Printf (printf)
 
 -- Query the configured API for a show with the given name. The `search` command!
-search ::
-  (MonadIO m, MonadError Error m) =>
-  Env ->
-  APIWrapper m ->
-  SearchOptions ->
-  m ()
+search :: (MonadIO m) => Env -> APIWrapper m -> SearchOptions -> m ()
 search env withApi (SearchOptions maybeApiKey searchQuery) = do
-  key <- liftEither $ populateAPIKey maybeApiKey env
+  key <- API.resolveAPIKey maybeApiKey env
   putStrLn' "Querying API..."
-  tvShowResults <- searchShowByName withApi key searchQuery
+  tvShowResults <- API.searchShowByName withApi key searchQuery
   putStrLn' $ resultsMsg tvShowResults
   printColorizedListLn tvShowResults
   where

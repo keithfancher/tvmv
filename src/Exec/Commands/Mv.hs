@@ -11,7 +11,7 @@ import Domain.API (APIWrapper)
 import Domain.Error (Error (..))
 import Domain.Rename (MatchedEpisodes, episodes, matchEpisodes, matchEpisodesAllowPartial, renameFiles)
 import Domain.Show (Episode (..), Season (..))
-import Exec.Env (Env, populateAPIKey)
+import Exec.Env (Env)
 import Exec.Filter (filterFiles)
 import Exec.Rename (RenameResult, runRenameOps)
 import File.Dir (listFiles)
@@ -31,7 +31,7 @@ mv env withApi mvOptions = do
   let (MvOptions maybeApiKey force _noLog _partial mkPortable _searchKey seasonSelection inFiles) = mvOptions
 
   -- Before doing anything, ensure we have an API key available:
-  apiKey <- liftEither $ populateAPIKey maybeApiKey env
+  apiKey <- API.resolveAPIKey maybeApiKey env
 
   -- Get the list of input files, parse out relevant season/episode data:
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
