@@ -32,7 +32,7 @@ data MvOptions = MvOptions
     force :: Bool, -- do not wait for user confirmation
     noLog :: Bool, -- don't write a log file
     allowPartial :: Bool, -- allow partial matches of episodes/files
-    portableNames :: Bool, -- portable, aka "Windows-friendly" file/episode names
+    unicodeFilenames :: Bool, -- allow full unicode in resulting filenames
     searchKey :: SearchKey,
     seasonNum :: SeasonSelection,
     seasonFiles :: [FilePath]

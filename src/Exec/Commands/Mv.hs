@@ -28,7 +28,7 @@ mv ::
   MvOptions ->
   m ()
 mv env withApi mvOptions = do
-  let (MvOptions maybeApiKey force _noLog _partial mkPortable _searchKey seasonSelection inFiles) = mvOptions
+  let (MvOptions maybeApiKey force _noLog _partial unicodeFilenames _searchKey seasonSelection inFiles) = mvOptions
 
   -- Before doing anything, ensure we have an API key available:
   apiKey <- API.resolveAPIKey maybeApiKey env
@@ -43,8 +43,8 @@ mv env withApi mvOptions = do
   printColorLn $ showFetchMessage seasonNums
   episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
 
-  -- If the option is set, make episode names "portable", aka Windows-friendly:
-  let niceEpData = if mkPortable then makePortableEpNames episodeData else episodeData
+  -- By default we make episode names "portable", aka Windows-friendly:
+  let niceEpData = if unicodeFilenames then episodeData else makePortableEpNames episodeData
 
   -- Match API data with the list of input files, smartly or dumbly:
   matchedFiles <- case seasonSelection of

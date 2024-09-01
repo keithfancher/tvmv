@@ -54,7 +54,7 @@ mvOptionsParser =
     <*> forceFlagParser
     <*> noLogFlagParser
     <*> allowPartialParser
-    <*> portableNamesParser
+    <*> unicodeFilenamesParser
     <*> searchKeyParser
     <*> seasonNumParser
     <*> filePathsParser
@@ -117,12 +117,12 @@ allowPartialParser =
         <> help "Allow mismatched number of episodes/files. (i.e. you have an incomplete set of files.) See README for more details."
     )
 
-portableNamesParser :: Parser Bool
-portableNamesParser =
+unicodeFilenamesParser :: Parser Bool
+unicodeFilenamesParser =
   switch
-    ( long "portable-filenames"
-        <> short 'w'
-        <> help "Rename using portable (aka Windows-friendly) filenames. ASCII, without special symbols, etc."
+    ( long "unicode-filenames"
+        <> short 'u'
+        <> help "Allow full unicode set of characters in resulting filenames. (By default, tvmv will create portable, Windows-friendly, ASCII-only filenames.)"
     )
 
 maybeApiKeyReader :: ReadM (Maybe APIKey)

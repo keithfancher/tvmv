@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Remove `--portable-filenames` option (aka `-w`). **Portable filenames are
+  now on by default.** Users who wish to keep Unicode filenames can use the
+  new `--unicode-filenames` option (aka `-u`). This option is the same as the
+  previous default behavior.
 - License update: `BSD-3-Clause` to `GPL-3.0-or-later`. Maybe this should go
   in the "Fixed" section ;)
 
