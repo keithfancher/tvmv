@@ -1,5 +1,5 @@
 import API.Stub (testAPI)
-import Command (Command (..), MvOptions (..), SearchKey (..), SeasonSelection (..), UndoOptions (..))
+import Command (Command (..), MvOptions (..), SearchKey (..), UndoOptions (..), UserSearchTerms (..))
 import Data.Text.IO qualified as TIO
 import Domain.Error (Error)
 import Execute (Env (..), execCommandWithAPI, selectRunner)
@@ -75,8 +75,7 @@ mvOptions =
       noLog = False, -- we want a log!
       allowPartial = False, -- don't allow partial matches
       unicodeFilenames = False, -- doesn't really matter for these tests
-      searchKey = Id 790, -- Poirot! by ID
-      seasonNum = SeasonNum 12,
+      userSearchTerms = Just (UserSearchTerms (Id 790) (Just 12)),
       seasonFiles = [testTempDir]
     }
 
