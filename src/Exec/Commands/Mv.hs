@@ -44,9 +44,13 @@ mv env withApi mvOptions = do
   let seasonSelection' = userSearchTerms >>= seasonSelection
   seasonNums <- getSeasonNums seasonSelection' parseResults
 
+  -- Get the parsed show name. If there's not exactly one, we fail. (For now!
+  -- Handling disparate TV shows in a single pass can come later.)
+  parsedShowName <- getShowName searchType parseResults
+
   -- Fetch episode data from our configured API:
   printColorLn $ showFetchMessage seasonNums
-  episodeData <- fetchEpisodeData (searchSeason apiKey) seasonNums
+  episodeData <- fetchEpisodeData (searchSeason apiKey parsedShowName) seasonNums
 
   -- By default we make episode names "portable", aka Windows-friendly:
   let niceEpData = if unicodeFilenames then episodeData else makePortableEpNames episodeData
@@ -64,10 +68,11 @@ mv env withApi mvOptions = do
     match = if allowPartial mvOptions then matchEpisodesAllowPartial else matchEpisodes
     renameMsg ops =
       "Preparing to execute the following " <> colorNum (length ops) <> " rename operations...\n"
-    searchSeason k = case showSelection <$> userSearchTerms mvOptions of
+    searchSeason k parsedName = case showSelection <$> userSearchTerms mvOptions of
       (Just (Name n)) -> API.searchSeasonByName withApi k n
       (Just (Id i)) -> API.searchSeasonById withApi k i
-      Nothing -> error "TODO! Show-name parsing not implemented yet :(" -- TODO!
+      -- Nothing provided, attempt to use parsed-out name:
+      Nothing -> API.searchSeasonByName withApi k parsedName
 
 -- Based on what data the user does and doesn't provide, we determine what
 -- extra bits need parsing out, if any. This extra bit of mapping here (and
@@ -119,13 +124,10 @@ autoMatchFiles parsedFiles epList = do
 
 -- If the user isn't actually requiring us to parse out data, we don't care if
 -- there are parsing errors.
---
--- TODO: This logic will likely have to be adjusted when we start parsing out
--- show names as well as season nums.
 showParseFailures :: (MonadIO m) => SearchType -> ParseResults -> m ()
 showParseFailures NoParse _ = return () -- No parsing means no failures
-showParseFailures _ (ParseResults _ _ []) = return () -- No failures also means no failures!
-showParseFailures _ (ParseResults _ _ failures) = asWarning $ printRelativeFiles failures errMsg
+showParseFailures _ (ParseResults _ _ _ []) = return () -- No failures also means no failures!
+showParseFailures _ (ParseResults _ _ _ failures) = asWarning $ printRelativeFiles failures errMsg
   where
     errMsg = "Failed to parse season/episode numbers from the following files:"
 
@@ -147,6 +149,25 @@ getSeasonNums (Just seasonNum) _ = return [seasonNum]
 getSeasonNums Nothing parseResults = case seasonNumbers parseResults of
   [] -> throwError $ ParseError "Unable to parse season/episode data from any input files"
   nonEmpty -> return nonEmpty
+
+-- Given the parse results and our search type, pull out a single show name, if
+-- it exists. If anything other than exactly one show name exists, we fail. For now!
+--
+-- (Unless the user has provided us a show name, of course, in which case this
+-- value doesn't matter.)
+getShowName :: (MonadIO m, MonadError Error m) => SearchType -> ParseResults -> m T.Text
+-- First, the name-parsing cases:
+getShowName ParseNameAndSeason parseResults = case showNames parseResults of
+  [] -> throwError $ ParseError "Unable to parse show name from episode files -- try specifying the name with the '-n' option"
+  [exactlyOneName] -> do
+    putStrLn' $ "Parsed out show name: '" <> T.unpack exactlyOneName <> "'"
+    return exactlyOneName
+  multiNames -> throwError $ ParseError $ "Multiple show names detected! (" <> show multiNames <> ") Sorry, but tvmv currently only supports operating on a single TV show at a time. (You can override the parsed name(s) with the '-n' option.)"
+-- In the case where we're NOT parsing out the name, we don't actually care
+-- what gets returned here.
+-- TODO: This is wonky. We shouldn't even be calling this function if we're not
+-- trying to parse out the name.
+getShowName _ _ = return ""
 
 -- Make episode names "portable", aka Windows-friendly. Remove/replace fancy
 -- characters, watch for reserved filenames, etc.
