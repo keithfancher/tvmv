@@ -1,6 +1,6 @@
 module Args (cliOptParser) where
 
-import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), SeasonSelection (..), UndoOptions (..))
+import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..), UserSearchTerms (..))
 import Data.Text qualified as T
 import Domain.API (APIKey)
 import Options.Applicative
@@ -55,32 +55,52 @@ mvOptionsParser =
     <*> noLogFlagParser
     <*> allowPartialParser
     <*> unicodeFilenamesParser
-    <*> searchKeyParser
-    <*> seasonNumParser
+    <*> userSearchTermsParser
     <*> filePathsParser
 
-seasonNumParser :: Parser SeasonSelection
-seasonNumParser = integerSeasonParser <|> autoSeasonFlag
+-- Fully optional. If no search terms specified, tvmv will try to parse out
+-- show name, season number, etc. Previously known as "auto" mode.
+userSearchTermsParser :: Parser (Maybe UserSearchTerms)
+userSearchTermsParser =
+  optional $
+    UserSearchTerms
+      <$> searchKeyParser
+      <*> maybeSeasonNumberParser
 
-integerSeasonParser :: Parser SeasonSelection
-integerSeasonParser =
-  SeasonNum
+searchKeyParser :: Parser SearchKey
+searchKeyParser = nameParser <|> idParser
+
+nameParser :: Parser SearchKey
+nameParser =
+  Name
+    <$> strOption
+      ( long "name"
+          <> short 'n'
+          <> metavar "SHOW_NAME"
+          <> help "The show name, or a fragment of the show name. We'll search the API with this query and use the first matching result to get show data."
+      )
+
+idParser :: Parser SearchKey
+idParser =
+  Id
     <$> option
+      auto
+      ( long "id"
+          <> short 'i'
+          <> metavar "SHOW_ID"
+          <> help "If you have the show's unique ID, you can search with that directly, rather than using its name. (You can get a show's ID with `tvmv search`.)"
+      )
+
+maybeSeasonNumberParser :: Parser (Maybe Int)
+maybeSeasonNumberParser =
+  optional $
+    option
       auto
       ( long "season"
           <> short 's'
           <> help "The season number for the files you're renaming. tvmv operates in units of seasons."
           <> metavar "SEASON_NUM"
       )
-
-autoSeasonFlag :: Parser SeasonSelection
-autoSeasonFlag =
-  flag' -- Note use of `flag'`! "Builder for a flag parser without a default value."
-    Auto
-    ( long "auto-detect"
-        <> short 'a'
-        <> help "Instead of specifying a season, tvmv will attempt to determine the season based on the input file names."
-    )
 
 apiKeyParser :: Parser (Maybe APIKey)
 apiKeyParser =
@@ -140,30 +160,6 @@ filePathsParser =
             <> help "If omitted, tvmv will operate on all files in the current directory. Otherwise, you can specify EITHER a single directory OR a set of files (via globbing or whatever else)."
         )
     )
-
-searchKeyParser :: Parser SearchKey
-searchKeyParser = nameParser <|> idParser
-
-nameParser :: Parser SearchKey
-nameParser =
-  Name
-    <$> strOption
-      ( long "name"
-          <> short 'n'
-          <> metavar "SHOW_NAME"
-          <> help "The show name, or a fragment of the show name. We'll search the API with this query and use the first matching result to get show data."
-      )
-
-idParser :: Parser SearchKey
-idParser =
-  Id
-    <$> option
-      auto
-      ( long "id"
-          <> short 'i'
-          <> metavar "SHOW_ID"
-          <> help "If you have the show's unique ID, you can search with that directly, rather than using its name. (You can get a show's ID with `tvmv search`.)"
-      )
 
 searchOptionsParser :: Parser SearchOptions
 searchOptionsParser =
