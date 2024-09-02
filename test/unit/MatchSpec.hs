@@ -30,19 +30,24 @@ parsedFiles =
   ParseResults
     { successes =
         [ ( "Poirot - 1x23 - He catches a cold.mkv",
-            SeasonEpNum {seasonNum = 1, episodeNum = 23}
+            SeasonEpNum {seasonNum = 1, episodeNum = 23},
+            Just "Poirot"
           ),
           ( "Poirot s12e4.mp4",
-            SeasonEpNum {seasonNum = 12, episodeNum = 4}
+            SeasonEpNum {seasonNum = 12, episodeNum = 4},
+            Just "Poirot"
           ),
           ( "Poirot s003e19 - Shut up, Hastings.mp4",
-            SeasonEpNum {seasonNum = 3, episodeNum = 19}
+            SeasonEpNum {seasonNum = 3, episodeNum = 19},
+            Just "Poirot"
           ),
           ( "s20e06 - something unmatchable, episode doesn't exist.mp4",
-            SeasonEpNum {seasonNum = 20, episodeNum = 6}
+            SeasonEpNum {seasonNum = 20, episodeNum = 6},
+            Nothing
           )
         ],
       seasonNumbers = [1, 3, 12, 20],
+      showNames = ["Poirot"],
       failures = ["Some un-parseable jibber-jabber"]
     }
 
