@@ -1,7 +1,7 @@
 module Exec.Commands.Mv (mv) where
 
 import API qualified
-import Command (MvOptions (..), SearchKey (..), SeasonSelection (..))
+import Command (MvOptions (..), SearchKey (..), UserSearchTerms (..))
 import Control.Monad.Except (MonadError, liftEither, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer (MonadWriter)
@@ -28,7 +28,7 @@ mv ::
   MvOptions ->
   m ()
 mv env withApi mvOptions = do
-  let (MvOptions maybeApiKey force _noLog _partial unicodeFilenames _searchKey seasonSelection inFiles) = mvOptions
+  let (MvOptions maybeApiKey force _noLog _partial unicodeFilenames userSearchTerms inFiles) = mvOptions
 
   -- Before doing anything, ensure we have an API key available:
   apiKey <- API.resolveAPIKey maybeApiKey env
@@ -36,8 +36,13 @@ mv env withApi mvOptions = do
   -- Get the list of input files, parse out relevant season/episode data:
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
   let parseResults = parseFilePaths filteredFiles
-  showParseFailures seasonSelection parseResults
-  seasonNums <- getSeasonNums seasonSelection parseResults
+
+  -- We need "search type" to know whether we actually care about parse
+  -- failures or not. (If we're not parsing, we don't care!)
+  let searchType = getSearchType userSearchTerms
+  showParseFailures searchType parseResults
+  let seasonSelection' = userSearchTerms >>= seasonSelection
+  seasonNums <- getSeasonNums seasonSelection' parseResults
 
   -- Fetch episode data from our configured API:
   printColorLn $ showFetchMessage seasonNums
@@ -46,10 +51,11 @@ mv env withApi mvOptions = do
   -- By default we make episode names "portable", aka Windows-friendly:
   let niceEpData = if unicodeFilenames then episodeData else makePortableEpNames episodeData
 
-  -- Match API data with the list of input files, smartly or dumbly:
-  matchedFiles <- case seasonSelection of
-    SeasonNum _ -> liftEither $ match niceEpData filteredFiles -- lexicographic sort, "dumb" matching
-    Auto -> autoMatchFiles (successes parseResults) niceEpData -- parsed filenames, "smart" matching
+  -- Match API data with the list of input files, smartly or dumbly, based on
+  -- whether the user has provided a season or we've parsed it out:
+  matchedFiles <- case seasonSelection' of
+    Just _ -> liftEither $ match niceEpData filteredFiles -- lexicographic sort, "dumb" matching
+    Nothing -> autoMatchFiles (successes parseResults) niceEpData -- parsed filenames, "smart" matching
 
   -- Finally, actually rename the input files based on the API data:
   let renameOps = renameFiles matchedFiles
@@ -58,9 +64,22 @@ mv env withApi mvOptions = do
     match = if allowPartial mvOptions then matchEpisodesAllowPartial else matchEpisodes
     renameMsg ops =
       "Preparing to execute the following " <> colorNum (length ops) <> " rename operations...\n"
-    searchSeason k = case searchKey mvOptions of
-      (Name n) -> API.searchSeasonByName withApi k n
-      (Id i) -> API.searchSeasonById withApi k i
+    searchSeason k = case showSelection <$> userSearchTerms mvOptions of
+      (Just (Name n)) -> API.searchSeasonByName withApi k n
+      (Just (Id i)) -> API.searchSeasonById withApi k i
+      Nothing -> error "TODO! Show-name parsing not implemented yet :(" -- TODO!
+
+-- Based on what data the user does and doesn't provide, we determine what
+-- extra bits need parsing out, if any. This extra bit of mapping here (and
+-- `getSearchType` below) means the user shouldn't ever have to explicitly
+-- select a "mode" of operation -- "auto" or what have you -- they just give us
+-- what they have and we do the rest.
+data SearchType = ParseNameAndSeason | ParseSeason | NoParse
+
+getSearchType :: Maybe UserSearchTerms -> SearchType
+getSearchType Nothing = ParseNameAndSeason -- nothing provided, must parse everything
+getSearchType (Just (UserSearchTerms _ Nothing)) = ParseSeason -- search key provided but no season
+getSearchType (Just (UserSearchTerms _ (Just _))) = NoParse -- everything provided, no need to parse at all
 
 -- Slightly neurotic? Nicer printing of the input seasons.
 showFetchMessage :: [Int] -> ColorText
@@ -98,10 +117,15 @@ autoMatchFiles parsedFiles epList = do
     showMatchFailures [] = return ()
     showMatchFailures failures = asWarning $ printRelativeFiles failures matchError
 
-showParseFailures :: (MonadIO m) => SeasonSelection -> ParseResults -> m ()
-showParseFailures (SeasonNum _) _ = return () -- No parsing means no failures
-showParseFailures Auto (ParseResults _ _ []) = return () -- No failures also means no failures!
-showParseFailures Auto (ParseResults _ _ failures) = asWarning $ printRelativeFiles failures errMsg
+-- If the user isn't actually requiring us to parse out data, we don't care if
+-- there are parsing errors.
+--
+-- TODO: This logic will likely have to be adjusted when we start parsing out
+-- show names as well as season nums.
+showParseFailures :: (MonadIO m) => SearchType -> ParseResults -> m ()
+showParseFailures NoParse _ = return () -- No parsing means no failures
+showParseFailures _ (ParseResults _ _ []) = return () -- No failures also means no failures!
+showParseFailures _ (ParseResults _ _ failures) = asWarning $ printRelativeFiles failures errMsg
   where
     errMsg = "Failed to parse season/episode numbers from the following files:"
 
@@ -118,9 +142,9 @@ printRelativeFiles files msg = do
 
 -- If the user has specified a season, simply return that. In the case of
 -- auto-detection, pull the seasons from the parsed input file list.
-getSeasonNums :: (MonadError Error m) => SeasonSelection -> ParseResults -> m [Int]
-getSeasonNums (SeasonNum n) _ = return [n]
-getSeasonNums Auto parseResults = case seasonNumbers parseResults of
+getSeasonNums :: (MonadError Error m) => Maybe Int -> ParseResults -> m [Int]
+getSeasonNums (Just seasonNum) _ = return [seasonNum]
+getSeasonNums Nothing parseResults = case seasonNumbers parseResults of
   [] -> throwError $ ParseError "Unable to parse season/episode data from any input files"
   nonEmpty -> return nonEmpty
 
