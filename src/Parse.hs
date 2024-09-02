@@ -1,15 +1,27 @@
 module Parse
-  ( SeasonEpNum (..),
+  ( EpisodeData (..),
+    SeasonEpNum (..),
     parseFilename,
   )
 where
 
+import Data.Char (isAlphaNum)
 import Data.Either (isRight)
+import Data.Text (Text, dropWhileEnd, pack, replace, strip)
 import Domain.Error (Error (..))
 import System.FilePath (takeFileName)
 import Text.Parsec (anyChar, char, lookAhead, many, many1, manyTill, parse, try, (<|>))
 import Text.Parsec.Char (digit)
 import Text.Parsec.String (Parser)
+
+-- The episode data we can parse out of a single filename. Show name may or may
+-- not exist, but if we're parsing at all, `SeasonEpNum` must exist. (Also
+-- since show name is parsed relative to that -- as the leading characters.)
+data EpisodeData = EpisodeData
+  { seasonEpNum :: SeasonEpNum,
+    showName :: Maybe Text
+  }
+  deriving (Eq, Show)
 
 -- Simple wrapper for the season number and episode number of an episode
 data SeasonEpNum = SeasonEpNum
@@ -26,7 +38,7 @@ data MultiEpNums = MultiEpNums
 
 -- Given the filename (or full path) for an episode, attempt to parse out the
 -- season and episode number.
-parseFilename :: FilePath -> Either Error SeasonEpNum
+parseFilename :: FilePath -> Either Error EpisodeData
 parseFilename fullFilePath =
   if isMultiEpFile fileName
     then Left $ ParseError "Multi-episode files are not yet supported :'("
@@ -44,21 +56,38 @@ isMultiEpFile fileName = isRight parseMultiEp
 
 -- Parses out the season number and episode number, ignoring all leading and
 -- trailing characters.
-fullFilename :: Parser SeasonEpNum
-fullFilename = withLeadingAndTrailingChars seasonEpNum
+fullFilename :: Parser EpisodeData
+fullFilename = do
+  (leadingChars, seasonEp) <- withLeadingAndTrailingChars seasonEpNum
+  -- Show name is just a cleaned up version of the leading characters:
+  let cleanName = case cleanShowName leadingChars of
+        "" -> Nothing
+        nonEmpty -> Just nonEmpty
+  return $ EpisodeData {seasonEpNum = seasonEp, showName = cleanName}
   where
     -- NOTE: The only reason none of these (currently) needs a `try` is that
     -- there is no overlap in the first character they parse, so they'll never
     -- consume each others' input. If this changes, don't forget the `try`!
     seasonEpNum = seasonEpNumXFormat <|> seasonEpNumSEFormat <|> seasonEpNumEpOnlyFormat
 
+-- Some simple transformations to make the show name more searchable/sane. Note
+-- the preference for `Text` over `String`, since it handles Unicode better.
+cleanShowName :: String -> Text
+cleanShowName = strip . replacePeriods . stripTrailingJunk . pack
+  where
+    -- Any lingering "stuff" after the show name-proper:
+    stripTrailingJunk = dropWhileEnd (not . isAlphaNum)
+    -- Convention of using '.' as word separator. Why is that, anyway?
+    replacePeriods = replace "." " "
+
 -- Use the given parser, but allow any number of leading and trailing characters.
-withLeadingAndTrailingChars :: Parser a -> Parser a
+-- Return the leading characters along with the parsed result.
+withLeadingAndTrailingChars :: Parser a -> Parser (String, a)
 withLeadingAndTrailingChars parser = do
-  _ <- leadingChars
+  leading <- leadingChars
   value <- parser
-  _ <- many anyChar
-  return value
+  _trailing <- many anyChar
+  return (leading, value)
   where
     -- Consume characters until we succeed in parsing a value. We need a
     -- version of our parser that doesn't *consume* our actual value here,

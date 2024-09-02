@@ -8,24 +8,31 @@ spec :: Spec
 spec = do
   describe "parseFilename" $ do
     it "parses all well-formed base cases (season + ep num ONLY)" $ do
-      mapM_ testResultSet inputOutputBaseCases
+      mapM_ testResultSetEpNumsOnly inputOutputBaseCases
 
     it "parses with trailing characters, ignoring them" $ do
-      mapM_ testResultSet inputOutputTrailing
+      mapM_ testResultSetEpNumsOnly inputOutputTrailing
 
     it "parses all well-formed full filenames" $ do
-      mapM_ testResultSet inputOutputFullFilename
+      mapM_ testResultSetEpNumsOnly inputOutputFullFilename
 
     it "parses all well-formed full paths" $ do
-      mapM_ testResultSet inputOutputFullPath
+      mapM_ testResultSetEpNumsOnly inputOutputFullPath
+
+    it "parses out show names, when they exist" $ do
+      mapM_ testResultSet inputOutputShowNames
 
     it "fails when given episode ranges, which are not yet supported" $ do
       mapM_ testFailures inputOutputEpRanges
 
 -- Given a tuple of (input, expected output), asserts that the expected result
 -- is returned when the input is parsed.
-testResultSet :: (String, SeasonEpNum) -> Expectation
+testResultSet :: (String, EpisodeData) -> Expectation
 testResultSet (input, expected) = parseFilename input `shouldBe` Right expected
+
+-- Same as above, but only asserting on season and episode numbers.
+testResultSetEpNumsOnly :: (String, SeasonEpNum) -> Expectation
+testResultSetEpNumsOnly (input, expected) = (seasonEpNum <$> parseFilename input) `shouldBe` Right expected
 
 testFailures :: String -> Expectation
 testFailures input = parseFilename input `shouldSatisfy` isLeft
@@ -61,6 +68,40 @@ inputOutputFullPath :: [(String, SeasonEpNum)]
 inputOutputFullPath =
   [ ("/home/jimbo/tv/A show - 1x21 - An episode.mkv", SeasonEpNum {seasonNum = 1, episodeNum = 21}),
     ("/media/0x12dumbdirectory/Poirot - s035e123 - s12e04 baaad.mp4", SeasonEpNum {seasonNum = 35, episodeNum = 123})
+  ]
+
+inputOutputShowNames :: [(String, EpisodeData)]
+inputOutputShowNames =
+  [ ( "Buffy - 1x21 - An episode.mkv",
+      EpisodeData (SeasonEpNum {seasonNum = 1, episodeNum = 21}) (Just "Buffy")
+    ),
+    ( "/media/0x12dumbdirectory/Poirot - s035e123 - s12e04 baaad.mp4",
+      EpisodeData (SeasonEpNum {seasonNum = 35, episodeNum = 123}) (Just "Poirot")
+    ),
+    ( "Angel.S01E03.In.The.Dark.mp4",
+      EpisodeData (SeasonEpNum {seasonNum = 1, episodeNum = 3}) (Just "Angel")
+    ),
+    ( "Psycho-Pass-EP03-blah blah blah",
+      EpisodeData (SeasonEpNum {seasonNum = 1, episodeNum = 3}) (Just "Psycho-Pass")
+    ),
+    ( "samurai.gourmet.s01e12.720p.mkv",
+      EpisodeData (SeasonEpNum {seasonNum = 1, episodeNum = 12}) (Just "samurai gourmet")
+    ),
+    ( "Californication [2x01].avi",
+      EpisodeData (SeasonEpNum {seasonNum = 2, episodeNum = 1}) (Just "Californication")
+    ),
+    ( "Higurashi - When They Cry - s01e01 - The Hidden Demon Chapter - Part 1 - The Beginning.mkv",
+      EpisodeData (SeasonEpNum {seasonNum = 1, episodeNum = 1}) (Just "Higurashi - When They Cry")
+    ),
+    ( "Steins;Gate - EP01 - Turning Point.mkv",
+      EpisodeData (SeasonEpNum {seasonNum = 1, episodeNum = 1}) (Just "Steins;Gate")
+    ),
+    ( "1x21 - An episode.mp4",
+      EpisodeData (SeasonEpNum {seasonNum = 1, episodeNum = 21}) Nothing
+    ),
+    ( "        ?_++//[]]]]]]]]]1x21 - An episode.mp4",
+      EpisodeData (SeasonEpNum {seasonNum = 1, episodeNum = 21}) Nothing
+    )
   ]
 
 -- These all use episode ranges, which are not (yet) supported:
