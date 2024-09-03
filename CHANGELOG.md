@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Ability to automatically parse TV show names from filenames! I would
+  consider this feature still in "beta", but you are no longer required to
+  supply `tvmv` with a show name via the `-n` option. In fact, simply calling
+  `tvmv mv` (with no arguments at all) will attempt to parse out all relevant
+  data from the filenames in the current directory. Handy!
 - A default TMDB API key. Users are no longer *required* to register their own
   API keys to use `tvmv`! This makes for a much smoother out-of-the-box
   experience. (Users can still opt to use their own API keys, same as before:
@@ -17,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Remove `--auto-detect` option (aka `-a`). **Auto-detect mode is now the
+  default** unless you specify a show name and season manually with the `-n`
+  and `-s` options.
 - Remove `--portable-filenames` option (aka `-w`). **Portable filenames are
   now on by default.** Users who wish to keep Unicode filenames can use the
   new `--unicode-filenames` option (aka `-u`). This option is the same as the
