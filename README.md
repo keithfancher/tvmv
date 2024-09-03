@@ -141,6 +141,11 @@ following section.)
 
 To uninstall, simply remove the binary.
 
+Note: On Apple silicon you need to install Rosetta, otherwise you will be prompted with the following error `zsh: bad CPU type in executable: tvmv`
+
+In your command prompt type: `softwareupdate --install-rosetta` to install the required update.
+[source](https://stackoverflow.com/questions/71122488/zsh-bad-cpu-type-in-executable-node)
+
 ### Building from source
 
 We use `stack` as our build tool. You can [install it
