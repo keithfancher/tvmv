@@ -52,7 +52,7 @@ mv env withApi mvOptions = do
   printColorLn $ showFetchMessage seasonNums
   episodeData <- fetchEpisodeData (searchSeason apiKey parsedShowName) seasonNums
 
-  -- By default we make episode names "portable", aka Windows-friendly:
+  -- By default we make episode and show names "portable", aka Windows-friendly:
   let niceEpData = if unicodeFilenames then episodeData else makePortableEpNames episodeData
 
   -- Match API data with the list of input files, smartly or dumbly, based on
@@ -169,12 +169,16 @@ getShowName ParseNameAndSeason parseResults = case showNames parseResults of
 -- trying to parse out the name.
 getShowName _ _ = return ""
 
--- Make episode names "portable", aka Windows-friendly. Remove/replace fancy
--- characters, watch for reserved filenames, etc.
+-- Make episode and show names "portable", aka Windows-friendly. Remove/replace
+-- fancy characters, watch for reserved filenames, etc.
 makePortableEpNames :: [Episode] -> [Episode]
-makePortableEpNames = map makePortableName
+makePortableEpNames = map makePortableNames
   where
-    makePortableName e = e {episodeName = makeTextPortable (episodeName e)}
+    makePortableNames e =
+      e
+        { episodeName = makeTextPortable (episodeName e),
+          episodeShowName = makeTextPortable (episodeShowName e)
+        }
     makeTextPortable = T.pack . makePortable . T.unpack
 
 -- Wrapper for less lifting :')

@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - License update: `BSD-3-Clause` to `GPL-3.0-or-later`. Maybe this should go
   in the "Fixed" section ;)
 
+### Fixed
+- The "portable filenames" functionality was previously only being applied to
+  *episode* names, not *show* names. Now it's applied to both.
+
 
 ## 0.5.0 - 2024-02-29
 
