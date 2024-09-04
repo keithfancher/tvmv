@@ -34,13 +34,15 @@ tvmvLogBaseFilename = "tvmv-log"
 -- Write (successful) results to a log file in the current directory.
 writeLogFile :: Logger
 writeLogFile [] = return () -- no ops, don't log
-writeLogFile results = do
-  logFile <- logFileName
-  printColorLn $
-    "Writing log to "
-      <> colorLog logFile
-      <> ".\nUse `tvmv undo` to undo any changes made by this operation."
-  TIO.writeFile logFile (getLogText results)
+writeLogFile results = case successfulOps results of
+  [] -> return () -- no successes, don't log
+  _nonEmpty -> do
+    logFile <- logFileName
+    printColorLn $
+      "Writing log to "
+        <> colorLog logFile
+        <> ".\nUse `tvmv undo` to undo any changes made by this operation."
+    TIO.writeFile logFile (getLogText results)
 
 colorLog :: FilePath -> ColorText
 colorLog = cyan . pack

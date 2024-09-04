@@ -33,8 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in the "Fixed" section ;)
 
 ### Fixed
+
 - The "portable filenames" functionality was previously only being applied to
   *episode* names, not *show* names. Now it's applied to both.
+- We will no longer write a log file if there were zero successful rename
+  operations.
 
 
 ## 0.5.0 - 2024-02-29
