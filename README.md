@@ -141,10 +141,9 @@ following section.)
 
 To uninstall, simply remove the binary.
 
-Note: On Apple silicon you need to install Rosetta, otherwise you will be prompted with the following error `zsh: bad CPU type in executable: tvmv`
-
-In your command prompt type: `softwareupdate --install-rosetta` to install the required update.
-[source](https://stackoverflow.com/questions/71122488/zsh-bad-cpu-type-in-executable-node)
+(Note: At the moment, `tvmv` MacOS binaries are built for Intel Macs. If
+you're using an Apple Silicon machine, you'll need to install Rosetta
+(`softwareupdate --install-rosetta`) or you'll get "bad CPU type" errors.)
 
 ### Building from source
 
