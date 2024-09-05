@@ -36,7 +36,7 @@ That's all there is to it!
   + [Multi-language subtitle files](#multi-language-subtitle-files)
   + [Other options](#other-options)
      * [-f, --force](#-f---force)
-     * [-w, --portable-filenames](#-w---portable-filenames)
+     * [-u, --unicode-filenames](#-u---unicode-filenames)
   + [API key location](#api-key-location)
   + [Configuration / Customization?](#configuration--customization)
 * [Known limitations](#known-limitations)
@@ -463,21 +463,24 @@ changes. (This goes for both the `mv` and `undo` commands.) If you want to
 skip this confirmation step, simply use the `-f` (or `--force`) command-line
 option. (For example, `tvmv undo -f`.)
 
-#### -w, --portable-filenames
+#### -u, --unicode-filenames
 
-By default, `tvmv` will rename files based on API data, whatever that data may
-look like. This can occasionally result in some annoying filenames, especially
-when the show data contains special characters (dashes, "smart" quotes, etc).
-The Windows command-line in particular tends to behave poorly in these cases,
-and can even [error out
+Allow the full unicode set of characters for filenames. By default, `tvmv`
+produces more "portable" filenames.
+
+`tvmv` uses API data to rename files, which means we can occasionally wind up
+with some annoying filenames -- especially when the show data contains special
+characters (dashes, "smart" quotes, etc). The Windows command-line in
+particular tends to behave poorly in these cases, and can even [error out
 entirely](#i-use-windows-and-im-getting-invalid-character-errors).
 
-The `-w` (or `--portable-filenames`) option, added in version `0.4.0`, ensures
-that written files use a more limited set of characters and those filenames
+By default (as of version `0.6.0`), `tvmv` ensures that written files use a
+more limited set of characters (ASCII, specifically) and that those filenames
 will be valid (and less annoying to work with) on all three supported
-operating systems: Windows, MacOS, and Linux.
+operating systems: Windows, MacOS, and Linux. (Though again: Windows is really
+the only problem-child here.)
 
-Note that, regardless of whether this option is set, `tvmv` will *always*
+Note that, regardless of whether the `-u` option is set, `tvmv` will *always*
 ensure it's writing valid filenames for the operating system it's built for.
 In other words, the Windows build of `tvmv` will always create valid Windows
 filenames, the Linux build will create valid Linux filenames, etc.
@@ -664,9 +667,10 @@ See also [this StackOverflow
 post](https://stackoverflow.com/questions/49476326/displaying-unicode-in-powershell/49481797#49481797)
 for more details.
 
-As of `tvmv` version `0.4.0`, there is also a
-[--portable-filenames](#-w---portable-filenames) option which should avoid
-this issue altogether, regardless of your OS.
+As of `tvmv` version `0.6.0`, writing Windows-friendly "portable" filenames is
+the default, so these errors should be rare. However, they might still come up
+if you're using the `-u`/`--unicode-filenames` option, or if special
+characters appear in `tvmv search` results.
 
 ### How can I rename files for all of a show's seasons at once?
 
