@@ -7,7 +7,7 @@ automatically rename your files to something human- and media-server-friendly.
 (For Plex, Jellyfin, Kodi, &c.)
 
 ```
-$ tvmv mv -n buffy -a
+$ tvmv mv -n buffy
 ```
 
 That's all there is to it!
@@ -23,12 +23,12 @@ That's all there is to it!
   + [Binary installation](#binary-installation)
   + [Building from source](#building-from-source)
 * [Using tvmv](#using-tvmv)
-  + [API key location](#api-key-location)
   + [tvmv commands](#tvmv-commands)
      * [mv](#mv)
         + [mv mode 1: Autodetect the season/episode numbers](#mv-mode-1-autodetect-the-seasonepisode-numbers)
-        + [mv mode 2: Specify a season number](#mv-mode-2-specify-a-season-number)
+        + [mv mode 2: Specify a show name and season number](#mv-mode-2-specify-a-show-name-and-season-number)
         + [Which mode should I use?](#which-mode-should-i-use)
+        + [TV show name autodetection](#tv-show-name-autodetection)
      * [undo](#undo)
         + [Log files](#log-files)
      * [search](#search)
@@ -37,6 +37,7 @@ That's all there is to it!
   + [Other options](#other-options)
      * [-f, --force](#-f---force)
      * [-w, --portable-filenames](#-w---portable-filenames)
+  + [API key location](#api-key-location)
   + [Configuration / Customization?](#configuration--customization)
 * [Known limitations](#known-limitations)
   + [Multi-episode files](#multi-episode-files)
@@ -97,7 +98,7 @@ media-server-friendly.
 - [x] Search for shows right from the command-line.
 - [x] Write portable filenames: Windows-friendly, Mac-friendly, and (of
   course!) Linux-friendly.
-- [x] Autodetect season/episode numbers in filenames.
+- [x] Autodetect season/episode numbers and show names in filenames.
 - [x] Autodetect language metadata in subtitle filenames.
 - [x] Easy to install: a single binary file with no external dependencies.
 - [x] Support for Linux, Mac OS, and Windows.
@@ -180,11 +181,16 @@ Here are some basic examples to get you started:
 $ tvmv mv -n buffy -s 4
 
 # Do the same thing, but auto-detect the season and episode number(s):
-$ tvmv mv -n buffy -a
+$ tvmv mv -n buffy
+
+# And better yet, auto-detect *everything* from the input files, including the
+# show's name:
+$ tvmv mv
 
 # The exact same operation again, but using Buffy's unique ID rather than a
-# name query. This ID can be easily fetched with the `tvmv search` command.
-$ tvmv mv -i 95 -a
+# name query. This ID can be fetched with the `tvmv search` command, or
+# directly from a search on the TMDB site.
+$ tvmv mv -i 95
 
 # This time, let's do season 1. And we're specifying a directory instead of
 # using the current working directory:
@@ -197,8 +203,10 @@ $ tvmv mv -n buffy -s 1 ~/tv/buffy/s1/*srt
 
 Note that the `mv` command has **two modes of operation**.
 
-1. **tvmv autodetects the season/episode numbers** using the `-a` flag, or
-2. **User specifies a season number** using the `-s` flag.
+1. **tvmv autodetects the season/episode numbers**. This is the default mode,
+   and will be used unless...
+2. **User specifies a show name and season number** using the `-n` and `-s`
+   flags, respectively.
 
 Read on to understand more about the pros/cons of each mode.
 
@@ -210,8 +218,10 @@ This is generally the most flexible, least painful option. However, **it
 requires file names which already contain season and episode numbers** in a
 standard format (e.g. `s03e23` or `3x23`).
 
-If this is the case for your files, simply pass them to `tvmv` with the `-a`
-flag. Here's a quick example:
+If this is the case for your files, simply pass them to `tvmv mv`. Here's a
+quick example. Note that here, we're still specifying the *show name* with the
+`-n` flag, though we could have left it off and `tvmv` would have
+[autodetected it](#tv-show-name-autodetection) from the third file:
 
 ```
 $ ls -1 poirot/
@@ -219,7 +229,7 @@ $ ls -1 poirot/
 1x1.pilot.encoded.by.MEGA.KEWL.TEAM.LOLZ.mkv
 'poirot s04e03.mkv'
 
-$ tvmv mv -n poirot -a poirot/
+$ tvmv mv -n poirot poirot/
 
 $ ls -1 poirot/
 "Agatha Christie's Poirot - s01e01 - The Adventure of the Clapham Cook.mkv"
@@ -230,13 +240,13 @@ $ ls -1 poirot/
 Note that `tvmv` will simply ignore files which it can't parse season/episode
 data from. Convenient!
 
-##### mv mode 2: Specify a season number
+##### mv mode 2: Specify a show name and season number
 
 "Dumb mode".
 
-The user specifies a season number (e.g. `-s 7`) and `tvmv`, without any
-processing of the filenames at all, sorts the files lexicographically, then
-applies the API data to each file **in that order**.
+The user specifies a show name and season number (e.g. `-n poirot -s 7`) and
+`tvmv`, without any processing of the filenames at all, sorts the files
+lexicographically, then applies the API data to each file **in that order**.
 
 This mode requires you to operate on only **a single season at a time**. It
 also requires you to operate on **a full, contiguous season**. If you attempt
@@ -263,12 +273,51 @@ correctly. (Or fix the filenames to be usable with the "auto-detect" mode.)
 ##### Which mode should I use?
 
 **Do your file names contain season and episode numbers already**, in a
-standard format like `s03e23` or `3x23`? If so, just use the autodetect mode
-(`-a`). It's more flexible, and can operate on non-contiguous files from
-arbitrary seasons.
+standard format like `s03e23` or `3x23`? If so, just use the autodetect mode.
+It's more flexible, and can operate on non-contiguous files from arbitrary
+seasons.
 
-Otherwise, you'll need to specify a season number with `-s`, and can only
-operate over contiguous episodes from a single season at a time.
+Otherwise, you'll need to specify a show name and season number with `-n` and
+`-s`, and can only operate over contiguous episodes from a single season at a
+time.
+
+##### TV show name autodetection
+
+As of version `0.6.0`, `tvmv` can autodetect TV show names as well as episode
+and season numbers. This feature is still in "beta" and currently uses a very
+simple method to extract the name: it must come before the season/episode
+numbers in at least *one* of the input files.
+
+Note that it doesn't even have to be the exact show name -- any TMDB search
+string that will yield the correct show as its first result will work.
+
+For example, look at these three (poorly named) files:
+
+```
+$ ls -1
+2x5.mkv
+4x8.mkv
+'thrones 1x1.mkv'
+
+$ tvmv mv
+User API key override not detected, using tvmv's default API key
+Parsed out show name: 'thrones'
+Fetching episode data from API for seasons 1, 2, 4
+Preparing to execute the following 3 rename operations...
+
+2x5.mkv ->
+Game of Thrones - s02e05 - The Ghost of Harrenhal.mkv
+
+4x8.mkv ->
+Game of Thrones - s04e08 - The Mountain and the Viper.mkv
+
+thrones 1x1.mkv ->
+Game of Thrones - s01e01 - Winter Is Coming.mkv
+
+Continue? (y/N)
+```
+
+Nice!
 
 #### undo
 
@@ -321,10 +370,11 @@ quickly grab some more info about a result or verify it's the show you expect.
 
 As you can see in the examples above, you can match a show on *either* its
 name *or* its unique ID. If you match a show by name (using the `-n` flag of
-the `mv` command), `tvmv` will use the **first** match returned by the API for
-your query. This is the same order that's returned by `tvmv search`, so you
-can preview the results if you like. (And you will have a chance to confirm
-the rename before it happens, of course.)
+the `mv` command or its show name autodetection), `tvmv` will use the
+**first** match returned by the API for your query. This is the same order
+that's returned by `tvmv search`, so you can preview the results if you like.
+(And you will have a chance to confirm the rename before it happens, of
+course.)
 
 Luckily, TMDB's search is generally very sane. If you search for `buffy`, you
 get back the right "Buffy" as the first result. Fragments are fine, too -- if
@@ -333,7 +383,7 @@ you get back "The Simpsons", etc.
 
 If you don't trust this behavior, or if you prefer something guaranteed to be
 repeatable (or scriptable?), you can match a show by its unique ID using the
-`-i` flag. As mentioned above, you can get a show's id via `tvmv search`.
+`-i` flag. As mentioned above, you can get a show's ID via `tvmv search`.
 
 ### Multi-language subtitle files
 
@@ -342,8 +392,8 @@ the language metadata in your filenames follows [the convention defined by
 Plex](https://support.plex.tv/articles/200471133-adding-local-subtitles-to-your-media/#toc-3),
 `tvmv` will maintain that metadata when it renames your files.
 
-When using the `--auto-detect`/`-a` mode, this all just works as expected and
-doesn't require any extra effort on your part:
+When using `tvmv`'s default "autodetect" mode, this all just works as expected
+and doesn't require any extra effort on your part:
 
 ```
 $ ls -1
@@ -351,7 +401,7 @@ $ ls -1
 'abfab - s02e03.en.sdh.forced.srt'
 'abfab - s02e03.mp4'
 
-$ tvmv mv -n "ab fab" -a
+$ tvmv mv -n "ab fab"
 Fetching episode data from API for season 2
 [etc, tvmv does its thing]
 
@@ -361,9 +411,9 @@ $ ls -1
 'Absolutely Fabulous - s02e03 - Morocco.mp4'
 ```
 
-This also works when you're *not* able to use `--auto-detect`/`-a`. However,
-for the number of episodes to line up properly, you'll need to rename *only
-one* set of subs at a time when not using `-a`. For example, consider the
+This also works when you're *not* able to use autodetect mode. However, for
+the number of episodes to line up properly, you'll need to rename *only one*
+set of subs at a time when not using autodetection. For example, consider the
 following (poorly-named) files:
 
 ```
@@ -376,11 +426,10 @@ $ ls -1
 'abfab 2.mp4'
 ```
 
-We can't use `-a` here because the season/episode numbers can't be
-auto-detected. Therefore we must take three passes: one for each language
-(`en` and `de`) and one for the episode files themselves (the `mp4` files).
-Here's what the first pass might look like, targeting only the English
-subtitles:
+The season/episode numbers can't be auto-detected in this case. Therefore we
+must take three passes: one for each language (`en` and `de`) and one for the
+episode files themselves (the `mp4` files). Here's what the first pass might
+look like, targeting only the English subtitles:
 
 ```
 $ tvmv mv -p -n "ab fab" -s 1 *en.srt
@@ -482,8 +531,8 @@ releases.
 
 `tvmv` can not yet handle multi-episode files. Which is to say, if you have a
 *single* file which contains *multiple* episodes, `tvmv` will simply fail to
-parse that file. (Of course this only applies when using `-a`/`--auto-detect`
-mode. "Dumb mode" doesn't parse the filenames at all.)
+parse that file. (Of course this only applies when using autodetect mode.
+"Dumb mode" doesn't parse the filenames at all.)
 
 The remaining files will still parse as expected. For example, with the
 following three files, *one* of which is a double episode:
@@ -578,7 +627,7 @@ rename a file. And TV is TV :)
 ### Is there a GUI?
 
 Nope, it's a command-line tool. It probably wouldn't be hard to build a GUI on
-top of it, but that's not a priority for me. (Calling `tvmv mv -n buffy -a` is
+top of it, but that's not a priority for me. (Calling `tvmv mv -n buffy` is
 quick and easy! That's really all there is to it.)
 
 ### How is this different from \[bulk-rename tool X\]?
@@ -622,9 +671,9 @@ this issue altogether, regardless of your OS.
 ### How can I rename files for all of a show's seasons at once?
 
 If you have several seasons of a show, with all the video files in the same
-directory (*not* in subdirectories), you can simply use `tvmv`'s
-`--auto-detect` flag (aka `-a`). In auto-detect mode, it will happily rename
-episodes from different seasons all at once.
+directory (*not* in subdirectories), you can simply use `tvmv`'s autodetect
+mode (which is its default mode of operation anyway). In this mode, it will
+happily rename episodes from different seasons all at once.
 
 However, `tvmv` does not currently traverse subdirectories automatically. If
 each season of your show is in its own subdirectory, your best bet is to use
@@ -645,7 +694,7 @@ $ find .
 
 # Now, with the help of `find` and `xargs`, we find all `mp4` files in these
 # dirs and pass those files to `tvmv mv`:
-$ find -name '*.mp4' -type f -print0 | xargs -0 tvmv mv -f -n poirot -a
+$ find -name '*.mp4' -type f -print0 | xargs -0 tvmv mv -f
 
 [ tvmv does its thing ]
 
