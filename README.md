@@ -19,7 +19,6 @@ That's all there is to it!
 
 * [Quickstart / Demo](#quickstart--demo)
 * [Overview / Features](#overview--features)
-* [Prerequisite: an API key](#prerequisite-an-api-key)
 * [Installation](#installation)
   + [Binary installation](#binary-installation)
   + [Building from source](#building-from-source)
@@ -62,11 +61,7 @@ page](https://github.com/keithfancher/tvmv/releases). With that out of the
 way...
 
 ```
-# You'll need a (free!) TheMovieDB API key. Pass it in via the CLI, an env
-# var, or a file. We'll use an env var for this example:
-$ export TMDB_API_KEY="ABCD1234"
-
-# Now, let's check out a season of a show we ripped:
+# Let's check out a season of a show we ripped:
 $ cd ~/rips/poirot/season12
 
 # Who named these files? Super-annoying :(
@@ -90,9 +85,9 @@ $ ls -1
 
 ## Overview / Features
 
-`tvmv` is a minimal, (almost-)zero-config command-line tool to bulk-rename
-your ripped or (legally!) downloaded TV episode files. It has sane defaults,
-talks to a sane API, and produces useful filenames that are human- and
+`tvmv` is a minimal, zero-config command-line tool to bulk-rename your ripped
+or (legally!) downloaded TV episode files. It has sane defaults, talks to a
+sane API, and produces useful filenames that are human- and
 media-server-friendly.
 
 - [x] Easily rename episode files, subtitles, or any other type of file using
@@ -107,15 +102,6 @@ media-server-friendly.
 - [x] Easy to install: a single binary file with no external dependencies.
 - [x] Support for Linux, Mac OS, and Windows.
 - [x] Free and open source!
-
-
-## Prerequisite: an API key
-
-You will need [an API key from
-TMDB](https://www.themoviedb.org/documentation/api). Sorry for the hassle! It
-only takes a minute to sign up and **it's free**. Feel free to put `tvmv` as
-the app-in-question in the sign-up form if it asks. (This is why I say
-"minimal fuss" and not "no fuss".)
 
 
 ## Installation
@@ -136,8 +122,7 @@ More details below.
 If you've downloaded [a binary
 release](https://github.com/keithfancher/tvmv/releases), you can simply
 extract the `tvmv` executable somewhere in your `PATH`. No installation
-process is required. (Other than configuring your API key, as covered in the
-following section.)
+process is required.
 
 To uninstall, simply remove the binary.
 
@@ -168,26 +153,6 @@ like. There are no ancillary files to worry about.)
 
 The "Quickstart" section above should get you pretty far. But there are a few
 other things to mention.
-
-### API key location
-
-[An API key](https://www.themoviedb.org/documentation/api) is required! There
-are three ways to pass `tvmv` your API key:
-
-1. Via the command line (the `-k` or `--api-key` options).
-2. Via the `TMDB_API_KEY` environment variable.
-3. Via a file: `$XDG_CONFIG_HOME/tvmv/tmdb-api-key`. (On most unix-like
-   systems, that would resolve to: `~/.config/tvmv/tmdb-api-key`. On a Windows
-   system, it would be something like
-   `C:/Users/<user>/AppData/Roaming/tvmv/tmdb-api-key`.)
-
-Important note: `tvmv` will look for your API key in those locations **in that
-order**. If you need to swap out API keys for a given run or a given terminal
-session, it should be easy to override on the command line or with the
-environment variable, respectively.
-
-(I personally just stick my key in `~/.config/tvmv/tmdb-api-key` and forget
-about it. Whatever works for you!)
 
 ### tvmv commands
 
@@ -467,6 +432,36 @@ Note that, regardless of whether this option is set, `tvmv` will *always*
 ensure it's writing valid filenames for the operating system it's built for.
 In other words, the Windows build of `tvmv` will always create valid Windows
 filenames, the Linux build will create valid Linux filenames, etc.
+
+### API key location
+
+**As of version `0.6.0`, users are no longer required to sign up for their own
+API keys!** 🎉
+
+`tvmv` has its own default key, which should get the job done. That said, if
+you're running into rate limits with the shared key or simply prefer to use
+your own key, it's quick, free, and easy to so.
+
+First, sign up on [TMDB](https://developer.themoviedb.org/docs/getting-started).
+Request an API key from [your settings page](https://www.themoviedb.org/settings/api)
+(you have to fill out a short form), and in a few seconds they should approve.
+
+Now that you've got your key, there are three ways to pass it to `tvmv`:
+
+1. Via the command line (the `-k` or `--api-key` options).
+2. Via the `TMDB_API_KEY` environment variable.
+3. Via a file: `$XDG_CONFIG_HOME/tvmv/tmdb-api-key`. (On most unix-like
+   systems, that would resolve to: `~/.config/tvmv/tmdb-api-key`. On a Windows
+   system, it would be something like
+   `C:/Users/<user>/AppData/Roaming/tvmv/tmdb-api-key`.)
+
+Important note: `tvmv` will look for your API key in those locations **in that
+order**. If you need to swap out API keys for a given run or a given terminal
+session, it should be easy to override on the command line or with the
+environment variable, respectively.
+
+(I personally just stick my key in `~/.config/tvmv/tmdb-api-key` and forget
+about it. Whatever works for you!)
 
 ### Configuration / Customization?
 
