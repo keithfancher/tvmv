@@ -9,7 +9,8 @@ module Exec.Rename
 where
 
 import Control.Exception (try)
-import Control.Monad.Except (MonadError, liftEither, when)
+import Control.Monad (when)
+import Control.Monad.Except (MonadError, liftEither)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Writer.Class (MonadWriter, tell)
 import Data.Text (Text)
