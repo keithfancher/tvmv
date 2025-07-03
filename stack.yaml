@@ -43,12 +43,6 @@ packages:
 # extra-deps: []
 extra-deps:
 - themoviedb-1.2.2
-# Latest version of hspec, newer than what's in Stackage. Specifically to fix
-# the annoying warning about missing export lists when using hspec-discover.
-- hspec-2.11.4
-- hspec-core-2.11.4
-- hspec-discover-2.11.4
-- hspec-expectations-0.8.4
 
 # As of now, the `themoviedb` library has some older dependencies that don't
 # jibe with our newer stack. This (slightly questionable) approach lets us keep
