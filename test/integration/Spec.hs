@@ -65,12 +65,13 @@ mvCommand :: Command
 mvCommand = Mv mvOptions
 
 emptyEnv :: Env
-emptyEnv = Env {apiKeyEnvVar = Nothing, apiKeyFile = Nothing}
+emptyEnv = Env {apiKeyEnvVar = Nothing, apiKeyFile = Nothing, languageEnvVar = Nothing, languageFile = Nothing}
 
 mvOptions :: MvOptions
 mvOptions =
   MvOptions
     { apiKey = Just "ExistsButDoesntMatter",
+      language = Nothing, -- the stub API ignores this
       force = True, -- do not pause to confirm
       noLog = False, -- we want a log!
       allowPartial = False, -- don't allow partial matches

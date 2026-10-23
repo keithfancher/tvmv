@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## Unreleased
+
+### Added
+
+- Show and episode names in languages other than English! Use the new
+  `--language` option (aka `-l`), e.g. `tvmv mv -l it-IT`. The language can
+  also be set with the `TVMV_LANGUAGE` environment variable or the
+  `$XDG_CONFIG_HOME/tvmv/language` file.
+
+
 ## 0.6.0 - 2024-09-05
 
 ### Added

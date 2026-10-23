@@ -9,7 +9,7 @@ module Command
 where
 
 import Data.Text (Text)
-import Domain.API (APIKey)
+import Domain.API (APIKey, LanguageCode)
 import Domain.Show (ItemId)
 
 -- The three commands
@@ -22,6 +22,9 @@ data MvOptions = MvOptions
   { -- APIKey might not be present in the CLI options. If this is Nothing, we'll
     -- check an env var and a file down the road. But it IS required eventually.
     apiKey :: Maybe APIKey,
+    -- Same deal for the language. But if it's Nothing everywhere, that's fine:
+    -- we'll use the API's default.
+    language :: Maybe LanguageCode,
 
     -- Boolean flags. These all default to False.
     force :: Bool, -- do not wait for user confirmation
@@ -58,6 +61,7 @@ data SearchKey = Name Text | Id ItemId
 
 data SearchOptions = SearchOptions
   { apiKey :: Maybe APIKey,
+    language :: Maybe LanguageCode,
     query :: Text
   }
 

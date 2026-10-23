@@ -37,6 +37,7 @@ That's all there is to it!
   + [Other options](#other-options)
      * [-f, --force](#-f---force)
      * [-u, --unicode-filenames](#-u---unicode-filenames)
+     * [-l, --language](#-l---language)
   + [API key location](#api-key-location)
   + [Configuration / Customization?](#configuration--customization)
 * [Known limitations](#known-limitations)
@@ -484,6 +485,40 @@ Note that, regardless of whether the `-u` option is set, `tvmv` will *always*
 ensure it's writing valid filenames for the operating system it's built for.
 In other words, the Windows build of `tvmv` will always create valid Windows
 filenames, the Linux build will create valid Linux filenames, etc.
+
+#### -l, --language
+
+By default, show and episode names come from TMDB in English. To use another
+language, pass its two-letter code, optionally followed by a country code.
+For example, Italian:
+
+```
+$ tvmv mv -l it-IT -n poirot -s 12
+
+$ ls -1
+"Poirot - s12e01 - Tragedia in tre atti.mp4"
+"Poirot - s12e02 - Poirot e la strage degli innocenti.mp4"
+"Poirot - s12e03 - Assassinio sull'Orient Express.mp4"
+"Poirot - s12e04 - Sfida a Poirot.mp4"
+```
+
+Both the show name and the episode names will be in the given language. Note
+that not every episode is translated into every language: for an untranslated
+episode, TMDB returns a generic name (e.g. "Episodio 5"). As always, you'll see
+the new filenames before anything is renamed.
+
+Also note that, without the [`-u` option](#-u---unicode-filenames), accented
+letters are swapped for plain ASCII ones (`è` becomes `e`, etc).
+
+If you always want the same language, there are three ways to set it:
+
+1. Via the command line (the `-l` or `--language` options).
+2. Via the `TVMV_LANGUAGE` environment variable.
+3. Via a file: `$XDG_CONFIG_HOME/tvmv/language`, containing only the language
+   code. (This lives right next to the [API key file](#api-key-location).)
+
+As with the API key, `tvmv` looks in those locations **in that order**. The
+`search` command uses the language, too.
 
 ### API key location
 

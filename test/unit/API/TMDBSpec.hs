@@ -1,6 +1,7 @@
 module API.TMDBSpec (spec) where
 
 import API.TMDB
+import Domain.API (APIConfig (..))
 import Domain.Show (Episode (..), Season (..), TvShow (..))
 import Network.API.TheMovieDB qualified as TMDB
 import Test.Hspec
@@ -10,6 +11,15 @@ spec = do
   describe "mapTvShow" $ do
     it "maps a TV show and all its episodes into our domain" $ do
       mapTvShow tmdbShow `shouldBe` resultShow
+
+  describe "tmdbSettings" $ do
+    it "passes the configured language along to TMDB" $ do
+      let settings = tmdbSettings (APIConfig "someKey" (Just "it-IT"))
+      TMDB.tmdbKey settings `shouldBe` "someKey"
+      TMDB.tmdbLanguage settings `shouldBe` Just "it-IT"
+
+    it "leaves the language unset if none is configured" $ do
+      TMDB.tmdbLanguage (tmdbSettings (APIConfig "someKey" Nothing)) `shouldBe` Nothing
 
 tmdbShow :: TMDB.TV
 tmdbShow =

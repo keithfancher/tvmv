@@ -12,6 +12,7 @@ data Error
   | RenameError String
   | UndoError String
   | MissingAPIKey
+  | InvalidLanguage String
   | ParseError String
   | UserAbort
   deriving (Eq, Show)
@@ -21,6 +22,7 @@ errorMessage :: Error -> String
 errorMessage UserAbort = "Operation aborted! No files have been renamed."
 errorMessage (APIError msg) = "TMDB API error: " <> msg
 errorMessage MissingAPIKey = "Unable to find TMDB API key!\nPlease provide a key via the '-k' CLI arg, the 'TMDB_API_KEY' env var, or a config file. See the README for more details. "
+errorMessage (InvalidLanguage lang) = "Invalid language: '" <> lang <> "'\nExpected a two-letter language code, optionally followed by a country code (e.g. 'it' or 'it-IT'). The language can be set via the '-l' CLI arg, the 'TVMV_LANGUAGE' env var, or a config file. See the README for more details."
 errorMessage otherError = "Failed with: " <> show otherError
 
 printErrorMessage :: Error -> IO ()

@@ -28,10 +28,11 @@ mv ::
   MvOptions ->
   m ()
 mv env withApi mvOptions = do
-  let (MvOptions maybeApiKey force _noLog _partial unicodeFilenames userSearchTerms inFiles) = mvOptions
+  let (MvOptions maybeApiKey maybeLanguage force _noLog _partial unicodeFilenames userSearchTerms inFiles) = mvOptions
 
-  -- Before doing anything, ensure we have an API key available:
-  apiKey <- API.resolveAPIKey maybeApiKey env
+  -- Before doing anything, ensure we have an API key (and a valid language, if
+  -- one is set) available:
+  apiConfig <- API.resolveAPIConfig maybeApiKey maybeLanguage env
 
   -- Get the list of input files, parse out relevant season/episode data:
   filteredFiles <- liftIO $ listFiles inFiles >>= filterFiles
@@ -50,7 +51,7 @@ mv env withApi mvOptions = do
 
   -- Fetch episode data from our configured API:
   printColorLn $ showFetchMessage seasonNums
-  episodeData <- fetchEpisodeData (searchSeason apiKey parsedShowName) seasonNums
+  episodeData <- fetchEpisodeData (searchSeason apiConfig parsedShowName) seasonNums
 
   -- By default we make episode and show names "portable", aka Windows-friendly:
   let niceEpData = if unicodeFilenames then episodeData else makePortableEpNames episodeData
@@ -68,11 +69,11 @@ mv env withApi mvOptions = do
     match = if allowPartial mvOptions then matchEpisodesAllowPartial else matchEpisodes
     renameMsg ops =
       "Preparing to execute the following " <> colorNum (length ops) <> " rename operations...\n"
-    searchSeason k parsedName = case showSelection <$> userSearchTerms mvOptions of
-      (Just (Name n)) -> API.searchSeasonByName withApi k n
-      (Just (Id i)) -> API.searchSeasonById withApi k i
+    searchSeason c parsedName = case showSelection <$> userSearchTerms mvOptions of
+      (Just (Name n)) -> API.searchSeasonByName withApi c n
+      (Just (Id i)) -> API.searchSeasonById withApi c i
       -- Nothing provided, attempt to use parsed-out name:
-      Nothing -> API.searchSeasonByName withApi k parsedName
+      Nothing -> API.searchSeasonByName withApi c parsedName
 
 -- Based on what data the user does and doesn't provide, we determine what
 -- extra bits need parsing out, if any. This extra bit of mapping here (and
