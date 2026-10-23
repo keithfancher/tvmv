@@ -2,7 +2,7 @@ module Args (cliOptParser) where
 
 import Command (Command (..), MvOptions (..), SearchKey (..), SearchOptions (..), UndoOptions (..), UserSearchTerms (..))
 import Data.Text qualified as T
-import Domain.API (APIKey)
+import Domain.API (APIKey, LanguageCode)
 import Options.Applicative
 import Version (currentVersion)
 
@@ -51,6 +51,7 @@ mvOptionsParser :: Parser MvOptions
 mvOptionsParser =
   MvOptions
     <$> apiKeyParser
+    <*> languageParser
     <*> forceFlagParser
     <*> noLogFlagParser
     <*> allowPartialParser
@@ -113,6 +114,17 @@ apiKeyParser =
         <> value Nothing -- If not specified, it's Nothing
     )
 
+languageParser :: Parser (Maybe LanguageCode)
+languageParser =
+  option
+    maybeLanguageReader
+    ( long "language"
+        <> short 'l'
+        <> metavar "LANG"
+        <> help "Language for show and episode names: a two-letter language code, optionally followed by a country code (e.g. `it` or `it-IT`). Defaults to English. You can also set this via an env var or a file -- see the README for details!"
+        <> value Nothing -- If not specified, it's Nothing
+    )
+
 forceFlagParser :: Parser Bool
 forceFlagParser =
   switch
@@ -146,7 +158,14 @@ unicodeFilenamesParser =
     )
 
 maybeApiKeyReader :: ReadM (Maybe APIKey)
-maybeApiKeyReader = eitherReader $ \case
+maybeApiKeyReader = maybeTextReader
+
+-- Validated later, along with any language from the env var or file.
+maybeLanguageReader :: ReadM (Maybe LanguageCode)
+maybeLanguageReader = maybeTextReader
+
+maybeTextReader :: ReadM (Maybe T.Text)
+maybeTextReader = eitherReader $ \case
   "" -> Right Nothing
   anythingNonEmpty -> Right $ Just $ T.pack anythingNonEmpty
 
@@ -165,6 +184,7 @@ searchOptionsParser :: Parser SearchOptions
 searchOptionsParser =
   SearchOptions
     <$> apiKeyParser
+    <*> languageParser
     <*> argument
       str
       ( metavar "SHOW_NAME"

@@ -2,12 +2,13 @@ module API.TMDB
   ( mapTvShow,
     tmdbApiWrapper,
     tmdbDefaultAPIKey,
+    tmdbSettings,
   )
 where
 
 import API.Error (toAPIError)
 import Data.Text qualified as T
-import Domain.API (APIKey, APIWrapper (..))
+import Domain.API (APIConfig (..), APIKey, APIWrapper (..))
 import Domain.Error (Error (..))
 import Domain.Show (Episode (..), ItemId, Season (..), TvShow (..))
 import Monad.Tvmv (Tvmv, mkTvmv)
@@ -33,23 +34,23 @@ tmdbApiWrapper =
 
 -- Get data for a single show. Note that this only fetches certain top-level
 -- data for the show, it does NOT get all the season/episode data.
-getShow' :: APIKey -> ItemId -> Tvmv TvShow
-getShow' apiKey itemId = toTvmv apiKey opDescription $ getShowTMDB itemId
+getShow' :: APIConfig -> ItemId -> Tvmv TvShow
+getShow' apiConfig itemId = toTvmv apiConfig opDescription $ getShowTMDB itemId
   where
     opDescription = "fetch show data for ID: " <> toText itemId
 
 -- Given the show data, we can pull down the data for a given season, and all
 -- its episodes.
-getSeason' :: APIKey -> TvShow -> Int -> Tvmv Season
-getSeason' apiKey showData seasonNum = toTvmv apiKey opDescription $ getSeasonTMDB showData seasonNum
+getSeason' :: APIConfig -> TvShow -> Int -> Tvmv Season
+getSeason' apiConfig showData seasonNum = toTvmv apiConfig opDescription $ getSeasonTMDB showData seasonNum
   where
     opDescription = "fetch season " <> toText seasonNum <> " of " <> showInfo
     showInfo = "\"" <> showName showData <> "\" (ID: " <> toText (showId showData) <> ")"
 
 -- Get list of shows from TMDB that match the given query. Again, this only
 -- contains the top-level data for each returned show.
-queryShows' :: APIKey -> T.Text -> Tvmv [TvShow]
-queryShows' apiKey nameQuery = toTvmv apiKey opDescription $ queryShowsTMDB nameQuery
+queryShows' :: APIConfig -> T.Text -> Tvmv [TvShow]
+queryShows' apiConfig nameQuery = toTvmv apiConfig opDescription $ queryShowsTMDB nameQuery
   where
     opDescription = "search shows with query text \"" <> nameQuery <> "\""
 
@@ -69,18 +70,23 @@ queryShowsTMDB nameQuery = do
   tvdbShows <- TMDB.searchTV nameQuery
   return $ map mapTvShow tvdbShows
 
--- Run it! Requires an API key.
-runTMDB :: APIKey -> TMDB.TheMovieDB a -> IO (Either TMDB.Error a)
-runTMDB key = TMDB.runTheMovieDB (TMDB.defaultSettings key)
+-- Run it! Requires an API key, and optionally a language.
+runTMDB :: APIConfig -> TMDB.TheMovieDB a -> IO (Either TMDB.Error a)
+runTMDB = TMDB.runTheMovieDB . tmdbSettings
+
+-- Map our API config to TMDB's settings. If a language is set, TMDB returns
+-- show and episode names in that language.
+tmdbSettings :: APIConfig -> TMDB.Settings
+tmdbSettings (APIConfig key lang) = (TMDB.defaultSettings key) {TMDB.tmdbLanguage = lang}
 
 -- Map to our internal monad stack, converting errors along the way.
 -- The `opDescription` parameter is used only in the case of errors, so we can
 -- tell the user exactly what we *attempted* to do when we failed.
-toTvmv :: APIKey -> T.Text -> TMDB.TheMovieDB a -> Tvmv a
-toTvmv key opDescription x = mkTvmv mappedResult
+toTvmv :: APIConfig -> T.Text -> TMDB.TheMovieDB a -> Tvmv a
+toTvmv apiConfig opDescription x = mkTvmv mappedResult
   where
     mappedResult = mapError opDescription <$> tmdbIO
-    tmdbIO = runTMDB key x
+    tmdbIO = runTMDB apiConfig x
 
 -- Map Eithers to our internal Error type.
 mapError :: T.Text -> Either TMDB.Error a -> Either Error a

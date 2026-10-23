@@ -1,7 +1,7 @@
 module API.Stub (testAPI) where
 
 import Data.Text qualified as T
-import Domain.API (APIKey, APIWrapper (..))
+import Domain.API (APIConfig, APIWrapper (..))
 import Domain.Show (Episode (..), ItemId, Season (..), TvShow (..))
 import Monad.Tvmv (Tvmv)
 
@@ -15,10 +15,10 @@ testAPI =
       queryShows = queryShowsStub
     }
 
-getShowStub :: Monad m => APIKey -> ItemId -> m TvShow
+getShowStub :: Monad m => APIConfig -> ItemId -> m TvShow
 getShowStub _ _ = return poirotShowData
 
-getSeasonStub :: Monad m => APIKey -> TvShow -> Int -> m Season
+getSeasonStub :: Monad m => APIConfig -> TvShow -> Int -> m Season
 getSeasonStub _ _ _ = return Season {seasonNumber = 12, episodes = poirotSeasonEps}
 
 poirotSeasonEps :: [Episode]
@@ -29,7 +29,7 @@ poirotSeasonEps =
     Episode 4 "The Clocks" 12 poirotName
   ]
 
-queryShowsStub :: Monad m => APIKey -> T.Text -> m [TvShow]
+queryShowsStub :: Monad m => APIConfig -> T.Text -> m [TvShow]
 queryShowsStub _ _ = return [poirotShowData]
 
 poirotName :: T.Text
